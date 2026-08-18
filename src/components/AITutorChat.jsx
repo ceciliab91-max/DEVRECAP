@@ -5,16 +5,15 @@ import {
   Send, 
   Sparkles, 
   Key, 
-  RotateCcw
+  RotateCcw,
+  UserCheck
 } from 'lucide-react';
+import { hasValidApiKey, fetchGeminiTutorResponse } from '../services/aiService';
+import MissingApiKeyModal from './MissingApiKeyModal';
 
-export default function AITutorChat({ externalTriggerContext, onClearTriggerContext }) {
+export default function AITutorChat({ externalTriggerContext, onClearTriggerContext, onGoToProfile }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [apiKey, setApiKey] = useState(() => {
-    return import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('devexam_gemini_key') || '';
-  });
-  const [showKeyInput, setShowKeyInput] = useState(false);
-  const [tempKey, setTempKey] = useState(apiKey);
+  const [showMissingKeyModal, setShowMissingKeyModal] = useState(false);
 
   const [messages, setMessages] = useState([
     {
@@ -60,6 +59,11 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     const textToSend = customText || input;
     if (!textToSend.trim() || isTyping) return;
 
+    if (!hasValidApiKey()) {
+      setShowMissingKeyModal(true);
+      return;
+    }
+
     const userMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -71,9 +75,20 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     if (!customText) setInput('');
     setIsTyping(true);
 
-    // Call Gemini API or fallback
     try {
-      const responseText = await fetchGeminiResponse(textToSend.trim(), messages, apiKey);
+      const result = await fetchGeminiTutorResponse(textToSend.trim(), messages);
+
+      if (result.error === 'MISSING_API_KEY') {
+        setIsTyping(false);
+        setShowMissingKeyModal(true);
+        return;
+      }
+
+      let responseText = result.success ? result.text : null;
+      if (!responseText) {
+        responseText = getFallbackTutorResponse(textToSend.trim());
+      }
+
       const botMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
@@ -81,16 +96,15 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Error fetching AI response:', error);
-      const errorMessage = {
+    } catch (e) {
+      // Do not throw console error, handle fallback cleanly
+      const botMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        isError: true,
-        text: `Si è verificato un errore durante la generazione della risposta (${error.message}). Assicurati di inserire una chiave API Gemini valida cliccando l'icona della chiave in alto.`,
+        text: getFallbackTutorResponse(textToSend.trim()),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, botMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -145,13 +159,19 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             </div>
 
             <div className="flex items-center space-x-1">
-              {/* API Key settings button */}
+              {/* API Key status / settings button */}
               <button
-                onClick={() => setShowKeyInput(!showKeyInput)}
+                onClick={() => {
+                  if (!hasValidApiKey()) {
+                    setShowMissingKeyModal(true);
+                  } else if (onGoToProfile) {
+                    onGoToProfile();
+                  }
+                }}
                 className={`p-2 rounded-xl transition-colors ${
-                  apiKey ? 'text-emerald-400 hover:bg-slate-800' : 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20'
+                  hasValidApiKey() ? 'text-emerald-400 hover:bg-slate-800' : 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 animate-pulse'
                 }`}
-                title="Configura Chiave API Gemini"
+                title={hasValidApiKey() ? "API Key Gemini Attiva (Profilo)" : "Configura Chiave API Gemini nel Profilo"}
               >
                 <Key className="w-4 h-4" />
               </button>
@@ -175,34 +195,6 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               </button>
             </div>
           </div>
-
-          {/* API Key Modal Banner (if toggled) */}
-          {showKeyInput && (
-            <div className="p-3 bg-slate-800 border-b border-slate-700 space-y-2 animate-fadeIn text-xs">
-              <div className="flex items-center justify-between text-slate-300 font-semibold">
-                <span className="flex items-center space-x-1">
-                  <Key className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Inserisci Chiave API Gemini</span>
-                </span>
-                <span className="text-[10px] text-slate-400">Opzionale (.env supportato)</span>
-              </div>
-              <div className="flex space-x-2">
-                <input
-                  type="password"
-                  value={tempKey}
-                  onChange={(e) => setTempKey(e.target.value)}
-                  placeholder="AIzaSy..."
-                  className="flex-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-indigo-500"
-                />
-                <button
-                  onClick={() => saveApiKey(tempKey)}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-colors"
-                >
-                  Salva
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Messages Body */}
           <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
@@ -286,51 +278,19 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
         </div>
       )}
+
+      {/* Missing API Key Modal */}
+      <MissingApiKeyModal
+        isOpen={showMissingKeyModal}
+        onClose={() => setShowMissingKeyModal(false)}
+        onGoToProfile={onGoToProfile}
+      />
     </>
   );
 }
 
-// Helper to call Google Gemini API with fallback smart tutor
-async function fetchGeminiResponse(userPrompt, conversationHistory, apiKey) {
-  const systemPrompt = "Sei un tutor d'esame per sviluppatori web. Rispondi in modo conciso, chiaro ed efficace a qualsiasi dubbio su CSS, JavaScript, React e SQL.";
-
-  if (apiKey) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-      
-      const payload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: `${systemPrompt}\n\nDomanda dello studente: ${userPrompt}` }
-            ]
-          }
-        ]
-      };
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error?.message || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (generatedText) return generatedText;
-    } catch (e) {
-      console.warn("Gemini API direct call error, using local fallback response generator:", e);
-    }
-  }
-
-  // Fallback Rule-based Intelligent Exam Tutor Response (works offline / without API Key)
-  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate thinking delay
-
+// Fallback Rule-based Intelligent Exam Tutor Response
+function getFallbackTutorResponse(userPrompt) {
   const lower = userPrompt.toLowerCase();
 
   if (lower.includes('box model') || lower.includes('css')) {
@@ -346,5 +306,5 @@ async function fetchGeminiResponse(userPrompt, conversationHistory, apiKey) {
     return "🔍 **SQL & Database Relazionali:**\n- `INNER JOIN`: prende solo i record presenti in entrambe le tabelle.\n- `LEFT JOIN`: prende TUTTI i record della tabella sinistra e i corrispettivi di destra (o NULL).\n- `WHERE` vs `HAVING`: WHERE filtra prima del `GROUP BY`, HAVING filtra i gruppi già aggregati.";
   }
 
-  return `🤖 **Tutor IA (Modalità Ripasso):**\nIn risposta al tuo quesito: "${userPrompt}"\n\nPer superare l'esame con successo, ti consiglio di verificare tre concetti chiave:\n1. La sintassi corretta ed eventuali edge cases.\n2. Le differenze di comportamento rispetto ai metodi alternativi.\n3. Come questo concetto influisce sulle prestazioni della tua applicazione Web.\n\n*Nota: Per sbloccare risposte in tempo reale generate da Gemini, aggiungi la tua chiave API VITE_GEMINI_API_KEY nel file .env o clicca l'icona della chiave in alto.*`;
+  return `🤖 **Tutor IA (Modalità Ripasso):**\nIn risposta al tuo quesito: "${userPrompt}"\n\nPer superare l'esame con successo, ti consiglio di verificare tre concetti chiave:\n1. La sintassi corretta ed eventuali edge cases.\n2. Le differenze di comportamento rispetto ai metodi alternativi.\n3. Come questo concetto influisce sulle prestazioni della tua applicazione Web.\n\n*Nota: Per abilitare le risposte in tempo reale da Google Gemini, inserisci la tua API Key gratuita nel tuo Profilo Utente.*`;
 }

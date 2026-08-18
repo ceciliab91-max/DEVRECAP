@@ -14,6 +14,7 @@ const DEFAULT_USERS = [
     bio: 'Sviluppatrice Web Junior in preparazione per l\'esame finale.',
     targetGrade: '28/30',
     examDate: '2026-09-30',
+    apiKey: '',
     createdAt: new Date().toISOString()
   },
   {
@@ -26,6 +27,7 @@ const DEFAULT_USERS = [
     bio: 'Docente ed Esaminatore per lo Sviluppo Web (CSS, JS, React, SQL).',
     targetGrade: '30L',
     examDate: '2026-10-15',
+    apiKey: '',
     createdAt: new Date().toISOString()
   }
 ];
@@ -118,7 +120,7 @@ export const loginUser = (email, password) => {
 };
 
 // Register action
-export const registerUser = ({ name, email, password, role = 'student' }) => {
+export const registerUser = ({ name, email, password, role = 'student', apiKey = '' }) => {
   const users = getUsers();
   const existing = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
 
@@ -136,6 +138,7 @@ export const registerUser = ({ name, email, password, role = 'student' }) => {
     bio: role === 'admin' ? 'Docente & Amministratore della piattaforma.' : 'Studente in preparazione per l\'esame.',
     targetGrade: '28/30',
     examDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +30 days default
+    apiKey: apiKey ? apiKey.trim() : '',
     createdAt: new Date().toISOString()
   };
 

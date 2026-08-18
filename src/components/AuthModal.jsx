@@ -10,7 +10,8 @@ import {
   UserPlus, 
   GraduationCap, 
   ShieldCheck, 
-  AlertCircle 
+  AlertCircle,
+  Key
 } from 'lucide-react';
 import { loginUser, registerUser } from '../utils/authStorage';
 
@@ -20,6 +21,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     name: '',
     email: '',
     password: '',
+    apiKey: '',
     role: 'student' // 'student' | 'admin'
   });
   const [error, setError] = useState(null);
@@ -192,6 +194,28 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               />
             </div>
           </div>
+
+          {mode === 'register' && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-slate-300">Gemini API Key Personale (Opzionale)</label>
+                <span className="text-[10px] font-semibold text-amber-400">BYOK</span>
+              </div>
+              <div className="relative">
+                <Key className="w-4 h-4 text-amber-400 absolute left-3 top-3" />
+                <input
+                  type="password"
+                  value={formData.apiKey}
+                  onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                  placeholder="AIzaSy..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <p className="text-[11px] text-slate-400 leading-snug">
+                Inserisci la tua chiave per sbloccare il Tutor IA e le correzioni del Live Coding a costo zero.
+              </p>
+            </div>
+          )}
 
           {mode === 'register' && (
             <div className="space-y-1.5 pt-1">

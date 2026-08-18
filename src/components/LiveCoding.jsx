@@ -15,6 +15,8 @@ import {
   Loader2,
   BookOpen
 } from 'lucide-react';
+import { hasValidApiKey, evaluateCodeWithAi } from '../services/aiService';
+import MissingApiKeyModal from './MissingApiKeyModal';
 
 export const challengesData = [
   // --- CSS CHALLENGES (4) ---
@@ -408,7 +410,7 @@ WHERE o.id IS NULL;`,
   }
 ];
 
-export default function LiveCoding() {
+export default function LiveCoding({ onGoToProfile }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [userCode, setUserCode] = useState('');
   const [evalResult, setEvalResult] = useState(null);
@@ -418,6 +420,7 @@ export default function LiveCoding() {
   // AI evaluation states
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiVerdict, setAiVerdict] = useState(null);
+  const [showMissingKeyModal, setShowMissingKeyModal] = useState(false);
 
   const filteredChallenges = subjectFilter === 'ALL'
     ? challengesData
@@ -458,15 +461,30 @@ export default function LiveCoding() {
     });
   };
 
-  // AI Evaluator simulated / LLM Engine (Docente Universitario Severo ma Formativo)
-  const handleAiEvaluation = () => {
+  // AI Evaluator LLM Engine with BYOK Gemini API & fallback
+  const handleAiEvaluation = async () => {
     if (!currentChallenge || !userCode) return;
+
+    if (!hasValidApiKey()) {
+      setShowMissingKeyModal(true);
+      return;
+    }
 
     setIsAiLoading(true);
     setAiVerdict(null);
 
-    // Simulate AI LLM Response delay
-    setTimeout(() => {
+    const res = await evaluateCodeWithAi(userCode, currentChallenge);
+
+    if (res.error === 'MISSING_API_KEY') {
+      setIsAiLoading(false);
+      setShowMissingKeyModal(true);
+      return;
+    }
+
+    if (res.success && res.verdict) {
+      setAiVerdict(res.verdict);
+    } else {
+      // Rule-based fallback if API fails or offline
       let passedRulesCount = 0;
       currentChallenge.checkRules.forEach(rule => {
         if (rule.regex.test(userCode)) passedRulesCount += 1;
@@ -494,16 +512,16 @@ export default function LiveCoding() {
         profName: "Prof. Loris",
         role: "Docente Universitario di Sviluppo Web",
         analisiRequisiti: isPass
-          ? "Il codice presentato soddisfa appieno i requisiti tecnici e la sintassi imposti dalla traccia dell'esercizio."
+          ? "Il codice presentato soddisfa appieno i requisiti tecnici imposti dalla traccia dell'esercizio."
           : "ATTENZIONE: Il codice inviato appare incompleto o privo di alcune istruzioni chiave richieste dalla dispensa didattica.",
         qualitaCodice: isPass
           ? "Strutturazione pulita, ottima aderenza alle convenzioni stilistiche ed alla formattazione."
           : "Riscontrata imprecisione nelle regole sintattiche o mancanza di costrutti essenziali.",
         codiceOttimizzato: currentChallenge.officialSolution
       });
+    }
 
-      setIsAiLoading(false);
-    }, 1800);
+    setIsAiLoading(false);
   };
 
   const handleResetCode = () => {
@@ -827,6 +845,13 @@ export default function LiveCoding() {
         </div>
 
       </div>
+
+      {/* Missing API Key Modal */}
+      <MissingApiKeyModal
+        isOpen={showMissingKeyModal}
+        onClose={() => setShowMissingKeyModal(false)}
+        onGoToProfile={onGoToProfile}
+      />
 
     </div>
   );

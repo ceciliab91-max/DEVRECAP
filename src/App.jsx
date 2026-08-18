@@ -154,7 +154,7 @@ export default function App() {
         )}
 
         {activeTab === 'live-coding' && (
-          <LiveCoding />
+          <LiveCoding onGoToProfile={() => setActiveTab('profile')} />
         )}
 
         {activeTab === 'quiz-run' && (
@@ -220,6 +220,7 @@ export default function App() {
       <AITutorChat 
         externalTriggerContext={aiTutorTriggerContext}
         onClearTriggerContext={() => setAiTutorTriggerContext(null)}
+        onGoToProfile={() => setActiveTab('profile')}
       />
 
       {/* Footer */}
