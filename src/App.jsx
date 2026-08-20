@@ -9,6 +9,8 @@ import ErrorPool from './components/ErrorPool';
 import HistoryView from './components/HistoryView';
 import LiveCoding from './components/LiveCoding';
 import HubStudio from './components/HubStudio';
+import Notebook from './components/Notebook';
+import StatisticheView from './components/StatisticheView';
 import AITutorChat from './components/AITutorChat';
 import UserProfile from './components/UserProfile';
 import AdminHub from './components/AdminHub';
@@ -28,7 +30,6 @@ import { getCurrentUser, logoutUser } from './utils/authStorage';
 export default function App() {
   const [themeState, setThemeState] = useState(() => getTheme());
   const [activeTab, setActiveTab] = useState('dashboard'); 
-  // 'dashboard', 'hub-studio', 'quiz-select', 'quiz-run', 'quiz-results', 'live-coding', 'planner', 'errors', 'history', 'profile', 'admin'
   
   const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -40,15 +41,10 @@ export default function App() {
 
   const [stats, setStats] = useState(() => getAggregateStats());
 
-  // Apply theme class to document element
+  // Apply theme class 'dark' to document.documentElement (<html>)
   useEffect(() => {
-    if (themeState === 'light') {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    }
+    const isDark = themeState === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
     setTheme(themeState);
   }, [themeState]);
 
@@ -116,7 +112,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 dark:text-slate-100 light:text-slate-900 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
       
       {/* Top Sticky Header */}
       <Navbar 
@@ -133,6 +129,7 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
+        {/* 1. Dashboard / Studio */}
         {activeTab === 'dashboard' && (
           <Dashboard 
             stats={stats}
@@ -143,10 +140,35 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'hub-studio' && (
+        {/* 2. Mappe & Schemi */}
+        {(activeTab === 'mappe-schemi' || activeTab === 'hub-studio') && (
           <HubStudio />
         )}
 
+        {/* 3. Notebook */}
+        {activeTab === 'notebook' && (
+          <Notebook />
+        )}
+
+        {/* 4. Tutor AI */}
+        {activeTab === 'tutor-ai' && (
+          <AITutorChat 
+            isFullPage={true}
+            onGoToProfile={() => setActiveTab('profile')}
+          />
+        )}
+
+        {/* 5. Statistiche (Progressi, Errori, Storico) */}
+        {activeTab === 'statistiche' && (
+          <StatisticheView 
+            stats={stats}
+            onStartErrorReview={handleStartErrorReview}
+            onRefreshStats={refreshStats}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {/* Secondary / Action Views */}
         {activeTab === 'quiz-select' && (
           <QuizSetup 
             onStartQuiz={handleStartQuiz}
@@ -172,7 +194,10 @@ export default function App() {
             onRestartQuiz={() => handleStartQuiz(quizModeInfo)}
             onGoHome={() => setActiveTab('dashboard')}
             onStartErrorReview={handleStartErrorReview}
-            onAskAITutor={(qContext) => setAiTutorTriggerContext(qContext)}
+            onAskAITutor={(qContext) => {
+              setAiTutorTriggerContext(qContext);
+              setActiveTab('tutor-ai');
+            }}
           />
         )}
 
@@ -216,12 +241,14 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
       />
 
-      {/* Floating AI Tutor Chatbot */}
-      <AITutorChat 
-        externalTriggerContext={aiTutorTriggerContext}
-        onClearTriggerContext={() => setAiTutorTriggerContext(null)}
-        onGoToProfile={() => setActiveTab('profile')}
-      />
+      {/* Floating AI Tutor Chatbot FAB (when activeTab !== 'tutor-ai') */}
+      {activeTab !== 'tutor-ai' && (
+        <AITutorChat 
+          externalTriggerContext={aiTutorTriggerContext}
+          onClearTriggerContext={() => setAiTutorTriggerContext(null)}
+          onGoToProfile={() => setActiveTab('profile')}
+        />
+      )}
 
       {/* Footer */}
       <Footer />
@@ -232,7 +259,7 @@ export default function App() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 py-6 text-center text-xs text-slate-500">
+    <footer className="border-t border-slate-200 dark:border-slate-800/80 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
         <span>DevExam Simulator & Study Planner &copy; {new Date().getFullYear()}</span>
         <span>CSS &bull; JavaScript &bull; React &bull; SQL</span>

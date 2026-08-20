@@ -1,21 +1,121 @@
 const KEYS = {
-  THEME: 'devexam_theme',
+  THEME: 'theme',
+  THEME_ALT: 'devexam_theme',
   HISTORY: 'devexam_history',
   ERRORS: 'devexam_errors',
   BOOKMARKS: 'devexam_bookmarks',
   ROADMAP: 'devexam_roadmap',
   FLASHCARDS: 'devexam_flashcards',
   CUSTOM_QUESTIONS: 'devexam_custom_questions',
-  CUSTOM_CHALLENGES: 'devexam_custom_challenges'
+  CUSTOM_CHALLENGES: 'devexam_custom_challenges',
+  STREAK_DATA: 'devexam_streak_data',
+  LAST_STUDY_DATE: 'lastStudyDate',
+  WEEKLY_ACTIVITY: 'weeklyActivity'
 };
 
 // --- THEME ---
 export const getTheme = () => {
-  return localStorage.getItem(KEYS.THEME) || 'dark';
+  return localStorage.getItem(KEYS.THEME) || localStorage.getItem(KEYS.THEME_ALT) || 'dark';
 };
 
 export const setTheme = (theme) => {
   localStorage.setItem(KEYS.THEME, theme);
+  localStorage.setItem(KEYS.THEME_ALT, theme);
+};
+
+// --- DAILY STREAK & WEEKLY ACTIVITY ---
+export const getWeekDays = () => {
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  const distToMon = currentDay === 0 ? 6 : currentDay - 1;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - distToMon);
+
+  const dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  const todayStr = now.toISOString().split('T')[0];
+
+  return dayNames.map((name, index) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + index);
+    const dateStr = d.toISOString().split('T')[0];
+    return {
+      name,
+      dateStr,
+      isToday: dateStr === todayStr,
+      isPast: dateStr < todayStr
+    };
+  });
+};
+
+export const getStreakData = () => {
+  try {
+    const rawData = localStorage.getItem(KEYS.STREAK_DATA);
+    let data = rawData ? JSON.parse(rawData) : null;
+
+    const rawLastDate = localStorage.getItem(KEYS.LAST_STUDY_DATE);
+    const rawWeekly = localStorage.getItem(KEYS.WEEKLY_ACTIVITY);
+    let weeklyActivity = rawWeekly ? JSON.parse(rawWeekly) : [];
+    if (!Array.isArray(weeklyActivity)) weeklyActivity = [];
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let streakCount = data?.streakCount || 0;
+    let lastStudyDate = data?.lastStudyDate || rawLastDate || null;
+
+    // Check if streak was broken (lastStudyDate was before yesterday and not today)
+    if (lastStudyDate && lastStudyDate !== todayStr && lastStudyDate !== yesterdayStr) {
+      streakCount = 0;
+    }
+
+    return {
+      streakCount,
+      lastStudyDate,
+      weeklyActivity: data?.weeklyActivity || weeklyActivity
+    };
+  } catch (e) {
+    console.error("Failed to parse streak data from localStorage", e);
+    return { streakCount: 0, lastStudyDate: null, weeklyActivity: [] };
+  }
+};
+
+export const recordStudyActivity = () => {
+  const current = getStreakData();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  let newStreak = current.streakCount;
+  const lastDate = current.lastStudyDate;
+
+  if (lastDate === todayStr) {
+    // Already recorded today, keep streak
+    if (newStreak === 0) newStreak = 1;
+  } else if (lastDate === yesterdayStr) {
+    // Consecutive day study!
+    newStreak += 1;
+  } else {
+    // Missed a day or first session
+    newStreak = 1;
+  }
+
+  const updatedWeekly = Array.from(new Set([...current.weeklyActivity, todayStr]));
+
+  const updatedData = {
+    streakCount: newStreak,
+    lastStudyDate: todayStr,
+    weeklyActivity: updatedWeekly
+  };
+
+  localStorage.setItem(KEYS.STREAK_DATA, JSON.stringify(updatedData));
+  localStorage.setItem(KEYS.LAST_STUDY_DATE, todayStr);
+  localStorage.setItem(KEYS.WEEKLY_ACTIVITY, JSON.stringify(updatedWeekly));
+
+  return updatedData;
 };
 
 // --- TEST HISTORY ---
@@ -38,6 +138,9 @@ export const saveTestResult = (result) => {
   };
   const updated = [newEntry, ...history];
   localStorage.setItem(KEYS.HISTORY, JSON.stringify(updated));
+
+  // Automatically record daily streak on test completion
+  recordStudyActivity();
 
   // Also update Error Pool automatically
   if (result.questions && Array.isArray(result.questions)) {
@@ -255,4 +358,8 @@ export const clearAllData = () => {
   localStorage.removeItem(KEYS.FLASHCARDS);
   localStorage.removeItem(KEYS.CUSTOM_QUESTIONS);
   localStorage.removeItem(KEYS.CUSTOM_CHALLENGES);
+  localStorage.removeItem(KEYS.STREAK_DATA);
+  localStorage.removeItem(KEYS.LAST_STUDY_DATE);
+  localStorage.removeItem(KEYS.WEEKLY_ACTIVITY);
 };
+
