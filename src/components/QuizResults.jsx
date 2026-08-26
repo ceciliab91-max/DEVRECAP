@@ -22,9 +22,9 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
   const { score30, percentage, score, totalQuestions, timeSpentSeconds, questions } = result;
 
   const getEvaluation = (score30Val) => {
-    if (score30Val >= 28) return { label: 'Eccellente! Esame Superato a Pieni Voti', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
-    if (score30Val >= 18) return { label: 'Esame Superato con Successo', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30' };
-    return { label: 'Esame Non Superato - Richiede Ripasso', color: 'text-red-400 bg-red-500/10 border-red-500/30' };
+    if (score30Val >= 28) return { label: 'Eccellente! Esame Superato a Pieni Voti', color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
+    if (score30Val >= 18) return { label: 'Esame Superato con Successo', color: 'text-indigo-700 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/30' };
+    return { label: 'Esame Non Superato - Richiede Ripasso', color: 'text-red-700 dark:text-red-400 bg-red-500/10 border-red-500/30' };
   };
 
   const evalStatus = getEvaluation(score30);
@@ -44,7 +44,7 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
     <div className="max-w-4xl mx-auto space-y-8 pb-16 animate-fadeIn">
       
       {/* Top Hero Score Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-800/90 border border-slate-700 p-6 sm:p-10 shadow-2xl text-center space-y-6">
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl text-center space-y-6 text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
@@ -129,8 +129,8 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
       {/* Educational Feedback: Question by Question Review */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white tracking-tight flex items-center space-x-2">
-            <BookOpen className="w-5 h-5 text-indigo-400" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2">
+            <BookOpen className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
             <span>Revisione Dettagliata Domande ({score}/{totalQuestions} Corrette)</span>
           </h2>
         </div>
@@ -143,10 +143,10 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
             return (
               <div 
                 key={q.questionId}
-                className={`p-6 sm:p-7 rounded-3xl border transition-all space-y-4 ${
+                className={`p-6 sm:p-7 rounded-2xl border transition-all space-y-4 shadow-sm ${
                   isCorrect
-                    ? 'bg-slate-800/40 border-emerald-500/30'
-                    : 'bg-slate-800/70 border-red-500/40'
+                    ? 'bg-white dark:bg-slate-900 border-emerald-500/30'
+                    : 'bg-white dark:bg-slate-900 border-red-500/40'
                 }`}
               >
                 
@@ -154,14 +154,14 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3">
                     <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold ${
-                      isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                      isCorrect ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/20 text-red-700 dark:text-red-400'
                     }`}>
                       {idx + 1}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-900 text-indigo-400 border border-slate-700">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-950 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700">
                       {q.subject}
                     </span>
-                    <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
                       {q.chapter}
                     </span>
                   </div>
@@ -176,10 +176,10 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                           correctAnswer: q.options[q.correctIndex],
                           userChoice: q.userChoice !== undefined && q.userChoice !== null ? q.options[q.userChoice] : 'Nessuna'
                         })}
-                        className="flex items-center space-x-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/40 hover:text-white transition-all shadow-sm"
+                        className="flex items-center space-x-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-all shadow-sm"
                         title="Genera spiegazione personalizzata dell'errore"
                       >
-                        <Bot className="w-3.5 h-3.5 text-indigo-400" />
+                        <Bot className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                         <span>💡 Chiedi al Tutor IA</span>
                       </button>
                     )}
@@ -188,8 +188,8 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                       onClick={() => handleToggleError(q.questionId)}
                       className={`flex items-center space-x-1.5 px-3 py-1 rounded-xl text-xs font-semibold border transition-all ${
                         inErrorPool
-                          ? 'bg-red-500/20 text-red-300 border-red-500/40'
-                          : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-200'
+                          ? 'bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/40'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
                       <AlertTriangle className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                 </div>
 
                 {/* Question Text */}
-                <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
                   {q.question}
                 </h3>
 
@@ -216,11 +216,11 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                     const isUserChoice = q.userChoice === optIdx;
                     const isCorrectChoice = q.correctIndex === optIdx;
 
-                    let rowStyle = 'bg-slate-900/40 border-slate-800 text-slate-400';
+                    let rowStyle = 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400';
                     if (isCorrectChoice) {
-                      rowStyle = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 font-semibold';
+                      rowStyle = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-800 dark:text-emerald-300 font-semibold';
                     } else if (isUserChoice && !isCorrectChoice) {
-                      rowStyle = 'bg-red-500/15 border-red-500/40 text-red-300 font-semibold';
+                      rowStyle = 'bg-red-500/15 border-red-500/40 text-red-800 dark:text-red-300 font-semibold';
                     }
 
                     return (
@@ -235,15 +235,15 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
 
                         <div className="flex items-center space-x-2">
                           {isUserChoice && (
-                            <span className="px-2 py-0.5 text-[10px] rounded bg-slate-800 font-bold text-slate-300">
+                            <span className="px-2 py-0.5 text-[10px] rounded bg-slate-200 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">
                               Tua Risposta
                             </span>
                           )}
                           {isCorrectChoice && (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                           )}
                           {isUserChoice && !isCorrectChoice && (
-                            <XCircle className="w-4 h-4 text-red-400" />
+                            <XCircle className="w-4 h-4 text-red-500 dark:text-red-400" />
                           )}
                         </div>
                       </div>
@@ -252,12 +252,12 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
                 </div>
 
                 {/* Educational Explanation Box */}
-                <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-1.5 text-xs">
-                  <div className="flex items-center space-x-2 text-indigo-400 font-bold">
+                <div className="p-4 rounded-2xl bg-indigo-500/10 dark:bg-indigo-950/30 border border-indigo-500/20 space-y-1.5 text-xs">
+                  <div className="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-bold">
                     <Sparkles className="w-4 h-4" />
                     <span>Spiegazione Concetto Tecnico</span>
                   </div>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                     {q.explanation}
                   </p>
                 </div>

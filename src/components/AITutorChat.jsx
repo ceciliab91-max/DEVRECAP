@@ -117,7 +117,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
   ];
 
   const contentUI = (
-    <div className={`flex flex-col h-full bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700/80 shadow-2xl backdrop-blur-xl overflow-hidden ${
+    <div className={`flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
       isFullPage 
         ? 'w-full max-w-4xl mx-auto rounded-3xl border h-[calc(100vh-140px)] min-h-[500px]'
         : 'fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 z-50 w-full sm:max-w-md h-[100dvh] sm:h-[560px] max-h-[100dvh] sm:max-h-[calc(100vh-theme(spacing.16))] sm:rounded-3xl animate-fadeIn'
@@ -178,8 +178,8 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         </div>
       </div>
 
-      {/* Messages Body Container - flex-1 overflow-y-auto overscroll-contain */}
-      <div className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-4 text-xs">
+      {/* Messages Body Container */}
+      <div className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-4 text-xs bg-white dark:bg-slate-900">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -188,17 +188,17 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             <div
               className={`max-w-[85%] p-3.5 rounded-2xl space-y-1 shadow-sm ${
                 msg.sender === 'user'
-                  ? 'bg-indigo-600 text-white rounded-br-none'
+                  ? 'bg-purple-600 text-white rounded-br-none'
                   : msg.isError
-                  ? 'bg-red-950/60 border border-red-500/40 text-red-200 rounded-bl-none'
-                  : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-slate-200 rounded-bl-none'
+                  ? 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-300 rounded-bl-none'
+                  : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none'
               }`}
             >
               <p className="leading-relaxed whitespace-pre-wrap font-sans">
                 {msg.text}
               </p>
-              <span className={`text-[9px] block text-right font-medium opacity-60 ${
-                msg.sender === 'user' ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'
+              <span className={`text-[9px] block text-right font-medium opacity-70 ${
+                msg.sender === 'user' ? 'text-purple-100' : 'text-slate-500 dark:text-slate-400'
               }`}>
                 {msg.time}
               </span>
@@ -208,7 +208,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
         {/* Typing Indicator */}
         {isTyping && (
-          <div className="flex items-center space-x-2 p-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl w-24 text-slate-400">
+          <div className="flex items-center space-x-2 p-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl w-24 text-slate-400">
             <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }} />
             <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }} />
             <span className="w-2 h-2 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -219,12 +219,12 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
       {/* Starter Quick Prompts */}
       {messages.length <= 2 && !isTyping && (
-        <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/50 flex space-x-2 overflow-x-auto no-scrollbar">
+        <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex space-x-2 overflow-x-auto no-scrollbar">
           {starterPrompts.map((prompt, idx) => (
             <button
               key={idx}
               onClick={() => handleSendMessage(prompt)}
-              className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-300 border border-slate-200 dark:border-slate-700 text-[11px] font-medium transition-colors"
+              className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-300 border border-slate-200 dark:border-slate-700 text-[11px] font-medium transition-colors"
             >
               {prompt}
             </button>
@@ -232,8 +232,8 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         </div>
       )}
 
-      {/* Input Area Form - sticky bottom-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur pb-safe */}
-      <div className="sticky bottom-0 p-3 bg-white/80 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 backdrop-blur pb-safe">
+      {/* Input Area Form */}
+      <div className="sticky bottom-0 p-3 bg-white/90 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 backdrop-blur pb-safe">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -246,12 +246,12 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Fai una domanda sul programma d'esame..."
-            className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:outline-none focus:border-indigo-500 transition-colors"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white transition-all shadow-md"
+            className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:hover:bg-purple-600 text-white transition-all shadow-md"
           >
             <Send className="w-4 h-4" />
           </button>

@@ -64,10 +64,10 @@ export default function AdminHub({ currentUser }) {
   // Security guard check
   if (!currentUser || currentUser.role !== 'admin') {
     return (
-      <div className="max-w-2xl mx-auto my-12 p-8 rounded-3xl bg-red-950/40 border border-red-500/40 text-center space-y-4">
-        <ShieldCheck className="w-12 h-12 text-red-400 mx-auto" />
-        <h2 className="text-xl font-bold text-white">Accesso Riservato agli Amministratori</h2>
-        <p className="text-xs text-slate-300">
+      <div className="max-w-2xl mx-auto my-12 p-8 rounded-3xl bg-red-500/10 border border-red-500/30 text-center space-y-4">
+        <ShieldCheck className="w-12 h-12 text-red-500 dark:text-red-400 mx-auto" />
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Accesso Riservato agli Amministratori</h2>
+        <p className="text-xs text-slate-600 dark:text-slate-300">
           Questa sezione è accessibile soltanto agli utenti con ruolo Docente/Admin.
         </p>
       </div>
@@ -174,7 +174,7 @@ export default function AdminHub({ currentUser }) {
     <div className="space-y-8 pb-16 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 p-6 sm:p-10 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 p-6 sm:p-10 shadow-2xl text-white">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
@@ -241,48 +241,48 @@ export default function AdminHub({ currentUser }) {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">Domande Totali Caricate</span>
-                <Database className="w-5 h-5 text-indigo-400" />
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Domande Totali Caricate</span>
+                <Database className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <div className="text-3xl font-black text-white">{allQuestions.length}</div>
-              <p className="text-[11px] text-slate-500">CSS, JS, React e SQL</p>
+              <div className="text-3xl font-black text-slate-900 dark:text-white">{allQuestions.length}</div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">CSS, JS, React e SQL</p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">Sfide Pratiche Live Coding</span>
-                <Code2 className="w-5 h-5 text-cyan-400" />
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Sfide Pratiche Live Coding</span>
+                <Code2 className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <div className="text-3xl font-black text-white">{allChallenges.length}</div>
-              <p className="text-[11px] text-slate-500">Esercizi pratici per gli studenti</p>
+              <div className="text-3xl font-black text-slate-900 dark:text-white">{allChallenges.length}</div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Esercizi pratici per gli studenti</p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">Studenti Iscritti</span>
-                <Users className="w-5 h-5 text-purple-400" />
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Studenti Iscritti</span>
+                <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="text-3xl font-black text-white">{usersList.length}</div>
-              <p className="text-[11px] text-slate-500">Account registrati in piattaforma</p>
+              <div className="text-3xl font-black text-slate-900 dark:text-white">{usersList.length}</div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Account registrati in piattaforma</p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">Media Voti Globale</span>
-                <Award className="w-5 h-5 text-amber-400" />
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Media Voti Globale</span>
+                <Award className="w-5 h-5 text-amber-500 dark:text-amber-400" />
               </div>
-              <div className="text-3xl font-black text-white">{globalStats.averageScore30 > 0 ? `${globalStats.averageScore30}/30` : 'N/A'}</div>
-              <p className="text-[11px] text-slate-500">Tutte le simulazioni svolte</p>
+              <div className="text-3xl font-black text-slate-900 dark:text-white">{globalStats.averageScore30 > 0 ? `${globalStats.averageScore30}/30` : 'N/A'}</div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Tutte le simulazioni svolte</p>
             </div>
 
           </div>
 
           {/* Subject Breakdown Card */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-xl">
-            <h3 className="text-base font-bold text-white flex items-center space-x-2">
-              <BookOpen className="w-5 h-5 text-indigo-400" />
+          <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span>Ripartizione Domande per Materia</span>
             </h3>
 
@@ -290,9 +290,9 @@ export default function AdminHub({ currentUser }) {
               {['CSS', 'JavaScript', 'React', 'SQL'].map((sub) => {
                 const count = allQuestions.filter(q => q.subject === sub).length;
                 return (
-                  <div key={sub} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-                    <span className="text-slate-400 font-semibold block">{sub}</span>
-                    <span className="text-xl font-bold text-white">{count} Quesiti</span>
+                  <div key={sub} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
+                    <span className="text-slate-600 dark:text-slate-400 font-semibold block">{sub}</span>
+                    <span className="text-xl font-bold text-slate-900 dark:text-white">{count} Quesiti</span>
                   </div>
                 );
               })}
@@ -312,13 +312,13 @@ export default function AdminHub({ currentUser }) {
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               {/* Search input */}
               <div className="relative flex-1 sm:w-64">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cerca domanda o capitolo..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-purple-500"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
                 />
               </div>
 
@@ -326,7 +326,7 @@ export default function AdminHub({ currentUser }) {
               <select
                 value={subjectFilter}
                 onChange={(e) => setSubjectFilter(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-purple-500"
+                className="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
               >
                 <option value="ALL">Tutte le Materie</option>
                 <option value="CSS">CSS</option>
@@ -347,10 +347,10 @@ export default function AdminHub({ currentUser }) {
           </div>
 
           {/* Questions Table */}
-          <div className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+              <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="p-4">Materia / Capitolo</th>
                     <th className="p-4">Testo Domanda</th>
@@ -358,26 +358,26 @@ export default function AdminHub({ currentUser }) {
                     <th className="p-4 text-right">Azioni</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
                   {filteredQuestionsList.map((q) => (
-                    <tr key={q.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={q.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="p-4 whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-indigo-400 font-bold block w-max">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 font-bold block w-max">
                           {q.subject}
                         </span>
-                        <span className="text-[11px] text-slate-500">{q.chapter || 'Generale'}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">{q.chapter || 'Generale'}</span>
                       </td>
 
                       <td className="p-4 max-w-md">
-                        <p className="font-semibold text-white leading-snug truncate">{q.question}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white leading-snug truncate">{q.question}</p>
                         {q.isCustom && (
-                          <span className="inline-block mt-1 px-1.5 py-0.2 rounded text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <span className="inline-block mt-1 px-1.5 py-0.2 rounded text-[9px] bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30">
                             Personalizzata Admin
                           </span>
                         )}
                       </td>
 
-                      <td className="p-4 text-[11px] text-slate-400">
+                      <td className="p-4 text-[11px] text-slate-500 dark:text-slate-400">
                         <span>4 Opzioni (Corretta: {String.fromCharCode(65 + (q.correctIndex || 0))})</span>
                       </td>
 
@@ -385,7 +385,7 @@ export default function AdminHub({ currentUser }) {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => handleOpenQuestionModal(q)}
-                            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 transition-colors"
+                            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-300 transition-colors"
                             title="Modifica Quesito"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -394,7 +394,7 @@ export default function AdminHub({ currentUser }) {
                           {q.isCustom && (
                             <button
                               onClick={() => handleDeleteQuestion(q.id)}
-                              className="p-2 rounded-lg bg-slate-800 hover:bg-red-900/60 text-red-400 transition-colors"
+                              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 transition-colors"
                               title="Elimina Quesito"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -417,7 +417,7 @@ export default function AdminHub({ currentUser }) {
         <div className="space-y-6">
           
           <div className="flex justify-between items-center">
-            <h3 className="text-base font-bold text-white">Elenco Sfide Pratiche per lo Studio</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Elenco Sfide Pratiche per lo Studio</h3>
             <button
               onClick={() => setShowChallengeModal(true)}
               className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 transition-all"
@@ -429,15 +429,15 @@ export default function AdminHub({ currentUser }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {allChallenges.map((c) => (
-              <div key={c.id} className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 relative shadow-lg">
+              <div key={c.id} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 relative">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-950 text-cyan-400 border border-slate-700">
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-950 text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700">
                     {c.subject}
                   </span>
                   {c.isCustom && (
                     <button
                       onClick={() => handleDeleteChallenge(c.id)}
-                      className="p-1.5 rounded-lg text-red-400 hover:bg-red-900/40 transition-colors"
+                      className="p-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                       title="Elimina Sfida"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -445,9 +445,9 @@ export default function AdminHub({ currentUser }) {
                   )}
                 </div>
 
-                <h4 className="text-base font-bold text-white">{c.title}</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">{c.description}</p>
-                <div className="text-[10px] text-slate-500 font-mono">
+                <h4 className="text-base font-bold text-slate-900 dark:text-white">{c.title}</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{c.description}</p>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                   Riferimento: {c.pdfReference}
                 </div>
               </div>
@@ -459,13 +459,13 @@ export default function AdminHub({ currentUser }) {
 
       {/* --- MODAL FORM: AGGIUNGI / MODIFICA DOMANDA --- */}
       {showQuestionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs text-slate-900 dark:text-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">
                 {editingQuestion ? 'Modifica Domanda' : 'Aggiungi Nuova Domanda d\'Esame'}
               </h3>
-              <button onClick={() => setShowQuestionModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowQuestionModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -473,11 +473,11 @@ export default function AdminHub({ currentUser }) {
             <form onSubmit={handleSaveQuestion} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Materia</label>
+                  <label className="text-slate-700 dark:text-slate-300 font-semibold">Materia</label>
                   <select
                     value={questionFormData.subject}
                     onChange={(e) => setQuestionFormData({ ...questionFormData, subject: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="CSS">CSS</option>
                     <option value="JavaScript">JavaScript</option>
@@ -487,32 +487,32 @@ export default function AdminHub({ currentUser }) {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold">Capitolo / Argomento</label>
+                  <label className="text-slate-700 dark:text-slate-300 font-semibold">Capitolo / Argomento</label>
                   <input
                     type="text"
                     required
                     value={questionFormData.chapter}
                     onChange={(e) => setQuestionFormData({ ...questionFormData, chapter: e.target.value })}
                     placeholder="Es. Flexbox Dispensa"
-                    className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Testo Quesito / Domanda</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Testo Quesito / Domanda</label>
                 <textarea
                   rows={2}
                   required
                   value={questionFormData.question}
                   onChange={(e) => setQuestionFormData({ ...questionFormData, question: e.target.value })}
                   placeholder="Scrivi qui la domanda d'esame..."
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Snippet di Codice (Opzionale)</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Snippet di Codice (Opzionale)</label>
                 <textarea
                   rows={2}
                   value={questionFormData.codeSnippet}
@@ -524,7 +524,7 @@ export default function AdminHub({ currentUser }) {
 
               {/* 4 Options */}
               <div className="space-y-2">
-                <label className="text-slate-300 font-semibold block">Opzioni di Risposta (Seleziona la corretta):</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold block">Opzioni di Risposta (Seleziona la corretta):</label>
                 {questionFormData.options.map((opt, idx) => (
                   <div key={idx} className="flex items-center space-x-2">
                     <input
@@ -534,7 +534,7 @@ export default function AdminHub({ currentUser }) {
                       onChange={() => setQuestionFormData({ ...questionFormData, correctIndex: idx })}
                       className="text-purple-600 focus:ring-purple-500"
                     />
-                    <strong className="text-slate-400 w-4">{String.fromCharCode(65 + idx)}.</strong>
+                    <strong className="text-slate-500 dark:text-slate-400 w-4">{String.fromCharCode(65 + idx)}.</strong>
                     <input
                       type="text"
                       required
@@ -545,21 +545,21 @@ export default function AdminHub({ currentUser }) {
                         setQuestionFormData({ ...questionFormData, options: newOpts });
                       }}
                       placeholder={`Opzione ${String.fromCharCode(65 + idx)}`}
-                      className="flex-1 p-2 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                      className="flex-1 p-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                 ))}
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Spiegazione Didattica Concetto</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Spiegazione Didattica Concetto</label>
                 <textarea
                   rows={2}
                   required
                   value={questionFormData.explanation}
                   onChange={(e) => setQuestionFormData({ ...questionFormData, explanation: e.target.value })}
                   placeholder="Spiegazione chiara che verrà mostrata dopo la risposta..."
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -567,7 +567,7 @@ export default function AdminHub({ currentUser }) {
                 <button
                   type="button"
                   onClick={() => setShowQuestionModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold"
                 >
                   Annulla
                 </button>
@@ -585,42 +585,42 @@ export default function AdminHub({ currentUser }) {
 
       {/* --- MODAL FORM: AGGIUNGI SFIDA LIVE CODING --- */}
       {showChallengeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">Aggiungi Nuova Sfida Pratica Live Coding</h3>
-              <button onClick={() => setShowChallengeModal(false)} className="text-slate-400 hover:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs text-slate-900 dark:text-slate-100">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Aggiungi Nuova Sfida Pratica Live Coding</h3>
+              <button onClick={() => setShowChallengeModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveChallenge} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Titolo Sfida</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Titolo Sfida</label>
                 <input
                   type="text"
                   required
                   value={challengeFormData.title}
                   onChange={(e) => setChallengeFormData({ ...challengeFormData, title: e.target.value })}
                   placeholder="Es. Centratura Flexbox"
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Descrizione Traccia</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Descrizione Traccia</label>
                 <textarea
                   rows={2}
                   required
                   value={challengeFormData.description}
                   onChange={(e) => setChallengeFormData({ ...challengeFormData, description: e.target.value })}
                   placeholder="Spiega l'obiettivo dell'esercizio..."
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                  className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">HTML Template</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">HTML Template</label>
                 <textarea
                   rows={2}
                   value={challengeFormData.htmlTemplate}
@@ -630,7 +630,7 @@ export default function AdminHub({ currentUser }) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">CSS Iniziale</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">CSS Iniziale</label>
                 <textarea
                   rows={2}
                   value={challengeFormData.initialCode}
@@ -640,7 +640,7 @@ export default function AdminHub({ currentUser }) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Soluzione Ufficiale</label>
+                <label className="text-slate-700 dark:text-slate-300 font-semibold">Soluzione Ufficiale</label>
                 <textarea
                   rows={2}
                   value={challengeFormData.officialSolution}
@@ -653,7 +653,7 @@ export default function AdminHub({ currentUser }) {
                 <button
                   type="button"
                   onClick={() => setShowChallengeModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold"
                 >
                   Annulla
                 </button>

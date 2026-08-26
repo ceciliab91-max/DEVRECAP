@@ -48,7 +48,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
       count: questionsData.filter(q => q.subject === 'CSS').length,
       description: 'Selettori avanzati, pseudo-classi :nth-child, Flexbox layout, position absolute/relative, rem/em ed opacità.',
       color: 'from-blue-500 to-cyan-500', 
-      accent: 'text-blue-500 dark:text-blue-400', 
+      accent: 'text-blue-600 dark:text-blue-400', 
       bg: 'bg-blue-500/10 border-blue-500/20' 
     },
     { 
@@ -58,7 +58,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
       count: questionsData.filter(q => q.subject === 'JavaScript').length,
       description: 'Scope, arrow functions, .map/.filter/.reduce, DOM manipulation, preventDefault, localStorage ed async/await.',
       color: 'from-yellow-500 to-amber-500', 
-      accent: 'text-amber-500 dark:text-amber-400', 
+      accent: 'text-amber-600 dark:text-amber-400', 
       bg: 'bg-amber-500/10 border-amber-500/20' 
     },
     { 
@@ -68,7 +68,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
       count: questionsData.filter(q => q.subject === 'React').length,
       description: 'Sintassi JSX, Props & children, useState, immutabilità con spread, useEffect lifecycle, Context e React Router.',
       color: 'from-cyan-400 to-sky-500', 
-      accent: 'text-cyan-500 dark:text-cyan-400', 
+      accent: 'text-cyan-600 dark:text-cyan-400', 
       bg: 'bg-cyan-500/10 border-cyan-500/20' 
     },
     { 
@@ -78,7 +78,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
       count: questionsData.filter(q => q.subject === 'SQL').length,
       description: 'RDBMS, SELECT con WHERE/ORDER BY, transazioni START TRANSACTION, INNER/LEFT JOIN, GROUP BY e HAVING.',
       color: 'from-purple-500 to-indigo-500', 
-      accent: 'text-purple-500 dark:text-purple-400', 
+      accent: 'text-purple-600 dark:text-purple-400', 
       bg: 'bg-purple-500/10 border-purple-500/20' 
     }
   ];
@@ -164,14 +164,14 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
 
       </div>
 
-      {/* NEW FEATURE: Daily Streak & Weekly Activity Widget */}
+      {/* Daily Streak & Weekly Activity Widget */}
       <StreakWidget />
 
       {/* Global Stats Summary Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Card 1: Simulazioni Completate */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Simulazioni</span>
             <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
@@ -185,7 +185,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         </div>
 
         {/* Card 2: Media Punteggio */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Media Voto</span>
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
@@ -206,7 +206,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         </div>
 
         {/* Card 3: Accuratezza Globale */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Accuratezza Risposte</span>
             <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -220,7 +220,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         </div>
 
         {/* Card 4: Errori da Rivedere */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl hover:border-slate-300 dark:hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Banca Errori</span>
             <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
@@ -257,21 +257,21 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
             return (
               <div
                 key={sub.id}
-                className="p-6 rounded-3xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 hover:border-indigo-500/50 transition-all flex flex-col justify-between space-y-4 shadow-md group"
+                className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl hover:border-indigo-500/50 transition-all flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className={`p-3 rounded-2xl ${sub.bg}`}>
                       <Icon className={`w-6 h-6 ${sub.accent}`} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {sub.count} Quesiti
                     </span>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">{sub.name}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pt-1 font-normal">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pt-1 font-normal">
                       {sub.description}
                     </p>
                   </div>
@@ -282,7 +282,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
                       <span>Accuratezza:</span>
                       <span className={sub.accent}>{subData.percent}%</span>
                     </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                       <div 
                         className={`h-full rounded-full bg-gradient-to-r ${sub.color}`}
                         style={{ width: `${subData.percent}%` }}
@@ -293,7 +293,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
 
                 <button
                   onClick={() => onStartQuiz({ mode: 'subject', subject: sub.id })}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-600 text-slate-800 dark:text-white hover:text-white text-xs font-bold flex items-center justify-center space-x-2 transition-all"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center space-x-2 transition-all"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Allenati su {sub.id}</span>
@@ -308,8 +308,8 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Attività Recenti */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-4 shadow-md">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/80 pb-3">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <History className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
               <span>Attività Recenti</span>
@@ -329,7 +329,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
           ) : (
             <div className="space-y-3">
               {historyList.map(item => (
-                <div key={item.id} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs">
+                <div key={item.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-slate-900 dark:text-white block">
                       {item.mode === 'full' ? 'Simulazione Completa' : item.mode === 'subject' ? `Test ${item.subjectFilter}` : 'Revisione Errori'}
@@ -347,8 +347,8 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         </div>
 
         {/* Argomenti Deboli / Banca Errori */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-4 shadow-md">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/80 pb-3">
+        <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400" />
               <span>Argomenti Deboli ({errorIds.length})</span>
@@ -365,15 +365,15 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
             <div className="text-center py-6 space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto" />
               <p className="text-xs text-slate-800 dark:text-slate-300 font-semibold">Nessun errore registrato!</p>
-              <p className="text-[11px] text-slate-500">I tuoi punti deboli compariranno qui dopo i test.</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">I tuoi punti deboli compariranno qui dopo i test.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {recentErrorQuestions.map(q => (
-                <div key={q.id} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60 space-y-1 text-xs">
+                <div key={q.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-1 text-xs">
                   <div className="flex justify-between text-[11px]">
                     <span className="font-bold text-indigo-600 dark:text-indigo-400">{q.subject}</span>
-                    <span className="text-slate-500">{q.chapter}</span>
+                    <span className="text-slate-500 dark:text-slate-400">{q.chapter}</span>
                   </div>
                   <p className="text-slate-800 dark:text-slate-200 font-medium truncate">{q.question}</p>
                 </div>

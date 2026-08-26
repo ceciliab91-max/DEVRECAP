@@ -103,7 +103,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
     <div className="max-w-4xl mx-auto space-y-8 pb-16 animate-fadeIn">
       
       {/* Profile Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
@@ -139,7 +139,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
           </div>
 
           {/* Exam Countdown Widget Box */}
-          <div className="p-4 rounded-2xl bg-slate-900/90 border border-indigo-500/30 text-center min-w-[180px] space-y-1 shadow-lg">
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-indigo-500/30 text-center min-w-[180px] space-y-1 shadow-lg">
             <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block flex items-center justify-center space-x-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Countdown Esame</span>
@@ -160,15 +160,15 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
         
         {/* Left Column: Form Edit */}
         <div className="md:col-span-2 space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl">
-            <h2 className="text-lg font-bold text-white tracking-tight flex items-center space-x-2 border-b border-slate-800 pb-4">
-              <User className="w-5 h-5 text-indigo-400" />
+          <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-4">
+              <User className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
               <span>Personalizza il tuo Profilo</span>
             </h2>
 
             {savedSuccess && (
-              <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Profilo aggiornato con successo!</span>
               </div>
             )}
@@ -177,31 +177,31 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
               
               {/* Name */}
               <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Nome Completo</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300">Nome Completo</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               {/* Bio */}
               <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Biografia / Note Personali</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300">Biografia / Note Personali</label>
                 <textarea
                   rows={3}
                   value={formData.bio}
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   placeholder="Es. Sviluppatore Web Junior in preparazione per l'esame finale."
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 resize-none"
                 />
               </div>
 
               {/* Avatar Selector */}
               <div className="space-y-2 pt-1">
-                <label className="font-semibold text-slate-300 block">Scegli Avatar:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">Scegli Avatar:</label>
                 <div className="flex flex-wrap gap-2">
                   {avatarOptions.map((av) => (
                     <button
@@ -210,8 +210,8 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
                       onClick={() => setFormData({ ...formData, avatar: av })}
                       className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border transition-all ${
                         formData.avatar === av
-                          ? 'bg-indigo-600/30 border-indigo-500 scale-110'
-                          : 'bg-slate-950 border-slate-800 hover:bg-slate-800'
+                          ? 'bg-indigo-500/20 border-indigo-500 scale-110'
+                          : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
                       {av}
@@ -224,8 +224,8 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300 flex items-center space-x-1">
-                    <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
+                    <Calendar className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                     <span>Data Obiettivo Esame</span>
                   </label>
                   <input
@@ -233,19 +233,19 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
                     required
                     value={formData.examDate}
                     onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300 flex items-center space-x-1">
-                    <Target className="w-3.5 h-3.5 text-pink-400" />
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
+                    <Target className="w-3.5 h-3.5 text-pink-500 dark:text-pink-400" />
                     <span>Target Voto Finale</span>
                   </label>
                   <select
                     value={formData.targetGrade}
                     onChange={(e) => setFormData({ ...formData, targetGrade: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="18/30">18 / 30 (Sufficiente)</option>
                     <option value="24/30">24 / 30 (Buono)</option>
@@ -258,34 +258,34 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
               </div>
 
               {/* Card Configurazione AI & API Key */}
-              <div className="pt-6 border-t border-slate-800 space-y-3">
+              <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Key className="w-4 h-4 text-amber-400" />
-                    <h3 className="font-bold text-white text-sm">Configurazione AI & API Key</h3>
+                    <Key className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Configurazione AI & API Key</h3>
                   </div>
-                  <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[10px] font-bold uppercase tracking-wider">
                     BYOK Model
                   </span>
                 </div>
-                <p className="text-slate-400 text-xs leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
                   Inserisci la tua API Key personale Google Gemini per sbloccare il Tutor IA e le valutazioni del Live Coding a costo zero.
                 </p>
 
                 <div className="space-y-2">
-                  <label className="font-semibold text-slate-300 block">Gemini API Key Personale</label>
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">Gemini API Key Personale</label>
                   <div className="relative flex items-center">
                     <input
                       type={showApiKey ? "text" : "password"}
                       value={formData.apiKey}
                       onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                       placeholder="Inserisci la tua chiave API (es. AIzaSy...)"
-                      className="w-full pl-4 pr-12 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500 transition-colors font-mono"
+                      className="w-full pl-4 pr-12 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 transition-colors font-mono"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors"
+                      className="absolute right-3 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg transition-colors"
                       title={showApiKey ? "Nascondi chiave" : "Mostra chiave"}
                     >
                       {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -298,7 +298,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1.5 text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4 transition-colors"
+                    className="inline-flex items-center space-x-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-semibold underline underline-offset-4 transition-colors"
                   >
                     <span>Ottieni una chiave gratuita su Google AI Studio</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -324,39 +324,39 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
         <div className="space-y-6">
           
           {/* Quick Stats Summary */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-xl text-xs">
-            <h3 className="font-bold text-white text-sm flex items-center space-x-2 border-b border-slate-800 pb-3">
-              <Award className="w-4 h-4 text-amber-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-xs">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <Award className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Statistiche di Studio</span>
             </h3>
 
             <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-400">Simulazioni Svolte:</span>
-                <strong className="text-white font-bold text-sm">{stats.totalSimulations}</strong>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                <span className="text-slate-600 dark:text-slate-400">Simulazioni Svolte:</span>
+                <strong className="text-slate-900 dark:text-white font-bold text-sm">{stats.totalSimulations}</strong>
               </div>
 
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-400">Media Punteggio:</span>
-                <strong className="text-indigo-400 font-bold text-sm">{stats.averageScore30}/30</strong>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                <span className="text-slate-600 dark:text-slate-400">Media Punteggio:</span>
+                <strong className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">{stats.averageScore30}/30</strong>
               </div>
 
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-400">Flashcard Apprese:</span>
-                <strong className="text-emerald-400 font-bold text-sm">{knownCards}</strong>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                <span className="text-slate-600 dark:text-slate-400">Flashcard Apprese:</span>
+                <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">{knownCards}</strong>
               </div>
 
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-400">Target Voto:</span>
-                <strong className="text-pink-400 font-bold text-sm">{formData.targetGrade}</strong>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                <span className="text-slate-600 dark:text-slate-400">Target Voto:</span>
+                <strong className="text-pink-600 dark:text-pink-400 font-bold text-sm">{formData.targetGrade}</strong>
               </div>
             </div>
           </div>
 
           {/* Badges / Traguardi Grid */}
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 shadow-xl text-xs">
-            <h3 className="font-bold text-white text-sm flex items-center space-x-2 border-b border-slate-800 pb-3">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-xs">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Obiettivi & Badge</span>
             </h3>
 
@@ -368,18 +368,18 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
                     key={b.id}
                     className={`p-3 rounded-2xl border flex items-center space-x-3 transition-all ${
                       b.unlocked
-                        ? 'bg-indigo-950/40 border-indigo-500/40 text-slate-200'
-                        : 'bg-slate-950/40 border-slate-800 text-slate-500 opacity-60'
+                        ? 'bg-indigo-500/10 dark:bg-indigo-950/40 border-indigo-500/30 text-slate-900 dark:text-slate-200'
+                        : 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 opacity-60'
                     }`}
                   >
                     <div className={`p-2 rounded-xl flex-shrink-0 ${
-                      b.unlocked ? 'bg-indigo-600/30 text-indigo-400' : 'bg-slate-800 text-slate-600'
+                      b.unlocked ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-600'
                     }`}>
                       <Icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-xs">{b.title}</h4>
-                      <p className="text-[10px] text-slate-400 leading-tight">{b.desc}</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-xs">{b.title}</h4>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-tight">{b.desc}</p>
                     </div>
                   </div>
                 );

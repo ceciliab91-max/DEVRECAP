@@ -345,8 +345,8 @@ export default function Notebook() {
               onClick={() => setActiveSubject(sub)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                 activeSubject === sub
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md font-bold'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               {sub === 'ALL' ? 'Tutti gli Appunti' : sub}
@@ -357,19 +357,19 @@ export default function Notebook() {
         {/* Search input & Reset */}
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cerca negli appunti..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
             />
           </div>
 
           <button
             onClick={handleResetDefaults}
-            className="p-2 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
             title="Ripristina Appunti Predefiniti"
           >
             <RotateCcw className="w-4 h-4" />
@@ -387,10 +387,10 @@ export default function Notebook() {
               <div
                 key={note.id}
                 onClick={() => handleSelectNote(note.id)}
-                className={`cursor-pointer group p-6 rounded-3xl border transition-all duration-200 flex flex-col justify-between space-y-4 shadow-lg ${
+                className={`cursor-pointer group p-6 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 shadow-sm ${
                   isSelected
-                    ? 'bg-slate-900 border-indigo-500 ring-2 ring-indigo-500/30'
-                    : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                    ? 'bg-purple-50 text-purple-900 dark:bg-purple-950/50 dark:text-purple-200 font-semibold border-purple-300 dark:border-purple-700 ring-2 ring-purple-500/30'
+                    : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
                 <div className="space-y-3">
@@ -398,15 +398,15 @@ export default function Notebook() {
                   {/* Top Subject Badge & Date */}
                   <div className="flex items-center justify-between">
                     <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                      note.subject === 'CSS' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-                      note.subject === 'JavaScript' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                      note.subject === 'React' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' :
-                      'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      note.subject === 'CSS' ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30' :
+                      note.subject === 'JavaScript' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30' :
+                      note.subject === 'React' ? 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30' :
+                      'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30'
                     }`}>
                       {note.subject}
                     </span>
 
-                    <span className="text-[11px] text-slate-500 flex items-center space-x-1 font-medium">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center space-x-1 font-medium">
                       <Clock className="w-3 h-3" />
                       <span>{formatDate(note.date)}</span>
                     </span>
@@ -414,26 +414,26 @@ export default function Notebook() {
 
                   {/* Title & Snippet Preview */}
                   <div>
-                    <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                       {note.title}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-3 font-normal">
                       {note.snippet || note.content}
                     </p>
                   </div>
                 </div>
 
                 {/* Tags & Action Link */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div className="flex flex-wrap gap-1">
                     {note.tags && note.tags.slice(0, 2).map((t, idx) => (
-                      <span key={idx} className="text-[9px] font-semibold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                      <span key={idx} className="text-[9px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
                         #{t}
                       </span>
                     ))}
                   </div>
 
-                  <span className="text-xs font-bold text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center space-x-1">
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center space-x-1">
                     <span>Leggi</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
@@ -445,10 +445,10 @@ export default function Notebook() {
         </div>
       ) : (
         /* Fallback Empty State */
-        <div className="text-center py-16 p-8 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
-          <FileText className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-lg font-bold text-white">Nessun appunto trovato</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+        <div className="text-center py-16 p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-sm">
+          <FileText className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto" />
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Nessun appunto trovato</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
             Non ci sono note salvate per la materia o la ricerca selezionata.
           </p>
           <div className="flex items-center justify-center space-x-3 pt-2">
@@ -460,7 +460,7 @@ export default function Notebook() {
             </button>
             <button
               onClick={handleResetDefaults}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all"
             >
               Ripristina Appunti Predefiniti
             </button>
@@ -472,7 +472,7 @@ export default function Notebook() {
       <div className="fixed bottom-6 right-6 z-30">
         <button
           onClick={handleOpenNewNoteDrawer}
-          className="flex items-center space-x-2 px-5 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-95 text-white font-bold text-xs shadow-2xl shadow-indigo-600/40 transition-all hover:scale-105"
+          className="flex items-center space-x-2 px-5 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-95 text-white font-bold text-xs shadow-xl shadow-indigo-600/40 transition-all hover:scale-105"
         >
           <Plus className="w-5 h-5" />
           <span className="hidden sm:inline">Crea Nuovo Appunto</span>
@@ -481,29 +481,29 @@ export default function Notebook() {
 
       {/* READ / EDIT DRAWER / MODAL PANEL (isNoteOpen === true) */}
       {isNoteOpen && activeNote && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex justify-end animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm flex justify-end animate-fadeIn">
           
-          <div className="w-full max-w-2xl h-full bg-slate-900 border-l border-slate-800 flex flex-col shadow-2xl overflow-hidden">
+          <div className="w-full max-w-2xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl overflow-hidden">
             
             {/* Drawer Header */}
-            <div className="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase ${
-                  activeNote.subject === 'CSS' ? 'bg-blue-500/20 text-blue-300' :
-                  activeNote.subject === 'JavaScript' ? 'bg-amber-500/20 text-amber-300' :
-                  activeNote.subject === 'React' ? 'bg-cyan-500/20 text-cyan-300' :
-                  'bg-purple-500/20 text-purple-300'
+                  activeNote.subject === 'CSS' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300' :
+                  activeNote.subject === 'JavaScript' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' :
+                  activeNote.subject === 'React' ? 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-300' :
+                  'bg-purple-500/20 text-purple-700 dark:text-purple-300'
                 }`}>
                   {activeNote.subject}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">Dettaglio Appunto</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Dettaglio Appunto</span>
               </div>
 
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setIsEditing(!isEditing)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
-                    isEditing ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                    isEditing ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   {isEditing ? 'Anteprima' : 'Modifica'}
@@ -511,7 +511,7 @@ export default function Notebook() {
 
                 <button
                   onClick={() => handleDeleteNote(activeNote.id)}
-                  className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors"
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                   title="Elimina Nota"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -519,7 +519,7 @@ export default function Notebook() {
 
                 <button
                   onClick={() => setIsNoteOpen(false)}
-                  className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   title="Chiudi Pannello"
                 >
                   <X className="w-5 h-5" />
@@ -528,14 +528,14 @@ export default function Notebook() {
             </div>
 
             {/* Drawer Body Content */}
-            <div className="flex-1 p-6 overflow-y-auto space-y-6">
+            <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
               
               {!isEditing ? (
                 /* READ ONLY VIEW */
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-2xl font-black text-white leading-tight">{activeNote.title}</h2>
-                    <div className="flex items-center space-x-3 text-xs text-slate-500 mt-2">
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">{activeNote.title}</h2>
+                    <div className="flex items-center space-x-3 text-xs text-slate-500 dark:text-slate-400 mt-2">
                       <span>Creato il {formatDate(activeNote.date)}</span>
                       {activeNote.tags && activeNote.tags.length > 0 && (
                         <span>&bull; Tags: {activeNote.tags.join(', ')}</span>
@@ -544,13 +544,13 @@ export default function Notebook() {
                   </div>
 
                   {activeNote.snippet && (
-                    <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 leading-relaxed font-medium">
+                    <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed font-medium">
                       💡 <strong>Sintesi:</strong> {activeNote.snippet}
                     </div>
                   )}
 
                   {/* Rendered content */}
-                  <div className="prose prose-invert max-w-none text-slate-200 text-sm leading-relaxed space-y-4 whitespace-pre-wrap font-sans">
+                  <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-sm leading-relaxed space-y-4 whitespace-pre-wrap font-sans">
                     {activeNote.content}
                   </div>
                 </div>
@@ -558,22 +558,22 @@ export default function Notebook() {
                 /* EDITING FORM VIEW */
                 <div className="space-y-4 text-xs">
                   <div>
-                    <label className="block text-slate-400 font-bold mb-1">Titolo dell'Appunto:</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Titolo dell'Appunto:</label>
                     <input
                       type="text"
                       value={editForm.title}
                       onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-semibold text-sm focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-400 font-bold mb-1">Materia:</label>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Materia:</label>
                       <select
                         value={editForm.subject}
                         onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                       >
                         <option value="CSS">CSS</option>
                         <option value="JavaScript">JavaScript</option>
@@ -583,42 +583,42 @@ export default function Notebook() {
                     </div>
 
                     <div>
-                      <label className="block text-slate-400 font-bold mb-1">Tags (separati da virgola):</label>
+                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Tags (separati da virgola):</label>
                       <input
                         type="text"
                         value={editForm.tags}
                         onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
                         placeholder="Flexbox, Hooks, Joins"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-bold mb-1">Breve Sintesi / Preview:</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Breve Sintesi / Preview:</label>
                     <input
                       type="text"
                       value={editForm.snippet}
                       onChange={(e) => setEditForm({ ...editForm, snippet: e.target.value })}
                       placeholder="Sommario rapido per la card..."
-                      className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-bold mb-1">Contenuto Completo dell'Appunto:</label>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Contenuto Completo dell'Appunto:</label>
                     <textarea
                       rows={12}
                       value={editForm.content}
                       onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                      className="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"
+                      className="w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 font-mono text-xs leading-relaxed"
                     />
                   </div>
 
                   <div className="pt-2 flex items-center justify-end space-x-3">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700"
+                      className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                     >
                       Annulla
                     </button>
@@ -636,11 +636,11 @@ export default function Notebook() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
+            <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Appunti DevExam Pro</span>
               <button
                 onClick={() => setIsNoteOpen(false)}
-                className="text-indigo-400 font-bold hover:underline"
+                className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
               >
                 Chiudi
               </button>
