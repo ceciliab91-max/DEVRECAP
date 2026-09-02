@@ -4,62 +4,81 @@ import {
   User, 
   Lock, 
   Mail, 
-  Shield, 
   Sparkles, 
   LogIn, 
   UserPlus, 
   GraduationCap, 
   ShieldCheck, 
   AlertCircle,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { loginUser, registerUser } from '../utils/authStorage';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [formData, setFormData] = useState({
+    username: '',
     name: '',
     email: '',
     password: '',
     apiKey: '',
     role: 'student' // 'student' | 'admin'
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     try {
       if (mode === 'login') {
-        const user = loginUser(formData.email, formData.password);
+        const identifier = (formData.username || formData.email).trim();
+        if (!identifier || !formData.password) {
+          throw new Error('Inserisci nome utente (o email) e password.');
+        }
+        const user = await loginUser(identifier, formData.password);
         if (onLoginSuccess) onLoginSuccess(user);
         onClose();
       } else {
-        if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim()) {
-          throw new Error('Compila tutti i campi richiesti.');
+        if (!formData.username.trim() && !formData.name.trim()) {
+          throw new Error('Inserisci un nome utente o nome valido.');
         }
-        const user = registerUser(formData);
+        if (!formData.password.trim()) {
+          throw new Error('Inserisci una password.');
+        }
+        const user = await registerUser(formData);
         if (onLoginSuccess) onLoginSuccess(user);
         onClose();
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Errore durante l\'operazione.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleQuickLogin = (email, password) => {
+  const handleQuickLogin = async (usernameOrEmail, password) => {
     setError(null);
+    setIsLoading(true);
     try {
-      const user = loginUser(email, password);
+      const user = await loginUser(usernameOrEmail, password);
       if (onLoginSuccess) onLoginSuccess(user);
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Errore durante il login rapido.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm animate-fadeIn">
@@ -148,52 +167,85 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
           )}
 
-          {mode === 'register' && (
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nome e Cognome</label>
-              <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Es. Cecilia"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
-                />
-              </div>
-            </div>
-          )}
-
+          {/* Username / Identifier field */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Indirizzo Email</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Nome Utente {mode === 'login' && <span className="text-slate-400 font-normal">(o Email)</span>}
+            </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
-                type="email"
+                type="text"
                 required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="nome@devexam.it"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
+                autoComplete="username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                placeholder={mode === 'login' ? 'Es. studente oppure nome@devexam.it' : 'Scegli un nome utente'}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs"
               />
             </div>
           </div>
+
+          {mode === 'register' && (
+            <>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nome e Cognome (Opzionale)</label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    autoComplete="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Es. Cecilia"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Indirizzo Email (Opzionale)</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="nome@devexam.it"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 text-xs"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
+                autoComplete={mode === 'login' ? "current-password" : "new-password"}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-3 top-2.5 transition-colors"
+                title={showPassword ? "Nascondi password" : "Mostra password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
+
+
 
           {mode === 'register' && (
             <div className="space-y-1">
@@ -205,11 +257,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <Key className="w-4 h-4 text-amber-500 absolute left-3 top-3" />
                 <input
                   type="password"
+                  autoComplete="off"
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                   placeholder="AIzaSy..."
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 text-xs transition-colors"
                 />
+
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
                 Inserisci la tua chiave per sbloccare il Tutor IA e le correzioni del Live Coding a costo zero.
@@ -252,7 +306,10 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
+            disabled={isLoading}
+            className={`w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
           >
             {mode === 'login' ? (
               <>
