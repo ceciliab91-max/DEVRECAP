@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  BrainCircuit, 
   Clock, 
   Sparkles, 
   Target, 
   Play, 
-  CheckCircle2, 
   ShieldCheck, 
   FileCode2, 
   Code2, 

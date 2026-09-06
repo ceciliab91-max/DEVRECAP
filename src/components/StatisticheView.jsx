@@ -9,15 +9,12 @@ import {
   FileCode2, 
   Code2, 
   Layers, 
-  Database,
-  ArrowRight,
-  RotateCcw
+  Database
 } from 'lucide-react';
 import ErrorPool from './ErrorPool';
 import HistoryView from './HistoryView';
-import { questionsData } from '../data/questionsData';
 
-export default function StatisticheView({ stats, onStartErrorReview, onRefreshStats, setActiveTab }) {
+export default function StatisticheView({ stats, onStartErrorReview, onRefreshStats }) {
   const [subTab, setSubTab] = useState('overview'); // 'overview', 'errors', 'history'
 
   const subjectConfig = [

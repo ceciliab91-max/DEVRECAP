@@ -4,10 +4,7 @@ import {
   RotateCcw, 
   Trash2, 
   CheckCircle2, 
-  Code, 
-  BookOpen, 
   Sparkles,
-  ArrowRight,
   Filter
 } from 'lucide-react';
 import { questionsData } from '../data/questionsData';

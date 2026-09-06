@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   User, 
-  Mail, 
   Calendar, 
   Target, 
   Award, 
@@ -9,29 +8,24 @@ import {
   CheckCircle2, 
   Clock, 
   Sparkles, 
-  ShieldCheck, 
-  BookOpen, 
   Layers, 
-  AlertTriangle,
-  RotateCcw,
-  Zap,
-  Key,
-  Eye,
-  EyeOff,
+  Key, 
+  Eye, 
+  EyeOff, 
   ExternalLink
 } from 'lucide-react';
 import { updateUserProfile } from '../utils/authStorage';
 import { getAggregateStats, getFlashcardStatus } from '../utils/storage';
 
 export default function UserProfile({ currentUser, onUpdateUser }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     name: currentUser.name || '',
     bio: currentUser.bio || '',
     avatar: currentUser.avatar || '👨‍💻',
     examDate: currentUser.examDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     targetGrade: currentUser.targetGrade || '28/30',
     apiKey: currentUser.apiKey || ''
-  });
+  }));
   const [showApiKey, setShowApiKey] = useState(false);
 
   const [savedSuccess, setSavedSuccess] = useState(false);
