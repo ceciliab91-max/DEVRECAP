@@ -27,10 +27,12 @@ export function hasValidApiKey() {
   return Boolean(getApiKey());
 }
 
+const GEMINI_MODEL = "gemini-2.5-flash";
+
 /**
  * Fetch response from Google Gemini API for Tutor Chatbot.
  */
-export async function fetchGeminiTutorResponse(userPrompt, conversationHistory = []) {
+export async function fetchGeminiTutorResponse(userPrompt, _conversationHistory = []) {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { error: 'MISSING_API_KEY' };
@@ -39,7 +41,7 @@ export async function fetchGeminiTutorResponse(userPrompt, conversationHistory =
   const systemPrompt = "Sei un tutor d'esame per sviluppatori web. Rispondi in modo conciso, chiaro ed efficace a qualsiasi dubbio su CSS, JavaScript, React e SQL.";
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
     
     const payload = {
       contents: [
@@ -52,11 +54,21 @@ export async function fetchGeminiTutorResponse(userPrompt, conversationHistory =
       ]
     };
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
+    // Fallback to gemini-2.0-flash if model version is unsupported for key
+    if (!res.ok && res.status === 404) {
+      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      res = await fetch(fallbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -72,7 +84,6 @@ export async function fetchGeminiTutorResponse(userPrompt, conversationHistory =
 
     return { error: 'EMPTY_RESPONSE', message: 'Nessun contenuto generato dal modello.' };
   } catch (e) {
-    // Avoid logging console errors directly per specification, return clean result
     return { error: 'NETWORK_ERROR', message: e.message || 'Errore di connessione di rete.' };
   }
 }
@@ -109,16 +120,25 @@ Fornisci una risposta JSON valida con la seguente struttura esatta (senza altri 
 }`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
     const payload = {
       contents: [{ role: "user", parts: [{ text: prompt }] }]
     };
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
+    if (!res.ok && res.status === 404) {
+      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      res = await fetch(fallbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -129,7 +149,6 @@ Fornisci una risposta JSON valida con la seguente struttura esatta (senza altri 
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (rawText) {
-      // Clean json fences if present
       const cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(cleaned);
       return { success: true, verdict: parsed };
@@ -140,3 +159,4 @@ Fornisci una risposta JSON valida con la seguente struttura esatta (senza altri 
     return { error: 'PARSING_ERROR', message: e.message || 'Impossibile interpretare la risposta del professore IA.' };
   }
 }
+
