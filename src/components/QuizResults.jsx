@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Award, 
   CheckCircle2, 
   XCircle, 
-  HelpCircle, 
   RotateCcw, 
   Home, 
-  BookOpen, 
-  Code, 
+  BookOpen,
   Sparkles,
-  Bookmark,
   AlertTriangle,
-  ArrowRight,
   Bot
 } from 'lucide-react';
 import { toggleErrorQuestion, getErrorPool } from '../utils/storage';

@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import QuizSetup from './components/QuizSetup';
 import QuizEngine from './components/QuizEngine';
 import QuizResults from './components/QuizResults';
-import StudyPlanner from './components/StudyPlanner';
-import ErrorPool from './components/ErrorPool';
-import HistoryView from './components/HistoryView';
-import LiveCoding from './components/LiveCoding';
-import HubStudio from './components/HubStudio';
-import Notebook from './components/Notebook';
-import StatisticheView from './components/StatisticheView';
 import AITutorChat from './components/AITutorChat';
-import UserProfile from './components/UserProfile';
-import AdminHub from './components/AdminHub';
-import AuthModal from './components/AuthModal';
+
+// Code-split heavy views for faster initial load
+const AuthModal = lazy(() => import('./components/AuthModal'));
+const AuthScreen = lazy(() => import('./components/AuthScreen'));
+const HubStudio = lazy(() => import('./components/HubStudio'));
+const Notebook = lazy(() => import('./components/Notebook'));
+const LiveCoding = lazy(() => import('./components/LiveCoding'));
+const StatisticheView = lazy(() => import('./components/StatisticheView'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
+const AdminHub = lazy(() => import('./components/AdminHub'));
+const StudyPlanner = lazy(() => import('./components/StudyPlanner'));
+const ErrorPool = lazy(() => import('./components/ErrorPool'));
+const HistoryView = lazy(() => import('./components/HistoryView'));
 
 import { questionsData } from './data/questionsData';
 import { 
@@ -22,10 +25,21 @@ import {
   setTheme, 
   getAggregateStats, 
   saveTestResult, 
-  getErrorPool,
+  getErrorPool, 
   getCustomQuestions 
 } from './utils/storage';
 import { getCurrentUser, logoutUser } from './utils/authStorage';
+import { cloudSyncUserData, cloudFetchUserData } from './services/cloudStorageService';
+
+function TabLoader() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 space-y-3">
+      <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+      <span className="text-xs font-medium text-slate-400">Caricamento modulo...</span>
+    </div>
+  );
+}
+
 
 export default function App() {
   const [themeState, setThemeState] = useState(() => getTheme());
@@ -41,6 +55,7 @@ export default function App() {
 
   const [stats, setStats] = useState(() => getAggregateStats());
 
+
   // Apply theme class 'dark' to document.documentElement (<html>)
   useEffect(() => {
     const isDark = themeState === 'dark';
@@ -55,6 +70,11 @@ export default function App() {
   const refreshStats = () => {
     setStats(getAggregateStats());
   };
+
+  // Sync isolated user stats on user switch or auth state change
+  useEffect(() => {
+    refreshStats();
+  }, [currentUser]);
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
@@ -103,12 +123,33 @@ export default function App() {
     setActiveTab('quiz-run');
   };
 
+  // Load remote cloud data on login if available
+  useEffect(() => {
+    if (currentUser?.id) {
+      cloudFetchUserData(currentUser.id).then(cloudData => {
+        if (cloudData) {
+          // If remote stats exist, refresh local state
+          refreshStats();
+        }
+      });
+    }
+  }, [currentUser]);
+
   // When user completes a quiz
   const handleFinishQuiz = (resultData) => {
     const savedEntry = saveTestResult(resultData);
     setLastResult(savedEntry);
     refreshStats();
     setActiveTab('quiz-results');
+
+    // Cloud background sync
+    if (currentUser?.id) {
+      cloudSyncUserData(currentUser.id, {
+        stats: getAggregateStats(),
+        errorPool: getErrorPool(),
+        lastResult: savedEntry
+      });
+    }
   };
 
   return (
@@ -126,113 +167,123 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        
-        {/* 1. Dashboard / Studio */}
-        {activeTab === 'dashboard' && (
-          <Dashboard 
-            stats={stats}
-            onStartQuiz={handleStartQuiz}
-            onStartErrorReview={handleStartErrorReview}
-            setActiveTab={setActiveTab}
-            currentUser={currentUser}
-          />
-        )}
+      {/* Main Content Area: Show AuthScreen if not authenticated */}
+      <main id="main-content" role="main" tabIndex="-1" className="flex-1 w-full focus:outline-none">
+        {!currentUser ? (
+          <Suspense fallback={<TabLoader />}>
+            <AuthScreen onLoginSuccess={handleLoginSuccess} />
+          </Suspense>
+        ) : (
+          <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+            <Suspense fallback={<TabLoader />}>
+            {/* 1. Dashboard / Studio */}
+            {activeTab === 'dashboard' && (
+              <Dashboard 
+                stats={stats}
+                onStartQuiz={handleStartQuiz}
+                onStartErrorReview={handleStartErrorReview}
+                setActiveTab={setActiveTab}
+                currentUser={currentUser}
+              />
+            )}
 
-        {/* 2. Mappe & Schemi */}
-        {(activeTab === 'mappe-schemi' || activeTab === 'hub-studio') && (
-          <HubStudio />
-        )}
+            {/* 2. Mappe & Schemi */}
+            {(activeTab === 'mappe-schemi' || activeTab === 'hub-studio') && (
+              <HubStudio />
+            )}
 
-        {/* 3. Notebook */}
-        {activeTab === 'notebook' && (
-          <Notebook />
-        )}
+            {/* 3. Notebook */}
+            {activeTab === 'notebook' && (
+              <Notebook />
+            )}
 
-        {/* 4. Tutor AI */}
-        {activeTab === 'tutor-ai' && (
-          <AITutorChat 
-            isFullPage={true}
-            onGoToProfile={() => setActiveTab('profile')}
-          />
-        )}
+            {/* 4. Tutor AI */}
+            {activeTab === 'tutor-ai' && (
+              <AITutorChat 
+                isFullPage={true}
+                onGoToProfile={() => setActiveTab('profile')}
+              />
+            )}
 
-        {/* 5. Statistiche (Progressi, Errori, Storico) */}
-        {activeTab === 'statistiche' && (
-          <StatisticheView 
-            stats={stats}
-            onStartErrorReview={handleStartErrorReview}
-            onRefreshStats={refreshStats}
-            setActiveTab={setActiveTab}
-          />
-        )}
+            {/* 5. Statistiche (Progressi, Errori, Storico) */}
+            {activeTab === 'statistiche' && (
+              <StatisticheView 
+                stats={stats}
+                onStartErrorReview={handleStartErrorReview}
+                onRefreshStats={refreshStats}
+                setActiveTab={setActiveTab}
+              />
+            )}
 
-        {/* Secondary / Action Views */}
-        {activeTab === 'quiz-select' && (
-          <QuizSetup 
-            onStartQuiz={handleStartQuiz}
-          />
-        )}
+            {/* Secondary / Action Views */}
+            {activeTab === 'quiz-select' && (
+              <QuizSetup 
+                onStartQuiz={handleStartQuiz}
+              />
+            )}
 
-        {activeTab === 'live-coding' && (
-          <LiveCoding onGoToProfile={() => setActiveTab('profile')} />
-        )}
+            {activeTab === 'live-coding' && (
+              <LiveCoding onGoToProfile={() => setActiveTab('profile')} />
+            )}
 
-        {activeTab === 'quiz-run' && (
-          <QuizEngine 
-            questions={quizQuestions}
-            modeInfo={quizModeInfo}
-            onFinishQuiz={handleFinishQuiz}
-            onCancelQuiz={() => setActiveTab('dashboard')}
-          />
-        )}
+            {activeTab === 'quiz-run' && (
+              <QuizEngine 
+                questions={quizQuestions}
+                modeInfo={quizModeInfo}
+                onFinishQuiz={handleFinishQuiz}
+                onCancelQuiz={() => setActiveTab('dashboard')}
+              />
+            )}
 
-        {activeTab === 'quiz-results' && lastResult && (
-          <QuizResults 
-            result={lastResult}
-            onRestartQuiz={() => handleStartQuiz(quizModeInfo)}
-            onGoHome={() => setActiveTab('dashboard')}
-            onStartErrorReview={handleStartErrorReview}
-            onAskAITutor={(qContext) => {
-              setAiTutorTriggerContext(qContext);
-              setActiveTab('tutor-ai');
-            }}
-          />
-        )}
+            {activeTab === 'quiz-results' && lastResult && (
+              <QuizResults 
+                result={lastResult}
+                onRestartQuiz={() => handleStartQuiz(quizModeInfo)}
+                onGoHome={() => setActiveTab('dashboard')}
+                onStartErrorReview={handleStartErrorReview}
+                onAskAITutor={(qContext) => {
+                  setAiTutorTriggerContext(qContext);
+                  setActiveTab('tutor-ai');
+                }}
+              />
+            )}
 
-        {activeTab === 'planner' && (
-          <StudyPlanner 
-            onStartQuiz={handleStartQuiz}
-          />
-        )}
+            {activeTab === 'planner' && (
+              <StudyPlanner 
+                onStartQuiz={handleStartQuiz}
+              />
+            )}
 
-        {activeTab === 'errors' && (
-          <ErrorPool 
-            onStartErrorReview={handleStartErrorReview}
-          />
-        )}
+            {activeTab === 'errors' && (
+              <ErrorPool 
+                onStartErrorReview={handleStartErrorReview}
+              />
+            )}
 
-        {activeTab === 'history' && (
-          <HistoryView 
-            onRefreshStats={refreshStats}
-          />
-        )}
+            {activeTab === 'history' && (
+              <HistoryView 
+                onRefreshStats={refreshStats}
+              />
+            )}
 
-        {activeTab === 'profile' && currentUser && (
-          <UserProfile 
-            currentUser={currentUser}
-            onUpdateUser={handleUpdateUser}
-          />
-        )}
+            {activeTab === 'profile' && (
+              <UserProfile 
+                currentUser={currentUser}
+                onUpdateUser={handleUpdateUser}
+              />
+            )}
 
-        {activeTab === 'admin' && (
-          <AdminHub 
-            currentUser={currentUser}
-          />
-        )}
-
+            {activeTab === 'admin' && (
+              <AdminHub 
+                currentUser={currentUser}
+              />
+            )}
+          </Suspense>
+        </div>
+      )}
       </main>
+
+
 
       {/* Auth Modal */}
       <AuthModal 
@@ -241,14 +292,15 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
       />
 
-      {/* Floating AI Tutor Chatbot FAB (when activeTab !== 'tutor-ai') */}
-      {activeTab !== 'tutor-ai' && (
+      {/* Floating AI Tutor Chatbot FAB (only when authenticated and activeTab !== 'tutor-ai') */}
+      {currentUser && activeTab !== 'tutor-ai' && (
         <AITutorChat 
           externalTriggerContext={aiTutorTriggerContext}
           onClearTriggerContext={() => setAiTutorTriggerContext(null)}
           onGoToProfile={() => setActiveTab('profile')}
         />
       )}
+
 
       {/* Footer */}
       <Footer />

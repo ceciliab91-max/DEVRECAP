@@ -6,16 +6,13 @@ import {
   ChevronLeft, 
   ChevronRight, 
   CheckCircle2, 
-  AlertCircle, 
   Grid, 
   Send,
-  Code,
-  Sparkles,
-  RotateCcw
+  Code
 } from 'lucide-react';
 import { toggleBookmark, getBookmarks } from '../utils/storage';
 
-export default function QuizEngine({ questions, modeInfo, onFinishQuiz, onCancelQuiz }) {
+export default function QuizEngine({ questions, modeInfo, onFinishQuiz }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState({}); // { [questionId]: selectedOptionIndex }
   const [flagged, setFlagged] = useState({}); // { [questionId]: boolean }

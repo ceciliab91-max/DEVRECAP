@@ -5,22 +5,30 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "vite build",
+    "build:watch": "vite build --watch",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lighthouse:mobile": "npx lighthouse http://localhost:5173 --preset=mobile --chrome-flags=\"--headless\" --output=html --output-path=./lighthouse-mobile.report.html",
+    "lighthouse:desktop": "npx lighthouse http://localhost:5173 --preset=desktop --chrome-flags=\"--headless\" --output=html --output-path=./lighthouse-desktop.report.html",
+    "lighthouse:all": "pnpm run lighthouse:mobile && pnpm run lighthouse:desktop"
   },
   "dependencies": {
+    "@netlify/blobs": "^11.0.3",
     "@tailwindcss/vite": "^4.3.3",
-    "lucide-react": "^1.31.0",
+    "lucide-react": "^1.43.0",
+    "lz-string": "^1.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.5",
-    "oxlint": "^1.75.0",
-    "vite": "^8.2.1"
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react-swc": "^4.3.3",
+    "oxlint": "^1.82.0",
+    "vite": "^8.2.2",
+    "vite-plugin-compression": "^0.5.1"
   }
 }
