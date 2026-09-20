@@ -6,8 +6,6 @@ import {
   XCircle,
   Sparkles,
   RotateCcw,
-  Eye,
-  FileCode2,
   HelpCircle,
   Award,
   Terminal,

@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { 
   History, 
-  Award, 
   Clock, 
   Calendar, 
-  Trash2, 
-  CheckCircle2, 
-  AlertTriangle,
-  RotateCcw,
-  Sparkles
+  Trash2
 } from 'lucide-react';
 import { getHistory, clearAllData } from '../utils/storage';
 

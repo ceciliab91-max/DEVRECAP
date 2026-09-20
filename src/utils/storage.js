@@ -1,3 +1,5 @@
+import { getCompressedItem, setCompressedItem, removeCompressedItem } from './compressedStorage';
+
 const KEYS = {
   THEME: 'theme',
   THEME_ALT: 'devexam_theme',
@@ -11,6 +13,29 @@ const KEYS = {
   STREAK_DATA: 'devexam_streak_data',
   LAST_STUDY_DATE: 'lastStudyDate',
   WEEKLY_ACTIVITY: 'weeklyActivity'
+};
+
+// Helper: Get currently authenticated user ID to isolate data
+export const getCurrentUserId = () => {
+  try {
+    const raw = localStorage.getItem('devexam_current_user');
+    if (raw) {
+      const u = JSON.parse(raw);
+      if (u && u.id) return u.id;
+    }
+  } catch (e) {
+    console.error("Failed to read current user", e);
+  }
+  return 'guest';
+};
+
+// Helper: Return user-isolated key
+const getScopedKey = (baseKey) => {
+  if (baseKey === KEYS.THEME || baseKey === KEYS.THEME_ALT || baseKey === KEYS.CUSTOM_QUESTIONS || baseKey === KEYS.CUSTOM_CHALLENGES) {
+    return baseKey;
+  }
+  const userId = getCurrentUserId();
+  return `${baseKey}_${userId}`;
 };
 
 // --- THEME ---
@@ -49,12 +74,9 @@ export const getWeekDays = () => {
 
 export const getStreakData = () => {
   try {
-    const rawData = localStorage.getItem(KEYS.STREAK_DATA);
-    let data = rawData ? JSON.parse(rawData) : null;
-
-    const rawLastDate = localStorage.getItem(KEYS.LAST_STUDY_DATE);
-    const rawWeekly = localStorage.getItem(KEYS.WEEKLY_ACTIVITY);
-    let weeklyActivity = rawWeekly ? JSON.parse(rawWeekly) : [];
+    const data = getCompressedItem(getScopedKey(KEYS.STREAK_DATA), null);
+    const rawLastDate = localStorage.getItem(getScopedKey(KEYS.LAST_STUDY_DATE));
+    let weeklyActivity = getCompressedItem(getScopedKey(KEYS.WEEKLY_ACTIVITY), []);
     if (!Array.isArray(weeklyActivity)) weeklyActivity = [];
 
     const todayStr = new Date().toISOString().split('T')[0];
@@ -76,7 +98,7 @@ export const getStreakData = () => {
       weeklyActivity: data?.weeklyActivity || weeklyActivity
     };
   } catch (e) {
-    console.error("Failed to parse streak data from localStorage", e);
+    console.error("Failed to parse streak data from storage", e);
     return { streakCount: 0, lastStudyDate: null, weeklyActivity: [] };
   }
 };
@@ -111,20 +133,48 @@ export const recordStudyActivity = () => {
     weeklyActivity: updatedWeekly
   };
 
-  localStorage.setItem(KEYS.STREAK_DATA, JSON.stringify(updatedData));
-  localStorage.setItem(KEYS.LAST_STUDY_DATE, todayStr);
-  localStorage.setItem(KEYS.WEEKLY_ACTIVITY, JSON.stringify(updatedWeekly));
+  setCompressedItem(getScopedKey(KEYS.STREAK_DATA), updatedData);
+  localStorage.setItem(getScopedKey(KEYS.LAST_STUDY_DATE), todayStr);
+  setCompressedItem(getScopedKey(KEYS.WEEKLY_ACTIVITY), updatedWeekly);
 
   return updatedData;
+};
+
+// Helper to generate minimal test seeds for demo accounts in 4 lines
+const generateSeedHistory = (scores) => {
+  return scores.map((score, i) => ({
+    id: Date.now() - (scores.length - i) * 86400000,
+    date: new Date(Date.now() - (scores.length - i) * 86400000).toISOString(),
+    score30: score,
+    percentage: Math.round((score / 30) * 100),
+    correctCount: score,
+    totalQuestions: 30,
+    modeInfo: { mode: 'full', timerMinutes: 30 }
+  }));
 };
 
 // --- TEST HISTORY ---
 export const getHistory = () => {
   try {
-    const data = localStorage.getItem(KEYS.HISTORY);
-    return data ? JSON.parse(data) : [];
+    const key = getScopedKey(KEYS.HISTORY);
+    const data = getCompressedItem(key, null);
+    if (data && Array.isArray(data)) return data;
+
+    // Initial mock presets for specific test usernames
+    const userRaw = localStorage.getItem('devexam_current_user');
+    if (userRaw) {
+      const uname = JSON.parse(userRaw)?.username?.toLowerCase();
+      const seeds = uname === 'gae' ? [26, 27, 28] : uname === 'mario' ? [28, 29, 30, 29, 30] : null;
+      if (seeds) {
+        const history = generateSeedHistory(seeds);
+        setCompressedItem(key, history);
+        return history;
+      }
+    }
+
+    return [];
   } catch (e) {
-    console.error("Failed to parse history from localStorage", e);
+    console.error("Failed to parse history from storage", e);
     return [];
   }
 };
@@ -137,7 +187,7 @@ export const saveTestResult = (result) => {
     ...result
   };
   const updated = [newEntry, ...history];
-  localStorage.setItem(KEYS.HISTORY, JSON.stringify(updated));
+  setCompressedItem(getScopedKey(KEYS.HISTORY), updated);
 
   // Automatically record daily streak on test completion
   recordStudyActivity();
@@ -162,16 +212,15 @@ export const saveTestResult = (result) => {
 // --- ERROR POOL ---
 export const getErrorPool = () => {
   try {
-    const data = localStorage.getItem(KEYS.ERRORS);
-    return data ? JSON.parse(data) : [];
+    return getCompressedItem(getScopedKey(KEYS.ERRORS), []);
   } catch (e) {
-    console.error("Failed to parse error pool from localStorage", e);
+    console.error("Failed to parse error pool from storage", e);
     return [];
   }
 };
 
 export const setErrorPool = (errorIds) => {
-  localStorage.setItem(KEYS.ERRORS, JSON.stringify(errorIds));
+  setCompressedItem(getScopedKey(KEYS.ERRORS), errorIds);
 };
 
 export const toggleErrorQuestion = (questionId) => {
@@ -189,10 +238,9 @@ export const toggleErrorQuestion = (questionId) => {
 // --- BOOKMARKS ---
 export const getBookmarks = () => {
   try {
-    const data = localStorage.getItem(KEYS.BOOKMARKS);
-    return data ? JSON.parse(data) : [];
+    return getCompressedItem(getScopedKey(KEYS.BOOKMARKS), []);
   } catch (e) {
-    console.error("Failed to parse bookmarks from localStorage", e);
+    console.error("Failed to parse bookmarks from storage", e);
     return [];
   }
 };
@@ -205,17 +253,16 @@ export const toggleBookmark = (questionId) => {
     bookmarks.add(questionId);
   }
   const updated = Array.from(bookmarks);
-  localStorage.setItem(KEYS.BOOKMARKS, JSON.stringify(updated));
+  setCompressedItem(getScopedKey(KEYS.BOOKMARKS), updated);
   return updated;
 };
 
 // --- ROADMAP CHECKLIST ---
 export const getRoadmapCompleted = () => {
   try {
-    const data = localStorage.getItem(KEYS.ROADMAP);
-    return data ? JSON.parse(data) : {};
+    return getCompressedItem(getScopedKey(KEYS.ROADMAP), {});
   } catch (e) {
-    console.error("Failed to parse roadmap from localStorage", e);
+    console.error("Failed to parse roadmap from storage", e);
     return {};
   }
 };
@@ -223,7 +270,7 @@ export const getRoadmapCompleted = () => {
 export const toggleRoadmapTopic = (topicId) => {
   const current = getRoadmapCompleted();
   const updated = { ...current, [topicId]: !current[topicId] };
-  localStorage.setItem(KEYS.ROADMAP, JSON.stringify(updated));
+  setCompressedItem(getScopedKey(KEYS.ROADMAP), updated);
   return updated;
 };
 
@@ -300,10 +347,9 @@ export const getAggregateStats = () => {
 // --- FLASHCARDS STATUS ---
 export const getFlashcardStatus = () => {
   try {
-    const data = localStorage.getItem(KEYS.FLASHCARDS);
-    return data ? JSON.parse(data) : {};
+    return getCompressedItem(getScopedKey(KEYS.FLASHCARDS), {});
   } catch (e) {
-    console.error("Failed to parse flashcard status from localStorage", e);
+    console.error("Failed to parse flashcard status from storage", e);
     return {};
   }
 };
@@ -311,55 +357,52 @@ export const getFlashcardStatus = () => {
 export const setFlashcardStatus = (cardId, status) => {
   const current = getFlashcardStatus();
   const updated = { ...current, [cardId]: status };
-  localStorage.setItem(KEYS.FLASHCARDS, JSON.stringify(updated));
+  setCompressedItem(getScopedKey(KEYS.FLASHCARDS), updated);
   return updated;
 };
 
 export const resetFlashcardStatus = () => {
-  localStorage.removeItem(KEYS.FLASHCARDS);
+  removeCompressedItem(getScopedKey(KEYS.FLASHCARDS));
   return {};
 };
 
 // --- CUSTOM QUESTIONS MANAGEMENT (ADMIN) ---
 export const getCustomQuestions = () => {
   try {
-    const data = localStorage.getItem(KEYS.CUSTOM_QUESTIONS);
-    return data ? JSON.parse(data) : [];
+    return getCompressedItem(KEYS.CUSTOM_QUESTIONS, []);
   } catch (e) {
-    console.error("Failed to parse custom questions from localStorage", e);
+    console.error("Failed to parse custom questions from storage", e);
     return [];
   }
 };
 
 export const saveCustomQuestions = (questions) => {
-  localStorage.setItem(KEYS.CUSTOM_QUESTIONS, JSON.stringify(questions));
+  setCompressedItem(KEYS.CUSTOM_QUESTIONS, questions);
 };
 
 // --- CUSTOM CHALLENGES MANAGEMENT (ADMIN) ---
 export const getCustomChallenges = () => {
   try {
-    const data = localStorage.getItem(KEYS.CUSTOM_CHALLENGES);
-    return data ? JSON.parse(data) : [];
+    return getCompressedItem(KEYS.CUSTOM_CHALLENGES, []);
   } catch (e) {
-    console.error("Failed to parse custom challenges from localStorage", e);
+    console.error("Failed to parse custom challenges from storage", e);
     return [];
   }
 };
 
 export const saveCustomChallenges = (challenges) => {
-  localStorage.setItem(KEYS.CUSTOM_CHALLENGES, JSON.stringify(challenges));
+  setCompressedItem(KEYS.CUSTOM_CHALLENGES, challenges);
 };
 
 export const clearAllData = () => {
-  localStorage.removeItem(KEYS.HISTORY);
-  localStorage.removeItem(KEYS.ERRORS);
-  localStorage.removeItem(KEYS.BOOKMARKS);
-  localStorage.removeItem(KEYS.ROADMAP);
-  localStorage.removeItem(KEYS.FLASHCARDS);
-  localStorage.removeItem(KEYS.CUSTOM_QUESTIONS);
-  localStorage.removeItem(KEYS.CUSTOM_CHALLENGES);
-  localStorage.removeItem(KEYS.STREAK_DATA);
-  localStorage.removeItem(KEYS.LAST_STUDY_DATE);
-  localStorage.removeItem(KEYS.WEEKLY_ACTIVITY);
+  removeCompressedItem(getScopedKey(KEYS.HISTORY));
+  removeCompressedItem(getScopedKey(KEYS.ERRORS));
+  removeCompressedItem(getScopedKey(KEYS.BOOKMARKS));
+  removeCompressedItem(getScopedKey(KEYS.ROADMAP));
+  removeCompressedItem(getScopedKey(KEYS.FLASHCARDS));
+  removeCompressedItem(getScopedKey(KEYS.STREAK_DATA));
+  removeCompressedItem(getScopedKey(KEYS.LAST_STUDY_DATE));
+  removeCompressedItem(getScopedKey(KEYS.WEEKLY_ACTIVITY));
 };
+
 

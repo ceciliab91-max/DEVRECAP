@@ -443,13 +443,13 @@ export default function HubStudio() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-                  📁 dispense_javascript
+                  📁 dispense/javascript
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-                  📁 dispense_react
+                  📁 dispense/react
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-                  📁 dispense_sql
+                  📁 dispense/sql
                 </div>
               </div>
             </div>
@@ -460,7 +460,7 @@ export default function HubStudio() {
               <ol className="space-y-2 list-decimal list-inside text-slate-600 dark:text-slate-400">
                 <li>Apri Google NotebookLM cliccando il pulsante qui sotto.</li>
                 <li>Crea un nuovo taccuino (es. "Ripasso Esame Web Developer").</li>
-                <li>Carica i file Markdown/PDF contenuti nelle cartelle `dispense_*`.</li>
+                <li>Carica i file Markdown/PDF contenuti nella cartella `dispense/`.</li>
                 <li>Genera schemi automatici o fai domande direttamente ai tuoi documenti!</li>
               </ol>
             </div>

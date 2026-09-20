@@ -3,21 +3,105 @@ import {
   BookOpen, 
   Plus, 
   Search, 
-  Tag, 
   Trash2, 
   Save, 
   X, 
   ExternalLink, 
   FileText, 
-  Sparkles, 
   ChevronRight, 
-  FolderDown,
-  RotateCcw,
-  CheckCircle2,
-  Clock,
-  Code
+  RotateCcw, 
+  Clock, 
+  Copy, 
+  Check 
 } from 'lucide-react';
 import { recordStudyActivity } from '../utils/storage';
+import { getCompressedItem, setCompressedItem } from '../utils/compressedStorage';
+
+function CodeBlock({ code, language }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative my-4 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 font-mono text-xs">
+      <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900 border-b border-slate-800 text-[11px] text-slate-400">
+        <span className="uppercase font-bold tracking-wider text-indigo-400">{language || 'code'}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center space-x-1 px-2 py-0.5 rounded-md hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+          title="Copia codice"
+        >
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          <span className="text-[10px]">{copied ? 'Copiato!' : 'Copia'}</span>
+        </button>
+      </div>
+      <pre className="p-4 overflow-x-auto text-slate-200 leading-relaxed">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+function NoteContentRenderer({ content }) {
+  if (!content) return null;
+
+  // Split by code blocks
+  const parts = content.split(/(```[\s\S]*?```)/g);
+
+  return (
+    <div className="space-y-3 text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+      {parts.map((part, idx) => {
+        if (part.startsWith('```') && part.endsWith('```')) {
+          const lines = part.slice(3, -3).trim().split('\n');
+          const firstLine = lines[0].trim();
+          const language = /^[a-zA-Z0-9_-]+$/.test(firstLine) ? firstLine : '';
+          const code = language ? lines.slice(1).join('\n') : lines.join('\n');
+          return <CodeBlock key={idx} code={code} language={language} />;
+        }
+
+        // Render standard markdown text paragraphs and headers
+        const lines = part.split('\n');
+        return (
+          <div key={idx} className="space-y-2">
+            {lines.map((line, lIdx) => {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('### ')) {
+                return (
+                  <h3 key={lIdx} className="text-base font-bold text-slate-900 dark:text-white pt-2 border-b border-slate-200 dark:border-slate-800 pb-1">
+                    {trimmed.replace('### ', '')}
+                  </h3>
+                );
+              }
+              if (trimmed.startsWith('1. ') || trimmed.startsWith('2. ') || trimmed.startsWith('3. ') || trimmed.startsWith('4. ')) {
+                return (
+                  <div key={lIdx} className="flex items-start space-x-2 pl-2">
+                    <span className="font-bold text-indigo-500">{trimmed.slice(0, 3)}</span>
+                    <span className="flex-1">{trimmed.slice(3)}</span>
+                  </div>
+                );
+              }
+              if (trimmed.startsWith('- ')) {
+                return (
+                  <div key={lIdx} className="flex items-start space-x-2 pl-4">
+                    <span className="text-indigo-400">&bull;</span>
+                    <span className="flex-1">{trimmed.slice(2)}</span>
+                  </div>
+                );
+              }
+              if (!trimmed) return <div key={lIdx} className="h-1" />;
+              return <p key={lIdx}>{trimmed}</p>;
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 
 const DEFAULT_NOTES = [
   {
@@ -126,18 +210,27 @@ ORDER BY total_orders DESC;
 ];
 
 export default function Notebook() {
-  // 1. NOTES STATE (with localStorage persistence & fallback)
+  const getNotesKey = () => {
+    try {
+      const raw = localStorage.getItem('devexam_current_user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u && u.id) return `devexam_notes_${u.id}`;
+      }
+    } catch {}
+    return 'devexam_notes_guest';
+  };
+
+  // 1. NOTES STATE (with compressed storage persistence & fallback per user)
   const [notes, setNotes] = useState(() => {
     try {
-      const saved = localStorage.getItem('devexam_notes');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+      const key = getNotesKey();
+      const saved = getCompressedItem(key, null) || getCompressedItem('devexam_notes', null);
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        return saved;
       }
     } catch (e) {
-      console.error("Failed to load notes from localStorage", e);
+      console.error("Failed to load notes from storage", e);
     }
     return DEFAULT_NOTES;
   });
@@ -164,9 +257,9 @@ export default function Notebook() {
     content: ''
   });
 
-  // Persist notes on change
+  // Persist notes on change using compression
   useEffect(() => {
-    localStorage.setItem('devexam_notes', JSON.stringify(notes));
+    setCompressedItem(getNotesKey(), notes);
   }, [notes]);
 
   // Derived selected note
@@ -549,11 +642,10 @@ export default function Notebook() {
                     </div>
                   )}
 
-                  {/* Rendered content */}
-                  <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-sm leading-relaxed space-y-4 whitespace-pre-wrap font-sans">
-                    {activeNote.content}
-                  </div>
+                  {/* Rendered content with formatted code blocks */}
+                  <NoteContentRenderer content={activeNote.content} />
                 </div>
+
               ) : (
                 /* EDITING FORM VIEW */
                 <div className="space-y-4 text-xs">

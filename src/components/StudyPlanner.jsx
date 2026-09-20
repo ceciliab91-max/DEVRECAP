@@ -8,9 +8,7 @@ import {
   Code2, 
   Database, 
   FileCode2, 
-  Sparkles,
-  Play,
-  RotateCcw,
+  Play, 
   Award
 } from 'lucide-react';
 import { roadmapData } from '../data/roadmapData';

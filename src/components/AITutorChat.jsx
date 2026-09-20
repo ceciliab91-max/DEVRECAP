@@ -28,32 +28,6 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  useEffect(() => {
-    if (isFullPage) {
-      setIsOpen(true);
-    }
-  }, [isFullPage]);
-
-  // Handle external triggers (e.g. from QuizResults "Ask AI Tutor")
-  useEffect(() => {
-    if (externalTriggerContext) {
-      setIsOpen(true);
-      const userPrompt = `Spiegami in modo dettagliato questa domanda d'esame di ${externalTriggerContext.subject}:\n\nDomanda: "${externalTriggerContext.question}"\nRisposta Corretta: "${externalTriggerContext.correctAnswer}"\n\nPerché la risposta corretta è questa e qual è il concetto dietro?`;
-      
-      handleSendMessage(userPrompt);
-      if (onClearTriggerContext) {
-        onClearTriggerContext();
-      }
-    }
-  }, [externalTriggerContext]);
-
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    if (isOpen) {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isTyping, isOpen]);
-
   const handleSendMessage = async (customText = null) => {
     const textToSend = customText || input;
     if (!textToSend.trim() || isTyping) return;
@@ -96,7 +70,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMessage]);
-    } catch (e) {
+    } catch {
       const botMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
@@ -108,6 +82,32 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       setIsTyping(false);
     }
   };
+
+  useEffect(() => {
+    if (isFullPage) {
+      setIsOpen(true);
+    }
+  }, [isFullPage]);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (isOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping, isOpen]);
+
+  // Handle external triggers (e.g. from QuizResults "Ask AI Tutor")
+  useEffect(() => {
+    if (externalTriggerContext) {
+      setIsOpen(true);
+      const userPrompt = `Spiegami in modo dettagliato questa domanda d'esame di ${externalTriggerContext.subject}:\n\nDomanda: "${externalTriggerContext.question}"\nRisposta Corretta: "${externalTriggerContext.correctAnswer}"\n\nPerché la risposta corretta è questa e qual è il concetto dietro?`;
+      
+      handleSendMessage(userPrompt);
+      if (onClearTriggerContext) {
+        onClearTriggerContext();
+      }
+    }
+  }, [externalTriggerContext]);
 
   const starterPrompts = [
     "💡 Spiegami il Box Model in CSS",
