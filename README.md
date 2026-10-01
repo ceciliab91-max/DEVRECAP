@@ -61,7 +61,6 @@
 
 ```text
 DEVRECAP/
-├── .agents/                 # Architettura Multi-Agente (MAS), ruoli e state log
 ├── dispense/                # Dispense didattiche ufficiali (CSS, JS, Node, React, SQL, AI)
 ├── netlify/                 # Netlify Serverless Functions (Auth, Cloud Sync)
 │   └── functions/
