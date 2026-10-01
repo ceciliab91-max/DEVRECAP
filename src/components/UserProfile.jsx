@@ -18,13 +18,14 @@ import { updateUserProfile } from '../utils/authStorage';
 import { getAggregateStats, getFlashcardStatus } from '../utils/storage';
 
 export default function UserProfile({ currentUser, onUpdateUser }) {
+  const safeUser = currentUser || {};
   const [formData, setFormData] = useState(() => ({
-    name: currentUser.name || '',
-    bio: currentUser.bio || '',
-    avatar: currentUser.avatar || '👨‍💻',
-    examDate: currentUser.examDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    targetGrade: currentUser.targetGrade || '28/30',
-    apiKey: currentUser.apiKey || ''
+    name: safeUser.name || safeUser.username || '',
+    bio: safeUser.bio || '',
+    avatar: safeUser.avatar || '👨‍💻',
+    examDate: safeUser.examDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    targetGrade: safeUser.targetGrade || '28/30',
+    apiKey: safeUser.apiKey || ''
   }));
   const [showApiKey, setShowApiKey] = useState(false);
 
@@ -47,10 +48,11 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
 
   const daysRemaining = calculateCountdownDays(formData.examDate);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updated = updateUserProfile(currentUser.id, formData);
+      const userId = safeUser.id || 'user-student-demo';
+      const updated = await updateUserProfile(userId, formData);
       if (onUpdateUser) onUpdateUser(updated);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
@@ -112,19 +114,19 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
           <div className="space-y-2 text-center sm:text-left flex-1">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {currentUser.name}
+                {safeUser.name || safeUser.username || 'Profilo Utente'}
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider border ${
-                currentUser.role === 'admin' 
+                safeUser.role === 'admin' 
                   ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
                   : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
               }`}>
-                {currentUser.role === 'admin' ? 'Docente / Admin' : 'Studente'}
+                {safeUser.role === 'admin' ? 'Docente / Admin' : 'Studente'}
               </span>
             </div>
 
             <p className="text-slate-400 text-xs sm:text-sm font-medium">
-              {currentUser.email}
+              {safeUser.email || `${safeUser.username || 'studente'}@devexam.it`}
             </p>
 
             <p className="text-slate-300 text-xs max-w-lg leading-relaxed pt-1">

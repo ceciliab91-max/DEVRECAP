@@ -103,7 +103,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
             {currentUser ? (
-              <>Bentornato, <span className="bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">{currentUser.name}</span>!</>
+              <>Bentornato, <span className="bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">{currentUser.name || currentUser.username || 'Sviluppatore'}</span>!</>
             ) : (
               <>Piattaforma di Preparazione all'Esame di <span className="bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">Sviluppo Web</span></>
             )}
@@ -154,7 +154,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
               {daysRemaining} <span className="text-sm font-bold text-slate-400">Giorni</span>
             </div>
             <div className="text-[11px] text-slate-400 font-medium">
-              Target: <strong className="text-pink-400">{currentUser.targetGrade}</strong>
+              Target: <strong className="text-pink-400">{currentUser?.targetGrade || '28/30'}</strong>
             </div>
             <span className="text-[10px] text-indigo-300 block underline group-hover:text-indigo-200">
               Modifica data nel profilo

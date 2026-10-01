@@ -1,7 +1,7 @@
 /**
  * Cloud Storage & Authentication Service for DevExam PRO.
  * Communicates with Netlify Serverless Functions + Netlify Blobs
- * with graceful fallback to LocalStorage when running offline/locally.
+ * with graceful fallback to LocalStorage when running offline/locally or on LAN.
  */
 
 const API_ENDPOINTS = {
@@ -10,14 +10,25 @@ const API_ENDPOINTS = {
 };
 
 /**
- * Returns true if running in standalone Vite dev without Netlify Functions proxy.
+ * Returns true if running in standalone Vite dev without Netlify Functions proxy
+ * (supports localhost, 127.0.0.1, 0.0.0.0, .local, and local LAN IP ranges e.g. 192.168.x.x for mobile testing).
  */
 function isStandaloneViteDev() {
   if (typeof window === 'undefined') return false;
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  // Netlify CLI typically runs on port 8888 or custom port with functions
-  const isNetlifyDev = window.location.port === '8888';
-  return isLocal && !isNetlifyDev;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+
+  const isLocalHostOrIp = 
+    hostname === 'localhost' || 
+    hostname === '127.0.0.1' || 
+    hostname === '0.0.0.0' ||
+    hostname.endsWith('.local') ||
+    /^192\.168\.\d+\.\d+$/.test(hostname) ||
+    /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
+
+  const isNetlifyDev = port === '8888';
+  return isLocalHostOrIp && !isNetlifyDev;
 }
 
 /**
@@ -41,22 +52,39 @@ export async function cloudLogin(usernameOrEmail, password) {
     return null; // Gracefully use local storage in Vite dev mode without throwing network 404
   }
 
-  const res = await fetch(API_ENDPOINTS.AUTH, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'login',
-      username: usernameOrEmail,
-      password: password
-    })
-  });
+  try {
+    const res = await fetch(API_ENDPOINTS.AUTH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        username: usernameOrEmail,
+        password: password
+      })
+    });
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.success) {
-    throw new Error(data.message || 'Credenziali non valide');
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) return null;
+
+    if (!res.ok || !data.success) {
+      if (res.status === 400 || res.status === 401) {
+        throw new Error(data.message || 'Credenziali non valide');
+      }
+      return null;
+    }
+
+    return data.user;
+  } catch (err) {
+    if (err.message && err.message.includes('Credenziali non valide')) {
+      throw err;
+    }
+    return null;
   }
-
-  return data.user;
 }
 
 /**
@@ -67,26 +95,43 @@ export async function cloudRegister({ username, email, password, name, role = 's
     return null;
   }
 
-  const res = await fetch(API_ENDPOINTS.AUTH, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'register',
-      username,
-      email,
-      password,
-      name,
-      role,
-      apiKey
-    })
-  });
+  try {
+    const res = await fetch(API_ENDPOINTS.AUTH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'register',
+        username,
+        email,
+        password,
+        name,
+        role,
+        apiKey
+      })
+    });
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.success) {
-    throw new Error(data.message || 'Errore durante la registrazione');
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) return null;
+
+    if (!res.ok || !data.success) {
+      if (res.status === 400 && data.message) {
+        throw new Error(data.message);
+      }
+      return null;
+    }
+
+    return data.user;
+  } catch (err) {
+    if (err.message && (err.message.includes('già registrato') || err.message.includes('già in uso') || err.message.includes('obbligatori'))) {
+      throw err;
+    }
+    return null;
   }
-
-  return data.user;
 }
 
 /**
@@ -97,22 +142,31 @@ export async function cloudUpdateProfile(userId, updatedFields) {
     return null;
   }
 
-  const res = await fetch(API_ENDPOINTS.AUTH, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'update-profile',
-      userId,
-      updatedFields
-    })
-  });
+  try {
+    const res = await fetch(API_ENDPOINTS.AUTH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update-profile',
+        userId,
+        updatedFields
+      })
+    });
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.success) {
-    throw new Error(data.message || 'Errore aggiornamento profilo cloud');
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data || !res.ok || !data.success) {
+      return null;
+    }
+
+    return data.user;
+  } catch {
+    return null;
   }
-
-  return data.user;
 }
 
 /**
@@ -159,4 +213,5 @@ export async function cloudFetchUserData(userId) {
     return null;
   }
 }
+
 

@@ -143,7 +143,7 @@ export default function Navbar({
                 {/* Profile Link Button */}
                 <button
                   onClick={() => setActiveTab('profile')}
-                  aria-label={`Apri il profilo utente di ${currentUser.name}`}
+                  aria-label={`Apri il profilo utente di ${currentUser.name || currentUser.username || 'Utente'}`}
                   aria-current={activeTab === 'profile' ? 'page' : undefined}
                   className={`h-9 flex items-center space-x-2 px-3 rounded-xl border text-xs font-semibold whitespace-nowrap transition-all ${
                     activeTab === 'profile'
@@ -152,7 +152,7 @@ export default function Navbar({
                   }`}
                 >
                   <span className="text-sm leading-none" aria-hidden="true">{currentUser.avatar || '👨‍💻'}</span>
-                  <span className="hidden sm:inline font-bold">{currentUser.name.split(' ')[0]}</span>
+                  <span className="hidden sm:inline font-bold">{currentUser.name ? currentUser.name.split(' ')[0] : (currentUser.username || 'Utente')}</span>
                   <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase leading-none ${
                     currentUser.role === 'admin' ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300' : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300'
                   }`}>
