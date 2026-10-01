@@ -388,10 +388,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 p-3.5 sm:p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group cursor-pointer"
+          className="fixed bottom-16 right-3.5 sm:bottom-6 sm:right-6 z-40 p-3 sm:p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-1.5 sm:space-x-2 group cursor-pointer border border-white/20"
           aria-label="Apri Tutor IA"
         >
-          <Bot className="w-6 h-6" />
+          <Bot className="w-5 h-5 sm:w-6 sm:h-6" />
           <span className="hidden sm:inline font-bold pr-1 text-sm">Tutor IA</span>
           <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
