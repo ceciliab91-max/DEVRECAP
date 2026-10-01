@@ -405,8 +405,8 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         <div
           className={`flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
             isFullPage
-              ? 'w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-12rem)] min-h-[500px] max-h-[780px] mb-8'
-              : 'fixed inset-x-0 bottom-0 top-14 sm:top-auto sm:inset-auto sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 z-50 w-full sm:w-[500px] md:w-[540px] max-w-[calc(100vw-2rem)] h-[calc(100dvh-3.75rem)] sm:h-[600px] max-h-[calc(100dvh-5.5rem)] rounded-t-3xl sm:rounded-3xl animate-fadeIn'
+              ? 'sticky top-16 sm:top-20 w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-6.5rem)] shadow-xl'
+              : 'fixed inset-x-0 bottom-14 sm:bottom-6 sm:right-6 sm:inset-auto z-50 w-full sm:w-[520px] max-w-[calc(100vw-1rem)] h-[calc(100dvh-7.5rem)] sm:h-[620px] max-h-[calc(100dvh-5rem)] rounded-t-3xl sm:rounded-3xl animate-fadeIn'
           }`}
         >
           {/* Mobile Handle Drag Bar */}
