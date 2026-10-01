@@ -5,6 +5,35 @@ const scraped = JSON.parse(fs.readFileSync(path.join(__dirname, 'scraped_dispens
 const baseDir = path.resolve(__dirname, '..');
 const dispenseDir = path.join(baseDir, 'dispense');
 
+function decodeHtmlEntities(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .replace(/&eacute;/gi, 'é')
+    .replace(/&egrave;/gi, 'è')
+    .replace(/&agrave;/gi, 'à')
+    .replace(/&ograve;/gi, 'ò')
+    .replace(/&ugrave;/gi, 'ù')
+    .replace(/&igrave;/gi, 'ì')
+    .replace(/&Eacute;/gi, 'É')
+    .replace(/&Egrave;/gi, 'È')
+    .replace(/&Agrave;/gi, 'À')
+    .replace(/&Ograve;/gi, 'Ò')
+    .replace(/&Ugrave;/gi, 'Ù')
+    .replace(/&Igrave;/gi, 'Ì')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&bull;/gi, '•')
+    .replace(/&hellip;/gi, '…')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
 // Group by module
 const modulesMap = {
   css: {
@@ -45,13 +74,6 @@ const modulesMap = {
   }
 };
 
-// Also keep existing CSS lessons if any were already high-quality
-const existingKnowledgePath = path.join(baseDir, 'src', 'data', 'dispenseKnowledge.js');
-let existingKnowledgeRaw = '';
-if (fs.existsSync(existingKnowledgePath)) {
-  existingKnowledgeRaw = fs.readFileSync(existingKnowledgePath, 'utf-8');
-}
-
 // Generate markdown files and build lessons
 for (const item of scraped) {
   let modKey = item.folder;
@@ -59,34 +81,39 @@ for (const item of scraped) {
   if (!modulesMap[modKey]) {
     modulesMap[modKey] = {
       moduleId: modKey,
-      moduleName: item.topic,
-      description: `Modulo didattico su ${item.topic}`,
+      moduleName: decodeHtmlEntities(item.topic),
+      description: `Modulo didattico su ${decodeHtmlEntities(item.topic)}`,
       lessons: []
     };
   }
 
+  const cleanTitle = decodeHtmlEntities(item.title);
+  const cleanSummary = decodeHtmlEntities(item.summary);
+
   // Create markdown content
   const mdLines = [
-    `# ${item.title}`,
+    `# ${cleanTitle}`,
     `\n**Argomento:** ${item.topic} | **Data Lezione:** ${item.date || '—'} | **File Sorgente:** ${item.file}\n`,
-    `## Panoramica\n${item.summary}\n`
+    `## Panoramica\n${cleanSummary}\n`
   ];
 
   const keyPoints = [];
   const pitfalls = [];
   const examQuestions = [
-    `Spiega i concetti fondamentali trattati in ${item.title} e come applicarli in un progetto reale.`,
-    `Quali sono le differenze pratiche ed errori da evitare quando si lavora con ${item.title}?`
+    `Spiega i concetti fondamentali trattati in ${cleanTitle} e come applicarli in un progetto reale.`,
+    `Quali sono le differenze pratiche ed errori da evitare quando si lavora con ${cleanTitle}?`
   ];
 
   if (item.sections && item.sections.length > 0) {
     for (const sec of item.sections) {
-      mdLines.push(`### ${sec.title}`);
-      mdLines.push(`${sec.text}\n`);
-      keyPoints.push(sec.title + ': ' + sec.text.slice(0, 120) + '...');
+      const secTitle = decodeHtmlEntities(sec.title);
+      const secText = decodeHtmlEntities(sec.text);
+      mdLines.push(`### ${secTitle}`);
+      mdLines.push(`${secText}\n`);
+      keyPoints.push(secTitle + ': ' + secText.slice(0, 140) + '...');
     }
   } else {
-    keyPoints.push(`Concetti fondamentali ed esempi pratici su ${item.title}.`);
+    keyPoints.push(`Concetti fondamentali ed esempi pratici su ${cleanTitle}.`);
   }
 
   // Extract pitfalls based on topic
@@ -119,15 +146,17 @@ for (const item of scraped) {
         lang = 'javascript';
       }
 
+      const cleanCode = decodeHtmlEntities(snip.code);
+
       codeSnippets.push({
-        title: `Esempio di codice ${sIdx}: ${item.title}`,
+        title: `Esempio di codice ${sIdx}: ${cleanTitle}`,
         language: lang,
-        code: snip.code.slice(0, 1000),
-        explanation: `Implementazione pratica illustrata nella dispensa per ${item.title}.`
+        code: cleanCode.slice(0, 1200),
+        explanation: `Implementazione pratica illustrata nella dispensa per ${cleanTitle}.`
       });
 
       mdLines.push('```' + lang);
-      mdLines.push(snip.code);
+      mdLines.push(cleanCode);
       mdLines.push('```\n');
       sIdx++;
     }
@@ -141,9 +170,9 @@ for (const item of scraped) {
   // Add lesson to module
   modulesMap[modKey].lessons.push({
     id: item.id,
-    title: item.title,
+    title: cleanTitle,
     pdfReference: item.file,
-    summary: item.summary.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"'),
+    summary: cleanSummary,
     keyPoints: keyPoints.slice(0, 6),
     examPitfalls: pitfalls,
     codeSnippets: codeSnippets.slice(0, 4),
@@ -151,7 +180,7 @@ for (const item of scraped) {
   });
 }
 
-// Ensure CSS module has lessons (add comprehensive modern CSS lessons)
+// Ensure CSS module has lessons
 if (modulesMap.css.lessons.length === 0) {
   modulesMap.css.lessons = [
     {
@@ -248,7 +277,7 @@ export function findRelevantLessons(query, maxResults = 3) {
   if (!query || typeof query !== "string") return [];
   
   const tokens = query.toLowerCase()
-    .replace(/[^a-zA-Z0-9\u00C0-\u017F]+/g, " ")
+    .replace(/[^a-zA-Z0-9\\u00C0-\\u017F]+/g, " ")
     .split(/\\s+/)
     .filter(t => t.length > 2);
     
@@ -279,8 +308,59 @@ export function findRelevantLessons(query, maxResults = 3) {
     .slice(0, maxResults)
     .map(item => item.lesson);
 }
+
+/**
+ * Ricerca di compatibilità per singolo argomento / parola chiave.
+ */
+export function findTopicByKeyword(query) {
+  const relevant = findRelevantLessons(query, 1);
+  if (relevant.length > 0) {
+    const lesson = relevant[0];
+    const mod = Object.values(DISPENSE_KNOWLEDGE_BASE).find(m => 
+      m.lessons.some(l => l.id === lesson.id)
+    );
+    return {
+      module: mod || DISPENSE_KNOWLEDGE_BASE.javascript,
+      lesson
+    };
+  }
+  return null;
+}
+
+export function findDispensaByTopic(topicId) {
+  return DISPENSE_KNOWLEDGE_BASE[topicId] || null;
+}
+
+/**
+ * Costruisce il contesto formattato delle dispense per il grounding del prompt LangChain.
+ */
+export function buildDispenseKnowledgeContext(subjectFilter = null, userQuery = null) {
+  let lessons = [];
+  if (userQuery) {
+    lessons = findRelevantLessons(userQuery, 3);
+  }
+  if (lessons.length === 0) {
+    if (subjectFilter && DISPENSE_KNOWLEDGE_BASE[subjectFilter]) {
+      lessons = DISPENSE_KNOWLEDGE_BASE[subjectFilter].lessons.slice(0, 4);
+    } else {
+      lessons = getAllDispenseLessons().slice(0, 4);
+    }
+  }
+
+  return lessons.map(l => \`
+[DISPENSA REF: \${l.pdfReference}]
+TITOLO: \${l.title}
+SOMMARIO: \${l.summary}
+PUNTI CHIAVE:
+\${l.keyPoints.map(p => \`- \${p}\`).join('\\n')}
+ERRORI / TRABOCCHETTI TIPICI:
+\${l.examPitfalls.map(p => \`- \${p}\`).join('\\n')}
+SNIPPET DIDATTICI:
+\${(l.codeSnippets || []).map(s => \`// \${s.title} (\${s.language})\\n\${s.code}\`).join('\\n\\n')}
+\`).join('\\n---\\n');
+}
 `;
 
 const fullJsContent = fileHeader + fileBody + fileFooter;
 fs.writeFileSync(path.join(baseDir, 'src', 'data', 'dispenseKnowledge.js'), fullJsContent, 'utf-8');
-console.log('Successfully written src/data/dispenseKnowledge.js and markdown files in dispense/');
+console.log('Successfully written cleaned src/data/dispenseKnowledge.js with HTML entity decoding.');
