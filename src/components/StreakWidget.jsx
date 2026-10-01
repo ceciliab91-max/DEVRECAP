@@ -65,7 +65,7 @@ export default function StreakWidget({ onActivityRecorded }) {
       </div>
 
       {/* Minimalist Mon-Sun Weekly Activity Bar */}
-      <div className="mt-3 pt-3 border-t border-slate-200/40 dark:border-slate-800/40">
+      <div className="mt-3 pt-2">
         <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-3">
           <span className="font-semibold flex items-center space-x-1.5 text-slate-900 dark:text-slate-200">
             <Calendar className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />

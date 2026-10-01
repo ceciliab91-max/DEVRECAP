@@ -311,7 +311,7 @@ export default function App() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200/50 dark:border-slate-800/50 py-3 sm:py-4 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+    <footer className="py-3 sm:py-4 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1.5">
         <span>DevExam Simulator & Study Planner &copy; {new Date().getFullYear()}</span>
         <span className="hidden sm:inline">CSS &bull; JavaScript &bull; React &bull; SQL</span>

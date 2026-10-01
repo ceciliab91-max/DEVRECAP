@@ -720,7 +720,7 @@ export default function LiveCoding({ onGoToProfile }) {
               }`}>
 
               {/* Header with Professor Name & Grade */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between pb-1">
                 <div className="flex items-center space-x-3">
                   <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30">
                     <Bot className="w-6 h-6" />
@@ -810,7 +810,7 @@ export default function LiveCoding({ onGoToProfile }) {
           {/* Traccia & Instructions Card */}
           {!aiVerdict && (
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <div className="flex items-center justify-between pb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <span className="flex items-center space-x-1.5">
                   <BookOpen className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                   <span>Traccia & Indicazioni del Quesito</span>

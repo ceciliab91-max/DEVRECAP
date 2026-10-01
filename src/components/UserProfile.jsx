@@ -157,7 +157,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
         {/* Left Column: Form Edit */}
         <div className="md:col-span-2 space-y-4 sm:space-y-6">
           <div className="p-4 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3 sm:pb-4">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 pb-1 sm:pb-2">
               <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400" />
               <span>Personalizza il tuo Profilo</span>
             </h2>
@@ -254,7 +254,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
               </div>
 
               {/* Card Configurazione AI & API Key */}
-              <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="pt-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Key className="w-4 h-4 text-amber-500 dark:text-amber-400" />
@@ -321,7 +321,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
           
           {/* Quick Stats Summary */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-xs">
-            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 pb-1">
               <Award className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Statistiche di Studio</span>
             </h3>
@@ -351,7 +351,7 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
 
           {/* Badges / Traguardi Grid */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-xs">
-            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 pb-1">
               <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Obiettivi & Badge</span>
             </h3>

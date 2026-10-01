@@ -166,7 +166,7 @@ export default function QuizSetup({ onStartQuiz }) {
         </div>
 
         {/* Launch Action Button */}
-        <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="pt-2">
           <button
             onClick={handleLaunch}
             className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-extrabold text-base shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-3 transition-all hover:scale-[1.01]"

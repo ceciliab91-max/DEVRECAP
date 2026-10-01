@@ -517,7 +517,7 @@ export default function Notebook() {
                 </div>
 
                 {/* Tags & Action Link */}
-                <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div className="pt-2 flex items-center justify-between">
                   <div className="flex flex-wrap gap-1">
                     {note.tags && note.tags.slice(0, 2).map((t, idx) => (
                       <span key={idx} className="text-[9px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
@@ -579,7 +579,7 @@ export default function Notebook() {
           <div className="w-full max-w-2xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl overflow-hidden">
             
             {/* Drawer Header */}
-            <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase ${
                   activeNote.subject === 'CSS' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300' :
@@ -728,7 +728,7 @@ export default function Notebook() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div className="p-4 bg-slate-50 dark:bg-slate-950 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Appunti DevExam Pro</span>
               <button
                 onClick={() => setIsNoteOpen(false)}

@@ -142,7 +142,7 @@ export default function StudyPlanner({ onStartQuiz }) {
             >
               
               {/* Subject Title Header */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
                 <div className="flex items-center space-x-3">
                   <div className={`p-3 rounded-2xl ${sub.badgeBg}`}>
                     <Icon className="w-6 h-6" />

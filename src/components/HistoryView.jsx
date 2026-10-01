@@ -122,7 +122,7 @@ export default function HistoryView({ onRefreshStats }) {
                 </div>
 
                 {/* Right score display */}
-                <div className="flex items-center space-x-6 sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-200 dark:border-slate-800">
+                <div className="flex items-center space-x-6 sm:justify-end pt-1 sm:pt-0">
                   <div className="text-right">
                     <div className="text-2xl font-black text-slate-900 dark:text-white">
                       {item.score30} <span className="text-xs font-bold text-slate-500">/ 30</span>

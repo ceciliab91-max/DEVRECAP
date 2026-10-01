@@ -461,7 +461,7 @@ export default function AdminHub({ currentUser }) {
       {showQuestionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs text-slate-900 dark:text-slate-100">
-            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div className="flex justify-between items-center pb-2">
               <h3 className="font-bold text-slate-900 dark:text-white text-base">
                 {editingQuestion ? 'Modifica Domanda' : 'Aggiungi Nuova Domanda d\'Esame'}
               </h3>
@@ -587,7 +587,7 @@ export default function AdminHub({ currentUser }) {
       {showChallengeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs text-slate-900 dark:text-slate-100">
-            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div className="flex justify-between items-center pb-2">
               <h3 className="font-bold text-slate-900 dark:text-white text-base">Aggiungi Nuova Sfida Pratica Live Coding</h3>
               <button onClick={() => setShowChallengeModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <X className="w-5 h-5" />

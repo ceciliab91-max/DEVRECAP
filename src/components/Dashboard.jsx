@@ -309,7 +309,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         
         {/* Attività Recenti */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex items-center justify-between pb-1">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <History className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
               <span>Attività Recenti</span>
@@ -348,7 +348,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
 
         {/* Argomenti Deboli / Banca Errori */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex items-center justify-between pb-1">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400" />
               <span>Argomenti Deboli ({errorIds.length})</span>

@@ -271,7 +271,7 @@ export default function HubStudio() {
                 </div>
 
                 {/* Bottom Action Footer */}
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <div className="pt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                   <span>Valuta la tua conoscenza di questa card:</span>
                 </div>
               </div>
@@ -372,7 +372,7 @@ export default function HubStudio() {
                       <div className="space-y-3">
                         
                         {/* Node Title Header */}
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div className="flex items-center justify-between pb-1">
                           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                             <span className="w-6 h-6 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">
                               {idx + 1}

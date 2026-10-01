@@ -36,7 +36,7 @@ export default function Navbar({
 
   return (
     <>
-      <header role="banner" className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md transition-colors duration-200">
+      <header role="banner" className="sticky top-0 z-40 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             
@@ -184,7 +184,7 @@ export default function Navbar({
         <nav 
           role="navigation" 
           aria-label="Navigazione rapida mobile"
-          className="lg:hidden fixed bottom-0 inset-x-0 z-40 flex items-center justify-around border-t border-slate-200 dark:border-slate-800 px-1 py-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg"
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 flex items-center justify-around px-1 py-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
         >
           {mainNavItems.map((item) => {
             const Icon = item.icon;

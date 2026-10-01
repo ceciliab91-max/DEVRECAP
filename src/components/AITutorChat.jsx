@@ -411,13 +411,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         >
           {/* Mobile Handle Drag Bar */}
           {!isFullPage && (
-            <div className="sm:hidden flex justify-center pt-2 pb-1 bg-slate-950/90 border-b border-slate-800">
+            <div className="sm:hidden flex justify-center pt-2 pb-1 bg-slate-950/90">
               <div className="w-12 h-1.5 rounded-full bg-slate-600" />
             </div>
           )}
 
           {/* Compact Header & Controls Bar */}
-          <div className="px-3.5 py-2.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-800 text-white flex flex-col gap-2">
+          <div className="px-3.5 py-2.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white shrink-0">
@@ -918,7 +918,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
           {/* Quick Starter Topics (Compact horizontal scroller chips) */}
           {messages.length <= 2 && !isTyping && (
-            <div className="px-3 py-1.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-950/60 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+            <div className="px-3 py-1.5 bg-slate-50/80 dark:bg-slate-950/60 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
               <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-amber-500" />
                 <span>Suggerimenti:</span>
@@ -941,7 +941,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           )}
 
           {/* Compact Input Area Form */}
-          <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+          <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 shadow-sm">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
