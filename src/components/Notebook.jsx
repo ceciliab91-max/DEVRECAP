@@ -405,7 +405,7 @@ export default function Notebook() {
         </div>
 
         {/* Google NotebookLM Link Box inside Header */}
-        <div className="mt-6 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-950/60 p-3 sm:p-4 rounded-2xl border border-slate-800/60">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center shadow-md flex-shrink-0">
               <FileText className="w-5 h-5 text-white" />

@@ -1,32 +1,59 @@
-import React, { useState } from 'react';
-import { 
-  BarChart3, 
-  AlertTriangle, 
-  History, 
-  Award, 
-  TrendingUp, 
-  CheckCircle2, 
-  FileCode2, 
-  Code2, 
-  Layers, 
-  Database
-} from 'lucide-react';
-import ErrorPool from './ErrorPool';
-import HistoryView from './HistoryView';
+import React, { useState } from "react";
+import {
+  BarChart3,
+  AlertTriangle,
+  History,
+  Award,
+  TrendingUp,
+  CheckCircle2,
+  FileCode2,
+  Code2,
+  Layers,
+  Database,
+} from "lucide-react";
+import ErrorPool from "./ErrorPool";
+import HistoryView from "./HistoryView";
 
-export default function StatisticheView({ stats, onStartErrorReview, onRefreshStats }) {
-  const [subTab, setSubTab] = useState('overview'); // 'overview', 'errors', 'history'
+export default function StatisticheView({
+  stats,
+  onStartErrorReview,
+  onRefreshStats,
+}) {
+  const [subTab, setSubTab] = useState("overview"); // 'overview', 'errors', 'history'
 
   const subjectConfig = [
-    { id: 'CSS', name: 'CSS 3 & Flexbox', icon: FileCode2, accent: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-    { id: 'JavaScript', name: 'JavaScript ES6+', icon: Code2, accent: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-    { id: 'React', name: 'React 18 & Hooks', icon: Layers, accent: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/20' },
-    { id: 'SQL', name: 'SQL & Database', icon: Database, accent: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' }
+    {
+      id: "CSS",
+      name: "CSS 3 & Flexbox",
+      icon: FileCode2,
+      accent: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-500/10 border-blue-500/20",
+    },
+    {
+      id: "JavaScript",
+      name: "JavaScript ES6+",
+      icon: Code2,
+      accent: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/20",
+    },
+    {
+      id: "React",
+      name: "React 18 & Hooks",
+      icon: Layers,
+      accent: "text-cyan-600 dark:text-cyan-400",
+      bg: "bg-cyan-500/10 border-cyan-500/20",
+    },
+    {
+      id: "SQL",
+      name: "SQL & Database",
+      icon: Database,
+      accent: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-500/10 border-purple-500/20",
+    },
   ];
 
   return (
     <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
-      
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl text-white">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
@@ -39,7 +66,9 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
               Progressi, Banca Errori e Storico Test
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Analizza le tue prestazioni su ciascuna materia dell'esame, rivedi le risposte errate per azzerare le lacune e consulta lo storico completo.
+              Analizza le tue prestazioni su ciascuna materia dell'esame, rivedi
+              le risposte errate per azzerare le lacune e consulta lo storico
+              completo.
             </p>
           </div>
         </div>
@@ -47,11 +76,11 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
         {/* Sub-Navigation Tabs */}
         <div className="flex flex-wrap gap-2 pt-4 sm:pt-6 border-t border-slate-800/80 mt-4 sm:mt-6">
           <button
-            onClick={() => setSubTab('overview')}
+            onClick={() => setSubTab("overview")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              subTab === 'overview'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+              subTab === "overview"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
             <TrendingUp className="w-4 h-4" />
@@ -59,11 +88,11 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
           </button>
 
           <button
-            onClick={() => setSubTab('errors')}
+            onClick={() => setSubTab("errors")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              subTab === 'errors'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+              subTab === "errors"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
             <AlertTriangle className="w-4 h-4 text-red-400" />
@@ -71,11 +100,11 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
           </button>
 
           <button
-            onClick={() => setSubTab('history')}
+            onClick={() => setSubTab("history")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              subTab === 'history'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+              subTab === "history"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
             <History className="w-4 h-4 text-indigo-400" />
@@ -85,9 +114,8 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
       </div>
 
       {/* SUB-TAB 1: PANORAMICA PROGRESSI */}
-      {subTab === 'overview' && (
+      {subTab === "overview" && (
         <div className="space-y-8">
-          
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
@@ -106,7 +134,9 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
                 <Award className="w-5 h-5 text-amber-500 dark:text-amber-400" />
               </div>
               <div className="mt-4 text-3xl font-extrabold text-slate-900 dark:text-white">
-                {stats.averageScore30 > 0 ? `${stats.averageScore30}/30` : 'N/A'}
+                {stats.averageScore30 > 0
+                  ? `${stats.averageScore30}/30`
+                  : "N/A"}
               </div>
             </div>
 
@@ -126,9 +156,11 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
                 <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400" />
               </div>
               <div className="mt-4 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{stats.errorsCount}</span>
+                <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
+                  {stats.errorsCount}
+                </span>
                 <button
-                  onClick={() => setSubTab('errors')}
+                  onClick={() => setSubTab("errors")}
                   className="text-xs font-bold text-red-600 dark:text-red-400 hover:underline"
                 >
                   Vedi Errori
@@ -139,23 +171,35 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
 
           {/* Subject Breakdown Cards */}
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Accuratezza per Materia</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Accuratezza per Materia
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {subjectConfig.map((sub) => {
                 const Icon = sub.icon;
-                const accuracy = stats.subjectAccuracy[sub.id] || { percent: 0, correct: 0, total: 0 };
+                const accuracy = stats.subjectAccuracy[sub.id] || {
+                  percent: 0,
+                  correct: 0,
+                  total: 0,
+                };
 
                 return (
-                  <div key={sub.id} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                  <div
+                    key={sub.id}
+                    className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className={`p-3 rounded-2xl ${sub.bg}`}>
                           <Icon className={`w-6 h-6 ${sub.accent}`} />
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900 dark:text-white text-base">{sub.name}</h3>
+                          <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                            {sub.name}
+                          </h3>
                           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                            {accuracy.correct} esatte su {accuracy.total} risposte fornite
+                            {accuracy.correct} esatte su {accuracy.total}{" "}
+                            risposte fornite
                           </span>
                         </div>
                       </div>
@@ -176,20 +220,16 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
               })}
             </div>
           </div>
-
         </div>
       )}
 
       {/* SUB-TAB 2: BANCA ERRORI */}
-      {subTab === 'errors' && (
+      {subTab === "errors" && (
         <ErrorPool onStartErrorReview={onStartErrorReview} />
       )}
 
       {/* SUB-TAB 3: STORICO TEST */}
-      {subTab === 'history' && (
-        <HistoryView onRefreshStats={onRefreshStats} />
-      )}
-
+      {subTab === "history" && <HistoryView onRefreshStats={onRefreshStats} />}
     </div>
   );
 }

@@ -174,7 +174,7 @@ export default function App() {
             <AuthScreen onLoginSuccess={handleLoginSuccess} />
           </Suspense>
         ) : (
-          <div className="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-6 pb-20 sm:pb-12">
+          <div className="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-14 sm:pb-6">
             <Suspense fallback={<TabLoader />}>
             {/* 1. Dashboard / Studio */}
             {activeTab === 'dashboard' && (
@@ -311,10 +311,10 @@ export default function App() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 dark:border-slate-800/80 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-      <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <footer className="border-t border-slate-200/50 dark:border-slate-800/50 py-3 sm:py-4 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1.5">
         <span>DevExam Simulator & Study Planner &copy; {new Date().getFullYear()}</span>
-        <span>CSS &bull; JavaScript &bull; React &bull; SQL</span>
+        <span className="hidden sm:inline">CSS &bull; JavaScript &bull; React &bull; SQL</span>
       </div>
     </footer>
   );

@@ -196,7 +196,7 @@ export default function AdminHub({ currentUser }) {
         </div>
 
         {/* Sub Navigation */}
-        <div className="flex flex-wrap gap-2 pt-6 border-t border-slate-800 mt-6">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 sm:pt-3 mt-2 sm:mt-3">
           <button
             onClick={() => setActiveTab('metrics')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
