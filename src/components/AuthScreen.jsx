@@ -77,24 +77,24 @@ export default function AuthScreen({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-[calc(100dvh-4rem)] flex flex-col justify-center items-center px-4 py-2 sm:py-4 relative overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-[calc(100dvh-4rem)] flex flex-col justify-start sm:justify-center items-center px-3 sm:px-4 py-3 sm:py-6 relative overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/15 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/15 dark:bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Container */}
-      <div className="w-full max-w-md relative z-10 space-y-2.5 my-auto">
+      <div className="w-full max-w-md relative z-10 space-y-2 sm:space-y-2.5 sm:my-auto">
         
         {/* Brand Header */}
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25">
-            <Sparkles className="w-5 h-5 text-white" />
+        <div className="text-center space-y-0.5 sm:space-y-1">
+          <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
+          <h1 className="text-lg sm:text-2xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
             DevExam PRO
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+          <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
             Simulatore d'esame e studio per sviluppatori web con Cloud Sync.
           </p>
           

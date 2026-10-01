@@ -96,24 +96,24 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16 animate-fadeIn">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Profile Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl text-white">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-900 border border-slate-800 p-4 sm:p-10 shadow-2xl text-white">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-6">
           
           {/* Avatar Display */}
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-xl flex-shrink-0">
-            <div className="w-full h-full rounded-[22px] bg-slate-900 flex items-center justify-center text-4xl">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-xl flex-shrink-0">
+            <div className="w-full h-full rounded-[18px] sm:rounded-[22px] bg-slate-900 flex items-center justify-center text-3xl sm:text-4xl">
               {formData.avatar}
             </div>
           </div>
 
-          <div className="space-y-2 text-center sm:text-left flex-1">
+          <div className="space-y-1.5 sm:space-y-2 text-center sm:text-left flex-1">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
                 {safeUser.name || safeUser.username || 'Profilo Utente'}
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider border ${
@@ -135,12 +135,12 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
           </div>
 
           {/* Exam Countdown Widget Box */}
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-indigo-500/30 text-center min-w-[180px] space-y-1 shadow-lg">
+          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-indigo-500/30 text-center w-full sm:w-auto sm:min-w-[180px] space-y-1 shadow-lg">
             <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block flex items-center justify-center space-x-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Countdown Esame</span>
             </span>
-            <div className="text-3xl font-black bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">
               {daysRemaining} Giorni
             </div>
             <span className="text-[10px] text-slate-400 block">
@@ -152,13 +152,13 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
       </div>
 
       {/* Main Grid: Form + Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
         
         {/* Left Column: Form Edit */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-4">
-              <User className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+        <div className="md:col-span-2 space-y-4 sm:space-y-6">
+          <div className="p-4 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-3 sm:pb-4">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400" />
               <span>Personalizza il tuo Profilo</span>
             </h2>
 

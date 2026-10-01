@@ -373,22 +373,22 @@ export default function Notebook() {
   };
 
   return (
-    <div className="space-y-8 pb-16 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
               <BookOpen className="w-3.5 h-3.5" />
               <span>Notebook & Raccolta Appunti</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
               I Tuoi Appunti ed Estratti di Studio
             </h1>
-            <p className="text-slate-400 text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Organizza i concetti teorici ed i code snippet principali per l'esame. Clicca su qualsiasi scheda per aprire il pannello di dettaglio o modifica.
             </p>
           </div>
@@ -396,7 +396,7 @@ export default function Notebook() {
           <div className="flex items-center space-x-3">
             <button
               onClick={handleOpenNewNoteDrawer}
-              className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all hover:scale-105"
+              className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all hover:scale-105"
             >
               <Plus className="w-4 h-4" />
               <span>Nuovo Appunto</span>

@@ -25,27 +25,27 @@ export default function StatisticheView({ stats, onStartErrorReview, onRefreshSt
   ];
 
   return (
-    <div className="space-y-8 pb-16 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl text-white">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl text-white">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
               <BarChart3 className="w-3.5 h-3.5" />
               <span>Statistiche & Analytics Pro</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
               Progressi, Banca Errori e Storico Test
             </h1>
-            <p className="text-slate-300 text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Analizza le tue prestazioni su ciascuna materia dell'esame, rivedi le risposte errate per azzerare le lacune e consulta lo storico completo.
             </p>
           </div>
         </div>
 
         {/* Sub-Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 pt-6 border-t border-slate-800/80 mt-6">
+        <div className="flex flex-wrap gap-2 pt-4 sm:pt-6 border-t border-slate-800/80 mt-4 sm:mt-6">
           <button
             onClick={() => setSubTab('overview')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${

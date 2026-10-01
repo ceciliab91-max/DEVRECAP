@@ -174,7 +174,7 @@ export default function App() {
             <AuthScreen onLoginSuccess={handleLoginSuccess} />
           </Suspense>
         ) : (
-          <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-6 pb-20 sm:pb-12">
             <Suspense fallback={<TabLoader />}>
             {/* 1. Dashboard / Studio */}
             {activeTab === 'dashboard' && (

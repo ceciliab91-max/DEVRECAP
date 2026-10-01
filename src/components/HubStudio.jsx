@@ -68,28 +68,28 @@ export default function HubStudio() {
   const percentageKnown = Math.round((knownCount / totalCards) * 100) || 0;
 
   return (
-    <div className="space-y-8 pb-16 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Hub Studio & Ripasso Visivo</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
               Strumenti di Ripasso & Materiali d'Esame
             </h1>
-            <p className="text-slate-300 text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Consolida la tua preparazione con le Flashcard ad effetto flip, esplora le Mappe Concettuali ad albero prima dell'esame o colleghi le tue dispense su NotebookLM.
             </p>
           </div>
 
           {/* Flashcard Progress Widget in Header */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center space-x-4 min-w-[220px]">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto sm:min-w-[220px]">
             <div className="relative w-12 h-12 flex items-center justify-center">
               <svg className="w-12 h-12 transform -rotate-90">
                 <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="4" className="text-slate-800" fill="transparent" />
