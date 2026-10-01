@@ -92,31 +92,31 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
     <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-5 sm:p-10 border border-indigo-500/20 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-pink-50/60 dark:from-indigo-950/80 dark:via-purple-950/80 dark:to-slate-900 p-5 sm:p-10 border border-indigo-100 dark:border-indigo-500/20 shadow-sm dark:shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
         <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 max-w-2xl space-y-3 sm:space-y-4">
-          <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-indigo-100/90 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>DevExam Dashboard / Studio</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {currentUser ? (
-              <>Bentornato, <span className="bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">{currentUser.name || currentUser.username || 'Sviluppatore'}</span>!</>
+              <>Bentornato, <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent">{currentUser.name || currentUser.username || 'Sviluppatore'}</span>!</>
             ) : (
-              <>Piattaforma di Preparazione all'Esame di <span className="bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">Sviluppo Web</span></>
+              <>Piattaforma di Preparazione all'Esame di <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-300 dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent">Sviluppo Web</span></>
             )}
           </h1>
           
-          <p className="text-slate-300 text-xs sm:text-base leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-base leading-relaxed">
             Allenati sulle 4 materie del corso (CSS, JS, React, SQL), simula prove ufficiali a tempo e monitora la tua preparazione giorno per giorno.
           </p>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
             <button
               onClick={() => setActiveTab('quiz-select')}
-              className="py-2.5 px-4 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 flex items-center space-x-2 transition-all hover:scale-[1.02]"
+              className="py-2.5 px-4 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 flex items-center space-x-2 transition-all hover:scale-[1.02]"
             >
               <BrainCircuit className="w-4 h-4" />
               <span>Simula Esame Completo</span>
@@ -124,17 +124,17 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
 
             <button
               onClick={() => setActiveTab('mappe-schemi')}
-              className="py-2.5 px-3.5 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 font-semibold text-xs flex items-center space-x-2 transition-all"
+              className="py-2.5 px-3.5 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-white dark:bg-indigo-500/20 hover:bg-indigo-50 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-500/40 shadow-sm font-semibold text-xs flex items-center space-x-2 transition-all"
             >
-              <Layers className="w-4 h-4 text-indigo-300" />
+              <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
               <span>Mappe & Schemi Visivi</span>
             </button>
 
             <button
               onClick={() => setActiveTab('notebook')}
-              className="py-2.5 px-3.5 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center space-x-2 transition-all"
+              className="py-2.5 px-3.5 sm:py-3 sm:px-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm font-semibold text-xs flex items-center space-x-2 transition-all"
             >
-              <BookOpen className="w-4 h-4 text-indigo-300" />
+              <BookOpen className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
               <span>Appunti Notebook</span>
             </button>
           </div>
@@ -144,19 +144,19 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
         {daysRemaining !== null && (
           <div 
             onClick={() => setActiveTab('profile')}
-            className="cursor-pointer group relative z-10 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-indigo-500/30 hover:border-indigo-500/60 shadow-xl transition-all w-full sm:w-auto sm:min-w-[200px] text-center space-y-1 sm:space-y-2"
+            className="cursor-pointer group relative z-10 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white/90 dark:bg-slate-950/80 border border-indigo-200/80 dark:border-indigo-500/30 hover:border-indigo-400 dark:hover:border-indigo-500/60 shadow-md dark:shadow-xl transition-all w-full sm:w-auto sm:min-w-[200px] text-center space-y-1 sm:space-y-2"
           >
-            <div className="flex items-center justify-center space-x-1.5 text-xs text-indigo-400 font-bold uppercase tracking-wider">
+            <div className="flex items-center justify-center space-x-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">
               <Clock className="w-4 h-4" />
               <span>Obiettivo Esame</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white group-hover:scale-105 transition-transform">
-              {daysRemaining} <span className="text-sm font-bold text-slate-400">Giorni</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white group-hover:scale-105 transition-transform">
+              {daysRemaining} <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Giorni</span>
             </div>
-            <div className="text-[11px] text-slate-400 font-medium">
-              Target: <strong className="text-pink-400">{currentUser?.targetGrade || '28/30'}</strong>
+            <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+              Target: <strong className="text-pink-600 dark:text-pink-400">{currentUser?.targetGrade || '28/30'}</strong>
             </div>
-            <span className="text-[10px] text-indigo-300 block underline group-hover:text-indigo-200">
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-300 block underline group-hover:text-indigo-500 dark:group-hover:text-indigo-200">
               Modifica data nel profilo
             </span>
           </div>

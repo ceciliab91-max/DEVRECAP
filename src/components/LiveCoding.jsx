@@ -546,23 +546,23 @@ export default function LiveCoding({ onGoToProfile }) {
     <div className="space-y-8 pb-16 animate-fadeIn">
 
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-4 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-50/90 via-indigo-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-cyan-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-cyan-200 dark:border-cyan-500/30 bg-cyan-100/90 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
               <Terminal className="w-3.5 h-3.5" />
               <span>Laboratorio Live Coding & Esaminatore IA</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Sfida Pratica sulle 4 Materie
             </h1>
-            <p className="text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
               Metti alla prova le tue competenze di scrittura codice per **CSS, JavaScript, React ed SQL** e ricevi feedback immediato dal Tutor IA!
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 px-4 py-2 rounded-2xl bg-slate-950 border border-slate-700 text-xs font-semibold text-cyan-400">
-            <Award className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center space-x-2 px-4 py-2 rounded-2xl bg-white/90 dark:bg-slate-950 border border-cyan-200/80 dark:border-slate-700 text-xs font-semibold text-cyan-700 dark:text-cyan-400 shadow-sm dark:shadow-none">
+            <Award className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <span>Sfida {selectedIdx + 1} di {filteredChallenges.length}</span>
           </div>
         </div>

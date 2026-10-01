@@ -39,10 +39,10 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
     <div className="max-w-4xl mx-auto space-y-8 pb-16 animate-fadeIn">
       
       {/* Top Hero Score Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-10 shadow-2xl text-center space-y-6 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-6 sm:p-10 shadow-sm dark:shadow-2xl text-center space-y-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-500/30 bg-indigo-100/90 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Esito Simulazione Completa</span>
         </div>
@@ -52,31 +52,31 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
           
           {/* Grade in 30ths */}
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Voto in Trentesimi</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Voto in Trentesimi</span>
             <div className="flex items-baseline justify-center space-x-1">
-              <span className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-300 dark:to-pink-400 bg-clip-text text-transparent">
                 {score30}
               </span>
-              <span className="text-xl font-bold text-slate-500">/ 30</span>
+              <span className="text-xl font-bold text-slate-400 dark:text-slate-500">/ 30</span>
             </div>
           </div>
 
-          <div className="hidden sm:block w-px h-16 bg-slate-700" />
+          <div className="hidden sm:block w-px h-16 bg-slate-200 dark:bg-slate-700" />
 
           {/* Percentage */}
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Percentuale Esatta</span>
-            <span className="text-4xl sm:text-5xl font-black text-white">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Percentuale Esatta</span>
+            <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">
               {percentage}%
             </span>
           </div>
 
-          <div className="hidden sm:block w-px h-16 bg-slate-700" />
+          <div className="hidden sm:block w-px h-16 bg-slate-200 dark:bg-slate-700" />
 
           {/* Time spent */}
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Tempo Impiegato</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-300">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Tempo Impiegato</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-200">
               {formatTimeMinutes(timeSpentSeconds)}
             </span>
           </div>
@@ -94,7 +94,7 @@ export default function QuizResults({ result, onRestartQuiz, onGoHome, onStartEr
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
             onClick={onGoHome}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all"
+            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold shadow-sm transition-all"
           >
             <Home className="w-4 h-4" />
             <span>Dashboard</span>

@@ -55,37 +55,37 @@ export default function StudyPlanner({ onStartQuiz }) {
     <div className="space-y-8 pb-16">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-6 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-500/30 bg-indigo-100/90 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
               <BookOpen className="w-3.5 h-3.5" />
               <span>Piano & Roadmap di Ripasso</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Tabella di Marcia Settimanale
             </h1>
-            <p className="text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
               Segna i capitoli completati per misurare la tua preparazione globale e visualizzare il grado di padronanza per ciascuna materia.
             </p>
           </div>
 
           {/* Progress Circle & Counter */}
-          <div className="flex items-center space-x-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+          <div className="flex items-center space-x-6 p-4 rounded-2xl bg-white/90 dark:bg-slate-950/80 border border-indigo-100 dark:border-slate-800 shadow-sm dark:shadow-none">
             <div className="space-y-1 text-right">
-              <span className="text-xs font-semibold text-slate-400 block">Completamento Roadmap</span>
-              <span className="text-3xl font-black text-white">{overallPercent}%</span>
-              <span className="text-[11px] text-indigo-400 block font-semibold">{completedTopicsCount} di {totalTopicsCount} Capitoli</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">Completamento Roadmap</span>
+              <span className="text-3xl font-black text-slate-900 dark:text-white">{overallPercent}%</span>
+              <span className="text-[11px] text-indigo-600 dark:text-indigo-400 block font-semibold">{completedTopicsCount} di {totalTopicsCount} Capitoli</span>
             </div>
-            <div className="w-14 h-14 rounded-full border-4 border-indigo-500/30 flex items-center justify-center relative">
-              <Award className="w-7 h-7 text-indigo-400" />
+            <div className="w-14 h-14 rounded-full border-4 border-indigo-500/30 flex items-center justify-center relative bg-indigo-50 dark:bg-transparent">
+              <Award className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
         </div>
 
         {/* Global Progress Bar */}
         <div className="space-y-2">
-          <div className="w-full bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-800">
+          <div className="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-300 dark:border-slate-800">
             <div 
               className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500"
               style={{ width: `${overallPercent}%` }}

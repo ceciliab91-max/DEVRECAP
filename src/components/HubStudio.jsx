@@ -71,46 +71,46 @@ export default function HubStudio() {
     <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-8 shadow-sm dark:shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-1.5 sm:space-y-2">
-            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-100/90 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Hub Studio & Ripasso Visivo</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Strumenti di Ripasso & Materiali d'Esame
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Consolida la tua preparazione con le Flashcard ad effetto flip, esplora le Mappe Concettuali ad albero prima dell'esame o colleghi le tue dispense su NotebookLM.
             </p>
           </div>
 
           {/* Flashcard Progress Widget in Header */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto sm:min-w-[220px]">
+          <div className="bg-white/90 dark:bg-slate-900/80 border border-indigo-100 dark:border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto sm:min-w-[220px] shadow-sm dark:shadow-none">
             <div className="relative w-12 h-12 flex items-center justify-center">
               <svg className="w-12 h-12 transform -rotate-90">
-                <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="4" className="text-slate-800" fill="transparent" />
+                <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="4" className="text-slate-200 dark:text-slate-800" fill="transparent" />
                 <circle 
                   cx="24" 
                   cy="24" 
                   r="18" 
                   stroke="currentColor" 
                   strokeWidth="4" 
-                  className="text-emerald-400 transition-all duration-500" 
+                  className="text-emerald-500 dark:text-emerald-400 transition-all duration-500" 
                   fill="transparent" 
                   strokeDasharray={113}
                   strokeDashoffset={113 - (113 * percentageKnown) / 100}
                 />
               </svg>
-              <span className="absolute text-[11px] font-bold text-white">{percentageKnown}%</span>
+              <span className="absolute text-[11px] font-bold text-slate-900 dark:text-white">{percentageKnown}%</span>
             </div>
             <div>
-              <span className="text-xs text-slate-400 font-medium block">Flashcard Apprese</span>
-              <span className="text-sm font-bold text-white">
-                <strong className="text-emerald-400">{knownCount}</strong> / {totalCards} Card
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block">Flashcard Apprese</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-white">
+                <strong className="text-emerald-600 dark:text-emerald-400">{knownCount}</strong> / {totalCards} Card
               </span>
             </div>
           </div>
@@ -122,8 +122,8 @@ export default function HubStudio() {
             onClick={() => setSubTab('flashcards')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === 'flashcards'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -134,8 +134,8 @@ export default function HubStudio() {
             onClick={() => setSubTab('mindmaps')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === 'mindmaps'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <BrainCircuit className="w-4 h-4" />
@@ -146,8 +146,8 @@ export default function HubStudio() {
             onClick={() => setSubTab('notebooklm')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === 'notebooklm'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <FileText className="w-4 h-4" />

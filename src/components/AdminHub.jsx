@@ -174,24 +174,24 @@ export default function AdminHub({ currentUser }) {
     <div className="space-y-8 pb-16 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-purple-500/30 p-6 sm:p-10 shadow-2xl text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-50/90 via-indigo-50/80 to-slate-50 dark:from-purple-950 dark:via-slate-900 dark:to-indigo-950 border border-purple-100 dark:border-purple-500/30 p-6 sm:p-10 shadow-sm dark:shadow-2xl">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-100/90 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/40">
+              <ShieldCheck className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Area Riservata Docenti ed Amministratori</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Pannello di Amministrazione "Admin Hub"
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Gestisci la banca dati delle domande d'esame, monitora le metriche globali degli studenti e aggiungi nuove sfide pratiche di codice.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
-            <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs font-bold text-white">Modalità Admin Attiva</span>
+          <div className="flex items-center space-x-2 bg-white/90 dark:bg-slate-900/80 p-3 rounded-2xl border border-purple-100 dark:border-slate-800 shadow-sm dark:shadow-none">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">Modalità Admin Attiva</span>
           </div>
         </div>
 
@@ -201,8 +201,8 @@ export default function AdminHub({ currentUser }) {
             onClick={() => setActiveTab('metrics')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'metrics'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <TrendingUp className="w-4 h-4" />
@@ -213,8 +213,8 @@ export default function AdminHub({ currentUser }) {
             onClick={() => setActiveTab('questions')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'questions'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <Database className="w-4 h-4" />
@@ -225,8 +225,8 @@ export default function AdminHub({ currentUser }) {
             onClick={() => setActiveTab('challenges')}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'challenges'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                : 'bg-slate-800/60 text-slate-400 hover:text-white'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                : 'bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent'
             }`}
           >
             <Code2 className="w-4 h-4" />

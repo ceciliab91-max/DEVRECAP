@@ -376,19 +376,19 @@ export default function Notebook() {
     <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-8 shadow-sm dark:shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-1.5 sm:space-y-2">
-            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-100/90 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20">
               <BookOpen className="w-3.5 h-3.5" />
               <span>Notebook & Raccolta Appunti</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               I Tuoi Appunti ed Estratti di Studio
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Organizza i concetti teorici ed i code snippet principali per l'esame. Clicca su qualsiasi scheda per aprire il pannello di dettaglio o modifica.
             </p>
           </div>
@@ -396,7 +396,7 @@ export default function Notebook() {
           <div className="flex items-center space-x-3">
             <button
               onClick={handleOpenNewNoteDrawer}
-              className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all hover:scale-105"
+              className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 flex items-center space-x-2 transition-all hover:scale-105"
             >
               <Plus className="w-4 h-4" />
               <span>Nuovo Appunto</span>
@@ -405,21 +405,21 @@ export default function Notebook() {
         </div>
 
         {/* Google NotebookLM Link Box inside Header */}
-        <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-950/60 p-3 sm:p-4 rounded-2xl border border-slate-800/60">
+        <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/90 dark:bg-slate-950/60 p-3 sm:p-4 rounded-2xl border border-indigo-100 dark:border-slate-800/60 shadow-sm dark:shadow-none">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center shadow-md flex-shrink-0">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-xs font-bold text-white block">Integrazione Dispense con Google NotebookLM</span>
-              <p className="text-[11px] text-slate-400">Carica i file PDF/MD delle dispense (CSS, JS, React, SQL) per generare guide ed audio podcast IA.</p>
+              <span className="text-xs font-bold text-slate-900 dark:text-white block">Integrazione Dispense con Google NotebookLM</span>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400">Carica i file PDF/MD delle dispense (CSS, JS, React, SQL) per generare guide ed audio podcast IA.</p>
             </div>
           </div>
           <a
             href="https://notebooklm.google.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-bold border border-slate-700 flex items-center space-x-1.5 flex-shrink-0 transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-slate-700 text-indigo-700 dark:text-indigo-300 text-xs font-bold border border-indigo-200 dark:border-slate-700 flex items-center space-x-1.5 flex-shrink-0 transition-colors shadow-sm"
           >
             <span>Apri NotebookLM</span>
             <ExternalLink className="w-3.5 h-3.5" />

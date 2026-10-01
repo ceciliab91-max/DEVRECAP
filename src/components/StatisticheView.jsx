@@ -55,17 +55,17 @@ export default function StatisticheView({
   return (
     <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-slate-800 p-4 sm:p-8 shadow-xl text-white">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-8 shadow-sm dark:shadow-xl">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-1.5 sm:space-y-2">
-            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold bg-indigo-100/90 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20">
               <BarChart3 className="w-3.5 h-3.5" />
               <span>Statistiche & Analytics Pro</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Progressi, Banca Errori e Storico Test
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Analizza le tue prestazioni su ciascuna materia dell'esame, rivedi
               le risposte errate per azzerare le lacune e consulta lo storico
               completo.
@@ -74,13 +74,13 @@ export default function StatisticheView({
         </div>
 
         {/* Sub-Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 pt-4 sm:pt-6 border-t border-slate-800/80 mt-4 sm:mt-6">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 sm:pt-3 mt-2 sm:mt-3">
           <button
             onClick={() => setSubTab("overview")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === "overview"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                : "bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent"
             }`}
           >
             <TrendingUp className="w-4 h-4" />
@@ -91,11 +91,11 @@ export default function StatisticheView({
             onClick={() => setSubTab("errors")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === "errors"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                : "bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent"
             }`}
           >
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400" />
             <span>Banca Errori ({stats.errorsCount})</span>
           </button>
 
@@ -103,11 +103,11 @@ export default function StatisticheView({
             onClick={() => setSubTab("history")}
             className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               subTab === "history"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                : "bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-transparent"
             }`}
           >
-            <History className="w-4 h-4 text-indigo-400" />
+            <History className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             <span>Storico Test ({stats.totalSimulations})</span>
           </button>
         </div>

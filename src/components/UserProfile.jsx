@@ -99,51 +99,51 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
       
       {/* Profile Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-900 border border-slate-800 p-4 sm:p-10 shadow-2xl text-white">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-10 shadow-sm dark:shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-6">
           
           {/* Avatar Display */}
           <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-xl flex-shrink-0">
-            <div className="w-full h-full rounded-[18px] sm:rounded-[22px] bg-slate-900 flex items-center justify-center text-3xl sm:text-4xl">
+            <div className="w-full h-full rounded-[18px] sm:rounded-[22px] bg-white dark:bg-slate-900 flex items-center justify-center text-3xl sm:text-4xl">
               {formData.avatar}
             </div>
           </div>
 
           <div className="space-y-1.5 sm:space-y-2 text-center sm:text-left flex-1">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 {safeUser.name || safeUser.username || 'Profilo Utente'}
               </h1>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider border ${
                 safeUser.role === 'admin' 
-                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
-                  : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                  ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/40' 
+                  : 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/40'
               }`}>
                 {safeUser.role === 'admin' ? 'Docente / Admin' : 'Studente'}
               </span>
             </div>
 
-            <p className="text-slate-400 text-xs sm:text-sm font-medium">
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium">
               {safeUser.email || `${safeUser.username || 'studente'}@devexam.it`}
             </p>
 
-            <p className="text-slate-300 text-xs max-w-lg leading-relaxed pt-1">
+            <p className="text-slate-600 dark:text-slate-300 text-xs max-w-lg leading-relaxed pt-1">
               "{formData.bio}"
             </p>
           </div>
 
           {/* Exam Countdown Widget Box */}
-          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-950/80 border border-indigo-500/30 text-center w-full sm:w-auto sm:min-w-[180px] space-y-1 shadow-lg">
-            <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block flex items-center justify-center space-x-1">
+          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/90 dark:bg-slate-950/80 border border-indigo-100 dark:border-indigo-500/30 text-center w-full sm:w-auto sm:min-w-[180px] space-y-1 shadow-sm dark:shadow-lg">
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block flex items-center justify-center space-x-1">
               <Clock className="w-3.5 h-3.5" />
               <span>Countdown Esame</span>
             </span>
-            <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent">
               {daysRemaining} Giorni
             </div>
-            <span className="text-[10px] text-slate-400 block">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
               Data: {formData.examDate}
             </span>
           </div>

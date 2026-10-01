@@ -37,17 +37,17 @@ export default function ErrorPool({ onStartErrorReview }) {
     <div className="space-y-8 pb-16">
       
       {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-6 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-50/90 via-orange-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-red-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-red-500/30 bg-red-500/10 text-red-400">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-red-200 dark:border-red-500/30 bg-red-100/90 dark:bg-red-500/10 text-red-700 dark:text-red-400">
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>Banca Errori & Punti Deboli</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Revisione Mirata degli Errori
             </h1>
-            <p className="text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
               Tutte le domande che hai sbagliato durante i test vengono salvate qui automaticamente. Allenati finché non hai eliminato ogni dubbio!
             </p>
           </div>
@@ -57,10 +57,10 @@ export default function ErrorPool({ onStartErrorReview }) {
             <button
               disabled={errorQuestions.length === 0}
               onClick={onStartErrorReview}
-              className={`flex items-center space-x-2 px-5 py-3 rounded-2xl font-bold text-xs shadow-lg transition-all ${
+              className={`flex items-center space-x-2 px-5 py-3 rounded-2xl font-bold text-xs shadow-md transition-all ${
                 errorQuestions.length > 0
                   ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-red-600/25'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
               }`}
             >
               <RotateCcw className="w-4 h-4" />
@@ -70,7 +70,7 @@ export default function ErrorPool({ onStartErrorReview }) {
             {errorQuestions.length > 0 && (
               <button
                 onClick={handleClearAllErrors}
-                className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-red-400 border border-slate-700 transition-colors"
+                className="p-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors"
                 title="Svuota banca errori"
               >
                 <Trash2 className="w-4 h-4" />

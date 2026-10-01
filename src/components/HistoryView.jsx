@@ -40,17 +40,17 @@ export default function HistoryView({ onRefreshStats }) {
     <div className="space-y-8 pb-16">
       
       {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-6 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-50/90 via-indigo-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-purple-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-300">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-500/30 bg-purple-100/90 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300">
               <History className="w-3.5 h-3.5" />
               <span>Storico & Log Simulazioni</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Registro delle Prove Effettuate
             </h1>
-            <p className="text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
               Consulta tutti i tuoi tentativi passati con date, durata del test, punteggio conseguito in trentesimi ed esito percentuale.
             </p>
           </div>
@@ -58,7 +58,7 @@ export default function HistoryView({ onRefreshStats }) {
           {historyList.length > 0 && (
             <button
               onClick={handleClearHistory}
-              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-red-400 border border-slate-700 text-xs font-semibold transition-all"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-slate-700 text-red-600 dark:text-red-400 border border-red-200 dark:border-slate-700 text-xs font-semibold shadow-sm transition-all"
             >
               <Trash2 className="w-4 h-4" />
               <span>Azzera Dati & Storico</span>
