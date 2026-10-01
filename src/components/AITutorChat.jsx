@@ -56,6 +56,49 @@ function renderFormattedText(text) {
   });
 }
 
+const TUTOR_MODES = [
+  {
+    id: 'socratic',
+    label: '💡 Spiega Teoria',
+    shortLabel: 'Teoria',
+    icon: Lightbulb,
+    activeBg: 'bg-indigo-600 text-white shadow-xs',
+    accentColor: 'text-amber-400',
+    description: 'Chiedi chiarimenti su concetti, slide e dispense per spiegazioni passo-passo con analogie e snippet.',
+    placeholder: 'Chiedi un concetto (es. Come funziona l\'Event Loop o useState?)...'
+  },
+  {
+    id: 'oral_exam',
+    label: '🎓 Simula Orale',
+    shortLabel: 'Orale',
+    icon: Award,
+    activeBg: 'bg-purple-600 text-white shadow-xs',
+    accentColor: 'text-purple-400',
+    description: 'Simula una vera interrogazione d\'esame: esponi un argomento e ricevi un voto in 30esimi, pregi e lacune.',
+    placeholder: 'Esponi la tua risposta all\'argomento per la valutazione in 30esimi...'
+  },
+  {
+    id: 'quiz',
+    label: '🎯 Genera Quiz',
+    shortLabel: 'Quiz',
+    icon: Target,
+    activeBg: 'bg-amber-600 text-white shadow-xs',
+    accentColor: 'text-amber-400',
+    description: 'Mettiti alla prova: genera al volo domande a scelta multipla con 4 opzioni e correzione immediata.',
+    placeholder: 'Indica l\'argomento del quiz o clicca un suggerimento in basso...'
+  },
+  {
+    id: 'debug',
+    label: '🛠️ Correggi Codice',
+    shortLabel: 'Debug',
+    icon: Wrench,
+    activeBg: 'bg-emerald-600 text-white shadow-xs',
+    accentColor: 'text-emerald-400',
+    description: 'Incolla uno snippet di codice o un errore per individuare bug, ricevere il fix e consigli di performance.',
+    placeholder: 'Incolla qui il codice o il messaggio di errore da analizzare...'
+  }
+];
+
 export default function AITutorChat({ externalTriggerContext, onClearTriggerContext, onGoToProfile, isFullPage = false }) {
   const [isOpen, setIsOpen] = useState(isFullPage);
   const [showMissingKeyModal, setShowMissingKeyModal] = useState(false);
@@ -69,7 +112,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       id: 'welcome',
       sender: 'bot',
       type: 'socratic',
-      text: 'Ciao! Sono il tuo **Tutor IA per lo Sviluppo Web**.\n\nHo integrato la Knowledge Base completa di oltre **40 dispense didattiche** (CSS, JavaScript, React, MySQL, Node.js, Express, Prisma ed AI Engineering con LangChain).\n\nScegli una modalità in alto per iniziare lo studio o fai una domanda direttamente.',
+      text: 'Ciao! Sono il tuo **Tutor IA per lo Sviluppo Web** con Knowledge Base di oltre **40 dispense didattiche**.\n\nScegli una delle 4 modalità di studio in alto:\n• **💡 Spiega Teoria:** Per comprendere concetti e codice passo-passo.\n• **🎓 Simula Orale:** Per allenarti all\'interrogazione d\'esame con voto in 30esimi.\n• **🎯 Genera Quiz:** Per metterti alla prova con domande a risposta multipla.\n• **🛠️ Correggi Codice:** Per incollare snippet con bug e ottenere la correzione immediata.',
       time: 'Adesso'
     }
   ]);
@@ -405,7 +448,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         <div
           className={`flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
             isFullPage
-              ? 'w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-9.5rem)] sm:h-[calc(100dvh-8rem)] min-h-[460px] shadow-xl my-1'
+              ? 'w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-full flex-1 min-h-0 shadow-xl'
               : 'fixed inset-x-3 bottom-[4.5rem] sm:bottom-6 sm:right-6 sm:inset-auto z-50 w-auto sm:w-[520px] max-w-[calc(100vw-1.5rem)] h-[calc(100dvh-10rem)] sm:h-[580px] max-h-[calc(100dvh-7.5rem)] rounded-2xl sm:rounded-3xl animate-fadeIn'
           }`}
         >
@@ -473,91 +516,79 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             </div>
 
             {/* Unified Mode Switcher & Filter Pills */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 justify-between">
-              {/* Segmented Mode Switcher */}
-              <div className="grid grid-cols-4 gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800/90 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setActiveMode('socratic')}
-                  className={`flex items-center justify-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                    activeMode === 'socratic'
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                  title="Spiegazione Concetti"
-                >
-                  <Lightbulb className="w-3 h-3 text-amber-400 shrink-0" />
-                  <span className="truncate">Spiega</span>
-                </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 justify-between">
+                {/* Segmented Mode Switcher with Explicit Titles */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-slate-950/90 p-1 rounded-xl border border-slate-800/90 shrink-0">
+                  {TUTOR_MODES.map((m) => {
+                    const Icon = m.icon;
+                    const isActive = activeMode === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          if (m.id === 'quiz') {
+                            handleStartAdaptiveQuiz();
+                          } else {
+                            setActiveMode(m.id);
+                          }
+                        }}
+                        className={`flex items-center justify-center space-x-1.5 px-2 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                          isActive
+                            ? m.activeBg
+                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                        }`}
+                        title={m.description}
+                      >
+                        <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : m.accentColor} shrink-0`} />
+                        <span className="font-bold tracking-tight">{m.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setActiveMode('oral_exam')}
-                  className={`flex items-center justify-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                    activeMode === 'oral_exam'
-                      ? 'bg-purple-600 text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                  title="Simulazione Orale"
-                >
-                  <Mic className="w-3 h-3 text-purple-400 shrink-0" />
-                  <span className="truncate">Orale</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleStartAdaptiveQuiz()}
-                  className={`flex items-center justify-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                    activeMode === 'quiz'
-                      ? 'bg-amber-600 text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                  title="Quiz Tecnico"
-                >
-                  <Target className="w-3 h-3 text-amber-400 shrink-0" />
-                  <span className="truncate">Quiz</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveMode('debug')}
-                  className={`flex items-center justify-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                    activeMode === 'debug'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                  title="Debug Codice"
-                >
-                  <Wrench className="w-3 h-3 text-emerald-400 shrink-0" />
-                  <span className="truncate">Debug</span>
-                </button>
+                {/* Compact Subject Filter Pills Carousel */}
+                <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
+                  {[
+                    { id: 'all', name: 'Tutte' },
+                    { id: 'javascript', name: 'JS' },
+                    { id: 'react', name: 'React' },
+                    { id: 'node', name: 'Node' },
+                    { id: 'ai', name: 'AI' },
+                    { id: 'sql', name: 'SQL' },
+                    { id: 'css', name: 'CSS' }
+                  ].map(sub => (
+                    <button
+                      type="button"
+                      key={sub.id}
+                      onClick={() => setSelectedSubject(sub.id)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                        selectedSubject === sub.id
+                          ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-500/50 shadow-xs font-bold'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Compact Subject Filter Pills Carousel */}
-              <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
-                {[
-                  { id: 'all', name: 'Tutte' },
-                  { id: 'javascript', name: 'JS' },
-                  { id: 'react', name: 'React' },
-                  { id: 'node', name: 'Node' },
-                  { id: 'ai', name: 'AI' },
-                  { id: 'sql', name: 'SQL' },
-                  { id: 'css', name: 'CSS' }
-                ].map(sub => (
-                  <button
-                    type="button"
-                    key={sub.id}
-                    onClick={() => setSelectedSubject(sub.id)}
-                    className={`px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                      selectedSubject === sub.id
-                        ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-500/50 shadow-xs'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    }`}
-                  >
-                    {sub.name}
-                  </button>
-                ))}
-              </div>
+              {/* Dynamic Mode Micro-Guide Banner */}
+              {(() => {
+                const currentModeObj = TUTOR_MODES.find(m => m.id === activeMode) || TUTOR_MODES[0];
+                const ModeIcon = currentModeObj.icon;
+                return (
+                  <div className="flex items-center px-2.5 py-1 rounded-lg bg-slate-950/70 border border-slate-800/60 text-[11px] text-slate-300">
+                    <span className="inline-flex items-center font-bold text-white mr-1.5 shrink-0">
+                      <ModeIcon className={`w-3 h-3 mr-1 ${currentModeObj.accentColor}`} />
+                      <span>{currentModeObj.label}:</span>
+                    </span>
+                    <span className="text-slate-300 font-normal truncate">{currentModeObj.description}</span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -947,15 +978,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={
-                  activeMode === 'socratic'
-                    ? "Fai una domanda tecnica su CSS, JS, React, Node, AI o SQL..."
-                    : activeMode === 'oral_exam'
-                    ? "Inserisci la tua risposta tecnica..."
-                    : activeMode === 'debug'
-                    ? "Incolla il frammento di codice da verificare..."
-                    : "Argomento del quiz da generare..."
-                }
+                placeholder={(TUTOR_MODES.find(m => m.id === activeMode) || TUTOR_MODES[0]).placeholder}
                 className="flex-1 px-3.5 py-2 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300/80 dark:border-slate-700 placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner"
               />
 

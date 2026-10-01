@@ -174,7 +174,7 @@ export default function App() {
             <AuthScreen onLoginSuccess={handleLoginSuccess} />
           </Suspense>
         ) : (
-          <div className="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-4 sm:pb-4">
+          <div className={activeTab === 'tutor-ai' ? 'max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-1 sm:py-2 h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-5.5rem)] flex flex-col overflow-hidden' : 'max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-4 sm:pb-4'}>
             <Suspense fallback={<TabLoader />}>
             {/* 1. Dashboard / Studio */}
             {activeTab === 'dashboard' && (
@@ -302,8 +302,8 @@ export default function App() {
       )}
 
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer (hidden in full-screen tutor-ai tab) */}
+      {activeTab !== 'tutor-ai' && <Footer />}
 
     </div>
   );
