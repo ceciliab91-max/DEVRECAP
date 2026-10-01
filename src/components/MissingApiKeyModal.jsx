@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, Key, ArrowRight, X, ExternalLink } from 'lucide-react';
 
-export default function MissingApiKeyModal({ isOpen, onClose, onGoToProfile }) {
+export default function MissingApiKeyModal({ isOpen = true, onClose, onGoToProfile }) {
   if (!isOpen) return null;
 
   return (

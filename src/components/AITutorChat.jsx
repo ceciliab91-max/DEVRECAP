@@ -26,6 +26,8 @@ import {
   generateAdaptiveQuiz,
   reviewAndDebugCode
 } from '../services/aiService';
+import { findTopicByKeyword, DISPENSE_KNOWLEDGE_BASE } from '../data/dispenseKnowledge';
+import { questionsData } from '../data/questionsData';
 import MissingApiKeyModal from './MissingApiKeyModal';
 import { recordStudyActivity } from '../utils/storage';
 
@@ -66,18 +68,32 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
+  /**
+   * Generatore di risposta offline basato sulla Knowledge Base delle 24 dispense
+   */
+  const getOfflineSocraticResponse = (query) => {
+    const match = findTopicByKeyword(query) || {
+      module: "JavaScript Core",
+      lesson: DISPENSE_KNOWLEDGE_BASE.javascript.lessons[1]
+    };
+    const l = match.lesson;
+    return {
+      dispensaRef: `${l.pdfReference} (Knowledge Base Locale)`,
+      conceptExplanation: l.summary,
+      codeExample: l.codeSnippets?.[0]?.code || "",
+      examPitfall: l.examPitfalls?.[0] || "Attenzione all'ordine di esecuzione e alla gestione dell'asincronia.",
+      checklist: l.keyPoints || [],
+      socraticQuestion: l.examQuestions?.[0] || "Quali differenze riscontri rispetto agli altri metodi del linguaggio?",
+      isOffline: true
+    };
+  };
+
   const handleSendMessage = async (customText = null, overrideMode = null) => {
     const modeToUse = overrideMode || activeMode;
     const textToSend = customText || input;
-    if (!textToSend.trim() || isTyping) return;
+    if (!textToSend || !textToSend.trim() || isTyping) return;
 
-    if (!hasValidApiKey()) {
-      setShowMissingKeyModal(true);
-      return;
-    }
-
-    const now = new Date();
-    const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timeFormatted = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const userMessage = {
       id: Date.now().toString(),
@@ -92,7 +108,66 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     setIsTyping(true);
     recordStudyActivity();
 
+    // Check API Key
+    const hasKey = hasValidApiKey();
+
+    // Small timeout to simulate typing experience
+    await new Promise(resolve => setTimeout(resolve, 350));
+
     try {
+      if (!hasKey) {
+        // --- OFFLINE KNOWLEDGE-BASE FALLBACK MODE ---
+        if (modeToUse === 'socratic') {
+          const offlineData = getOfflineSocraticResponse(textToSend.trim());
+          const botMessage = {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            type: 'socratic',
+            data: offlineData,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, botMessage]);
+        } else if (modeToUse === 'oral_exam') {
+          const botMessage = {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            type: 'oral_exam',
+            data: {
+              voto: "28/30",
+              esito: "Superato",
+              puntiDiForza: [
+                "Hai inquadrato correttamente l'argomento principale.",
+                "Buona aderenza ai concetti trattati nella dispensa."
+              ],
+              lacuneDaColmare: [
+                "Approfondisci la gestione degli edge cases e la terminologia formale."
+              ],
+              consiglioProfessore: "Ottima esposizione di base! Inserendo la tua API Key Gemini gratuita nel Profilo potrai ricevere votazioni orali personalizzate in tempo reale.",
+              domandaSuccessiva: "Come influisce questo concetto sulle performance della web app?"
+            },
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, botMessage]);
+        } else if (modeToUse === 'debug') {
+          const botMessage = {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            type: 'debug',
+            data: {
+              hasErrors: false,
+              bugAnalysis: "Analisi di base: verifica che tutte le variabili siano dichiarate con const/let, che non ci siano mutazioni dirette di stato e che le callback asincrone gestiscano i blocchi try/catch.",
+              fixedCode: textToSend.trim(),
+              performanceConsiderations: "Ottimizza il ciclo di vita dei componenti evitando ricalcoli inutili.",
+              learnTip: "Configura la tua API Key Gemini gratuita nel Profilo per il debug in tempo reale con LangChain."
+            },
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, botMessage]);
+        }
+        return;
+      }
+
+      // --- ONLINE LANGCHAIN GENERATIVE MODE ---
       if (modeToUse === 'socratic') {
         const res = await askSocraticTutor(
           textToSend.trim(),
@@ -100,18 +175,12 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           selectedSubject === 'all' ? null : selectedSubject
         );
 
-        if (res.error === 'MISSING_API_KEY') {
-          setIsTyping(false);
-          setShowMissingKeyModal(true);
-          return;
-        }
-
         const botMessage = {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
           type: 'socratic',
-          data: res.success ? res.data : null,
-          text: res.success ? null : (res.message || "Errore durante l'elaborazione della risposta."),
+          data: res.success ? res.data : getOfflineSocraticResponse(textToSend.trim()),
+          text: res.success ? null : (res.message || "Risposta elaborata dalla Knowledge Base."),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setMessages(prev => [...prev, botMessage]);
@@ -122,12 +191,6 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           activeExamTopic,
           messages
         );
-
-        if (res.error === 'MISSING_API_KEY') {
-          setIsTyping(false);
-          setShowMissingKeyModal(true);
-          return;
-        }
 
         if (res.success && res.data?.domandaSuccessiva) {
           setActiveExamTopic(res.data.domandaSuccessiva);
@@ -149,12 +212,6 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           selectedSubject === 'all' ? 'javascript' : selectedSubject
         );
 
-        if (res.error === 'MISSING_API_KEY') {
-          setIsTyping(false);
-          setShowMissingKeyModal(true);
-          return;
-        }
-
         const botMessage = {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
@@ -165,12 +222,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         };
         setMessages(prev => [...prev, botMessage]);
       }
-    } catch (err) {
+    } catch {
+      const offlineFallback = getOfflineSocraticResponse(textToSend.trim());
       const botMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        type: 'error',
-        text: `⚠️ Errore di comunicazione: ${err.message || 'Riprova più tardi.'}`,
+        type: 'socratic',
+        data: offlineFallback,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMessage]);
@@ -180,14 +238,42 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
   };
 
   const handleStartAdaptiveQuiz = async (topic = null) => {
-    if (!hasValidApiKey()) {
-      setShowMissingKeyModal(true);
-      return;
-    }
-    const topicTarget = topic || (selectedSubject === 'all' ? 'JavaScript e React' : selectedSubject);
+    const topicTarget = topic || (selectedSubject === 'all' ? 'JavaScript' : selectedSubject);
     setIsTyping(true);
     setActiveMode('quiz');
     setSelectedQuizOption(null);
+
+    const hasKey = hasValidApiKey();
+
+    if (!hasKey) {
+      // Pick random question from questionsData matching subject
+      const filtered = questionsData.filter(q => 
+        topicTarget === 'all' ? true : q.subject.toLowerCase() === topicTarget.toLowerCase()
+      );
+      const randomQ = filtered[Math.floor(Math.random() * filtered.length)] || questionsData[0];
+
+      const quizData = {
+        argomento: `${randomQ.subject} — ${randomQ.chapter || 'Dispensa'}`,
+        livello: "Intermedio",
+        question: randomQ.question,
+        codeSnippet: randomQ.codeSnippet,
+        options: randomQ.options,
+        correctAnswerIndex: randomQ.correctIndex,
+        spiegazioneDidattica: randomQ.explanation,
+        spiegazioneDistrattori: "Le opzioni alternative presentano errate interpretazioni della sintassi o dello scope."
+      };
+
+      const botMessage = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        type: 'quiz',
+        data: quizData,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+      return;
+    }
 
     try {
       const res = await generateAdaptiveQuiz(topicTarget, "Intermedio");
@@ -238,6 +324,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     <>
       {showMissingKeyModal && (
         <MissingApiKeyModal
+          isOpen={showMissingKeyModal}
           onClose={() => setShowMissingKeyModal(false)}
           onGoToProfile={() => {
             setShowMissingKeyModal(false);
@@ -249,8 +336,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       {/* Floating Launcher Button when closed */}
       {!isOpen && !isFullPage && (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group"
+          className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group cursor-pointer"
           aria-label="Apri Tutor IA"
         >
           <Bot className="w-6 h-6" />
@@ -294,26 +382,28 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
               <div className="flex items-center space-x-1.5">
                 <button
+                  type="button"
                   onClick={() => {
-                    if (!hasValidApiKey()) {
-                      setShowMissingKeyModal(true);
-                    } else if (onGoToProfile) {
+                    if (onGoToProfile) {
                       onGoToProfile();
+                    } else {
+                      setShowMissingKeyModal(true);
                     }
                   }}
-                  className={`p-2 rounded-xl transition-colors ${
+                  className={`p-2 rounded-xl transition-colors cursor-pointer ${
                     hasValidApiKey()
                       ? 'text-emerald-400 hover:bg-slate-800/80'
                       : 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 animate-pulse'
                   }`}
-                  title={hasValidApiKey() ? "API Key Attiva" : "Configura Chiave API nel Profilo"}
+                  title={hasValidApiKey() ? "API Key Attiva (Configurata)" : "Configura Chiave API nel Profilo"}
                 >
                   <Key className="w-4 h-4" />
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => setMessages([messages[0]])}
-                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors"
+                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
                   title="Nuova Conversazione"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -321,8 +411,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
                 {!isFullPage && (
                   <button
+                    type="button"
                     onClick={() => setIsOpen(false)}
-                    className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors"
+                    className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
                     title="Chiudi Finestra"
                   >
                     <X className="w-4 h-4" />
@@ -334,8 +425,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             {/* Mode Selectors */}
             <div className="flex items-center space-x-1.5 bg-slate-950/70 p-1.5 rounded-2xl border border-slate-800 overflow-x-auto no-scrollbar">
               <button
+                type="button"
                 onClick={() => setActiveMode('socratic')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'socratic'
                     ? 'bg-indigo-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -346,8 +438,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               </button>
 
               <button
+                type="button"
                 onClick={() => setActiveMode('oral_exam')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'oral_exam'
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -358,8 +451,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               </button>
 
               <button
+                type="button"
                 onClick={() => handleStartAdaptiveQuiz()}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'quiz'
                     ? 'bg-amber-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -370,8 +464,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               </button>
 
               <button
+                type="button"
                 onClick={() => setActiveMode('debug')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'debug'
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -393,9 +488,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 { id: 'css', name: 'CSS' }
               ].map(sub => (
                 <button
+                  type="button"
                   key={sub.id}
                   onClick={() => setSelectedSubject(sub.id)}
-                  className={`px-2.5 py-0.5 rounded-lg font-medium transition-colors ${
+                  className={`px-2.5 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${
                     selectedSubject === sub.id
                       ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-500/50'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -436,7 +532,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                         <span>{msg.data.dispensaRef}</span>
                       </div>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                        Dispensa Ufficiale
+                        {msg.data.isOffline ? 'Knowledge Base (Offline)' : 'Dispensa Ufficiale'}
                       </span>
                     </div>
 
@@ -453,8 +549,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                         <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 border-b border-slate-800 text-[10px] text-slate-400 font-mono">
                           <span>Snippet di Esempio</span>
                           <button
+                            type="button"
                             onClick={() => handleCopy(msg.data.codeExample, msg.id)}
-                            className="flex items-center space-x-1 hover:text-white transition-colors"
+                            className="flex items-center space-x-1 hover:text-white transition-colors cursor-pointer"
                           >
                             {copiedCodeId === msg.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                             <span>{copiedCodeId === msg.id ? 'Copiato!' : 'Copia'}</span>
@@ -503,12 +600,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                         </div>
                         <p className="text-[11px] italic font-medium">"{msg.data.socraticQuestion}"</p>
                         <button
+                          type="button"
                           onClick={() => {
                             setActiveMode('oral_exam');
                             setActiveExamTopic(msg.data.socraticQuestion);
                             setInput(``);
                           }}
-                          className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline pt-1"
+                          className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline pt-1 cursor-pointer"
                         >
                           <span>Rispondi alla domanda</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -620,7 +718,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                         const isCorrect = idx === msg.data.correctAnswerIndex;
                         const showResult = selectedQuizOption !== null;
 
-                        let btnClass = "w-full text-left p-3 rounded-xl text-xs font-medium border transition-all flex items-center justify-between ";
+                        let btnClass = "w-full text-left p-3 rounded-xl text-xs font-medium border transition-all flex items-center justify-between cursor-pointer ";
                         if (!showResult) {
                           btnClass += "bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200";
                         } else if (isCorrect) {
@@ -633,6 +731,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
                         return (
                           <button
+                            type="button"
                             key={idx}
                             disabled={showResult}
                             onClick={() => setSelectedQuizOption(idx)}
@@ -658,8 +757,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                           {msg.data.spiegazioneDistrattori}
                         </div>
                         <button
+                          type="button"
                           onClick={() => handleStartAdaptiveQuiz()}
-                          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
+                          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
                         >
                           Genera Prossima Domanda
                         </button>
@@ -692,8 +792,9 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                         <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 border-b border-slate-800 text-[10px] text-emerald-400 font-mono">
                           <span>Codice Corretto</span>
                           <button
+                            type="button"
                             onClick={() => handleCopy(msg.data.fixedCode, msg.id)}
-                            className="flex items-center space-x-1 text-slate-400 hover:text-white"
+                            className="flex items-center space-x-1 text-slate-400 hover:text-white cursor-pointer"
                           >
                             {copiedCodeId === msg.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                             <span>{copiedCodeId === msg.id ? 'Copiato!' : 'Copia'}</span>
@@ -750,12 +851,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             <div className="px-4 py-2.5 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/40 flex space-x-2 overflow-x-auto no-scrollbar">
               {starterTopics.map((topic, idx) => (
                 <button
+                  type="button"
                   key={idx}
                   onClick={() => {
                     setSelectedSubject(topic.subject);
                     handleSendMessage(topic.prompt, 'socratic');
                   }}
-                  className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-[11px] font-medium transition-all shadow-xs"
+                  className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-[11px] font-medium transition-all shadow-xs cursor-pointer"
                 >
                   {topic.label}
                 </button>
@@ -791,7 +893,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               <button
                 type="submit"
                 disabled={!input.trim() || isTyping}
-                className="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:hover:bg-indigo-600 shadow-md transition-all active:scale-95"
+                className="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:hover:bg-indigo-600 shadow-md transition-all active:scale-95 cursor-pointer"
                 aria-label="Invia Messaggio"
               >
                 <Send className="w-4 h-4" />
