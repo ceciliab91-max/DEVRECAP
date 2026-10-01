@@ -1027,4 +1027,455 @@ HAVING COUNT(*) > 3;`,
     correctIndex: 0,
     explanation: "Dalla dispensa Aggregazione e Grouping: per filtrare i dati basandosi sul risultato di funzioni di aggregazione (es. `COUNT(*) > 3`) si DEVE usare la clausola `HAVING` dopo il `GROUP BY`, poiché `WHERE` non può valutare funzioni aggregate."
   }
+,
+  {
+    "id": "js-16",
+    "subject": "JavaScript",
+    "chapter": "Event Loop & Microtasks",
+    "question": "Qual è l'output del seguente snippet di codice relativo all'Event Loop?",
+    "codeSnippet": "console.log(1);\nsetTimeout(() => console.log(2), 0);\nPromise.resolve().then(() => console.log(3));\nconsole.log(4);",
+    "options": [
+      "1, 4, 3, 2",
+      "1, 2, 3, 4",
+      "1, 3, 4, 2",
+      "1, 4, 2, 3"
+    ],
+    "correctIndex": 0,
+    "explanation": "Il codice sincrono viene eseguito subito (1, 4). La microtask queue (Promise .then) ha priorità assoluta rispetto alla macrotask queue (setTimeout), stampando 3 prima di 2."
+  },
+  {
+    "id": "js-17",
+    "subject": "JavaScript",
+    "chapter": "Closures & Scope",
+    "question": "Cosa stamperà la chiamata a increment()?",
+    "codeSnippet": "function createCounter() {\n  let count = 0;\n  return () => ++count;\n}\nconst c1 = createCounter();\nconst c2 = createCounter();\nc1();\nconsole.log(c1(), c2());",
+    "options": [
+      "2 1",
+      "2 2",
+      "1 1",
+      "NaN NaN"
+    ],
+    "correctIndex": 0,
+    "explanation": "Ogni invocazione di createCounter genera un nuovo lexical environment isolato. c1 mantiene il proprio count (1 poi 2), mentre c2 ha il proprio count indipendente (1)."
+  },
+  {
+    "id": "js-18",
+    "subject": "JavaScript",
+    "chapter": "Array Methods Avanzati",
+    "question": "Cosa restituisce l'uso del metodo reduce su questo array?",
+    "codeSnippet": "const numbers = [1, 2, 3, 4];\nconst res = numbers.reduce((acc, curr) => acc + curr, 10);",
+    "options": [
+      "20",
+      "10",
+      "24",
+      "[10, 1, 2, 3, 4]"
+    ],
+    "correctIndex": 0,
+    "explanation": "Il valore iniziale dell'accumulatore è 10. Sommando in sequenza 1, 2, 3 e 4 si ottiene 10 + 10 = 20."
+  },
+  {
+    "id": "js-19",
+    "subject": "JavaScript",
+    "chapter": "Nullish Coalescing & Falsy Values",
+    "question": "Qual è la differenza di valutazione tra l'operatore || (OR logico) e ?? (Nullish Coalescing)?",
+    "codeSnippet": "const val1 = 0 || \"default\";\nconst val2 = 0 ?? \"default\";",
+    "options": [
+      "val1 è \"default\", val2 è 0.",
+      "Entrambi i valori sono \"default\".",
+      "val1 è 0, val2 è \"default\".",
+      "Entrambi restituiscono 0."
+    ],
+    "correctIndex": 0,
+    "explanation": "L'operatore || valuta 0 come falsy e restituisce il fallback. L'operatore ?? considera fallback solo null e undefined, quindi mantiene 0."
+  },
+  {
+    "id": "js-20",
+    "subject": "JavaScript",
+    "chapter": "Clonazione & Riferimenti di Memoria",
+    "question": "Cosa accade all'oggetto originale eseguendo uno shallow copy con spread operator?",
+    "codeSnippet": "const user = { name: \"Alex\", skills: [\"JS\", \"CSS\"] };\nconst copy = { ...user };\ncopy.skills.push(\"React\");",
+    "options": [
+      "user.skills conterrà anche \"React\" perché gli array/oggetti annidati sono copiati per riferimento.",
+      "user.skills rimarrà invariato con solo [\"JS\", \"CSS\"].",
+      "Verrà sollevato un TypeError.",
+      "L'oggetto originale user viene eliminato dal Garbage Collector."
+    ],
+    "correctIndex": 0,
+    "explanation": "Lo spread operator esegue solo uno shallow clone (copia superficiale). Le proprietà primitive vengono duplicate, ma gli oggetti/array annidati continuano a condividere lo stesso puntatore in memoria."
+  },
+  {
+    "id": "js-21",
+    "subject": "JavaScript",
+    "chapter": "Event Delegation & Bubbling",
+    "question": "Cos'è il pattern dell'Event Delegation nel DOM?",
+    "codeSnippet": "document.querySelector(\"#list\").addEventListener(\"click\", (e) => {\n  if (e.target.matches(\"li.item\")) {\n    console.log(e.target.dataset.id);\n  }\n});",
+    "options": [
+      "Assegnare un unico listener all'elemento genitore sfruttando la risalita (bubbling) degli eventi dai figli.",
+      "Duplicare il listener su ogni singolo tag figlio tramite forEach.",
+      "Bloccare tutti gli eventi tramite e.preventDefault().",
+      "Inviare l'evento a un server WebSocket."
+    ],
+    "correctIndex": 0,
+    "explanation": "L'Event Delegation sfrutta la fase di Bubbling per catturare gli eventi generati dai figli su un unico antenato comune, ottimizzando la memoria ed evitando listener su elementi dinamici."
+  },
+  {
+    "id": "js-22",
+    "subject": "JavaScript",
+    "chapter": "Async/Await & Parallelismo",
+    "question": "Come si eseguono due promise indipendenti in parallelo senza bloccare la prima?",
+    "codeSnippet": "/* Opzione corretta */\nconst [data1, data2] = await Promise.all([fetch1(), fetch2()]);",
+    "options": [
+      "Usando Promise.all([fetch1(), fetch2()]) con un unico await.",
+      "Facendo due await in sequenza: await fetch1(); await fetch2();",
+      "Racchiudendo entrambe le chiamate in un blocco while(true).",
+      "Usando un timer setTimeout sincrono."
+    ],
+    "correctIndex": 0,
+    "explanation": "Promise.all avvia le promise in concorrenza e si risolve quando tutte hanno terminato, dimezzando i tempi di attesa rispetto ad await sequenziali."
+  },
+  {
+    "id": "js-23",
+    "subject": "JavaScript",
+    "chapter": "Set & Map",
+    "question": "Qual è il modo più performante e idiomatico per rimuovere i duplicati da un array primitivo in ES6+?",
+    "codeSnippet": "const unique = [...new Set([1, 2, 2, 3, 4, 4])];",
+    "options": [
+      "[...new Set(array)]",
+      "array.filter((item) => item !== undefined)",
+      "JSON.parse(JSON.stringify(array))",
+      "array.sort().reverse()"
+    ],
+    "correctIndex": 0,
+    "explanation": "La struttura dati Set ammette solo valori univoci. Creando un Set dall'array e riaprendolo con lo spread operator si ottiene un array senza duplicati in O(n)."
+  },
+  {
+    "id": "js-24",
+    "subject": "JavaScript",
+    "chapter": "Destructuring & Rest Operator",
+    "question": "Qual è il valore della variabile rest dopo questo destructuring?",
+    "codeSnippet": "const { a, b, ...rest } = { a: 10, b: 20, c: 30, d: 40 };",
+    "options": [
+      "{ c: 30, d: 40 }",
+      "[30, 40]",
+      "{ a: 10, b: 20 }",
+      "undefined"
+    ],
+    "correctIndex": 0,
+    "explanation": "Il rest property raccoglie tutte le chiavi enumerabili rimanenti che non sono state esplicitamente estratte nel pattern di destructuring."
+  },
+  {
+    "id": "js-25",
+    "subject": "JavaScript",
+    "chapter": "Error Handling (try / catch / finally)",
+    "question": "Cosa accade nel blocco finally se il blocco try esegue un return anticipato?",
+    "codeSnippet": "function test() {\n  try {\n    return \"FROM_TRY\";\n  } finally {\n    console.log(\"FINALLY_RUN\");\n  }\n}",
+    "options": [
+      "Il blocco finally viene comunque eseguito prima che il controllo ritorni al chiamante.",
+      "Il blocco finally viene ignorato completamente.",
+      "Viene sollevato un errore di sintassi.",
+      "La funzione non restituisce alcun valore."
+    ],
+    "correctIndex": 0,
+    "explanation": "La clausola finally viene sempre eseguita prima che il blocco try/catch ceda il controllo o completi l'istruzione return."
+  },
+  {
+    "id": "react-11",
+    "subject": "React",
+    "chapter": "Hooks & Ciclo di Vita",
+    "question": "Qual è lo scopo della funzione di cleanup restituita all'interno di useEffect?",
+    "codeSnippet": "useEffect(() => {\n  const timer = setInterval(tick, 1000);\n  return () => clearInterval(timer);\n}, []);",
+    "options": [
+      "Pulire timer, listener o sottoscrizioni prima dello smontaggio del componente o prima della successiva esecuzione dell'effetto.",
+      "Forzare il rendering immediato del componente padre.",
+      "Resettare tutti gli stati dello useState a 0.",
+      "Salvare automaticamente lo stato in localStorage."
+    ],
+    "correctIndex": 0,
+    "explanation": "La funzione restituita funge da cleanup e previene memory leak annullando timer, disiscrivendo observer e rimuovendo event listener."
+  },
+  {
+    "id": "react-12",
+    "subject": "React",
+    "chapter": "useMemo vs useCallback",
+    "question": "Qual è la differenza essenziale tra useMemo e useCallback?",
+    "codeSnippet": "const memoizedValue = useMemo(() => compute(a, b), [a, b]);\nconst memoizedFn = useCallback(() => doSomething(a), [a]);",
+    "options": [
+      "useMemo memorizza il risultato del calcolo di una funzione; useCallback memorizza l'istanza della funzione stessa.",
+      "useMemo si usa solo per le stringhe, useCallback per gli array.",
+      "useCallback esegue la funzione ad ogni rendering, useMemo non la esegue mai.",
+      "Non vi è alcuna differenza, sono sinonimi intercambiabili."
+    ],
+    "correctIndex": 0,
+    "explanation": "useMemo ritorna il valore calcolato dalla funzione di factory, mentre useCallback ritorna la funzione memoizzata per evitare che cambi referenza ad ogni render dei figli."
+  },
+  {
+    "id": "react-13",
+    "subject": "React",
+    "chapter": "useRef & Accesso al DOM",
+    "question": "Cosa differenzia l'aggiornamento di un useRef rispetto a uno useState?",
+    "codeSnippet": "const countRef = useRef(0);\ncountRef.current += 1;",
+    "options": [
+      "La modifica di ref.current non scatena un nuovo rendering del componente.",
+      "useRef causa sempre il doppio dei re-render di useState.",
+      "useRef accetta solo elementi HTML e mai numeri o oggetti.",
+      "useRef si azzera ad ogni render del componente."
+    ],
+    "correctIndex": 0,
+    "explanation": "useRef fornisce un contenitore mutabile il cui valore persiste tra i rendering senza provocare un nuovo ciclo di re-render quando viene modificato."
+  },
+  {
+    "id": "react-14",
+    "subject": "React",
+    "chapter": "Stato Immutabile & Batching",
+    "question": "Perché in React lo stato non deve mai essere mutato direttamente (es. state.push())?",
+    "codeSnippet": "/* ERRATO */ items.push(newItem); setItems(items);\n/* CORRETTO */ setItems(prev => [...prev, newItem]);",
+    "options": [
+      "Perché React effettua confronti per riferimento (Object.is); mutando l'oggetto esistente il riferimento non cambia e il re-render viene saltato.",
+      "Perché il browser blocca le mutazioni di array con un errore di sicurezza.",
+      "Perché push() è deprecato in JavaScript moderno.",
+      "Perché lo stato diventerebbe automaticamente di sola lettura."
+    ],
+    "correctIndex": 0,
+    "explanation": "React si basa sull'immutabilità: controlla se il riferimento dell'oggetto/array è cambiato prima di pianificare il diffing nel Virtual DOM."
+  },
+  {
+    "id": "react-15",
+    "subject": "React",
+    "chapter": "Context API & Ottimizzazioni",
+    "question": "Qual è il potenziale collo di bottiglia nell'uso ingenuo del Context API su stati ad alta frequenza?",
+    "codeSnippet": "<ThemeContext.Provider value={{ theme, setTheme }}>\n  <App />\n</ThemeContext.Provider>",
+    "options": [
+      "Tutti i componenti che usano useContext(ThemeContext) effettueranno il re-render ogni volta che il valore del contesto cambia.",
+      "Il Context API impedisce l'uso di TailwindCSS.",
+      "I dati del Context vengono salvati permanentemente nel database.",
+      "Non è possibile passare funzioni dentro il Context."
+    ],
+    "correctIndex": 0,
+    "explanation": "Qualsiasi componente consumatore del contesto si ri-renderizza ad ogni variazione del valore fornito dal Provider; per ovviare a ciò si separano contesti di stato e di dispatch."
+  },
+  {
+    "id": "react-16",
+    "subject": "React",
+    "chapter": "Prop Key nelle Liste",
+    "question": "Perché l'uso dell'indice di un array come prop \"key\" è sconsigliato in liste dinamiche?",
+    "codeSnippet": "{items.map((item, index) => <Item key={index} data={item} />)}",
+    "options": [
+      "Se gli elementi vengono eliminati, riordinati o inseriti in testa, gli indici cambiano provocando bug di stato nei componenti figli e rendering inefficienti.",
+      "Perché React non supporta numeri come chiavi.",
+      "Perché l'indice rallenta il caricamento della pagina di 5 secondi.",
+      "Perché le chiavi devono sempre coincidere con il nome del tag HTML."
+    ],
+    "correctIndex": 0,
+    "explanation": "Le chiavi devono identificare univocamente l'entità concettuale (es. id dal database) affinché l'algoritmo di riconciliazione preservi correttamente lo stato locale dei componenti durante il riordino."
+  },
+  {
+    "id": "react-17",
+    "subject": "React",
+    "chapter": "Controlled vs Uncontrolled Components",
+    "question": "Cosa definisce un componente input come \"Controlled\" in React?",
+    "codeSnippet": "<input value={text} onChange={(e) => setText(e.target.value)} />",
+    "options": [
+      "Il valore dell'input è guidato dallo stato React e modificato tramite un handler di evento.",
+      "L'input è controllato esclusivamente dal DOM tramite ref.",
+      "L'input è disabilitato e non modificabile.",
+      "L'input effettua una validazione automatica lato server senza JS."
+    ],
+    "correctIndex": 0,
+    "explanation": "In un controlled component il valore del campo è interamente sincronizzato e governato da uno stato React (single source of truth)."
+  },
+  {
+    "id": "react-18",
+    "subject": "React",
+    "chapter": "Lazy Loading & Suspense",
+    "question": "A cosa serve combinare React.lazy() con <Suspense>?",
+    "codeSnippet": "const HeavyModal = React.lazy(() => import(\"./HeavyModal\"));\n<Suspense fallback={<Spinner />}>\n  <HeavyModal />\n</Suspense>",
+    "options": [
+      "A effettuare il code-splitting dinamico caricando il bundle del componente solo quando viene effettivamente renderizzato a schermo.",
+      "A velocizzare il rendering del CSS inline.",
+      "A convertire il componente in un Server Component Node.js.",
+      "A memorizzare il componente in localStorage."
+    ],
+    "correctIndex": 0,
+    "explanation": "React.lazy permette di caricare i componenti su richiesta (chunking asincrono), mentre Suspense gestisce l'interfaccia di fallback (es. scheletro o spinner) durante il caricamento di rete."
+  },
+  {
+    "id": "react-19",
+    "subject": "React",
+    "chapter": "Custom Hooks",
+    "question": "Qual è la regola fondamentale nella creazione di un Custom Hook in React?",
+    "codeSnippet": "function useWindowWidth() {\n  const [width, setWidth] = useState(window.innerWidth);\n  // ...\n  return width;\n}",
+    "options": [
+      "Il nome della funzione deve iniziare con \"use\" e può incapsulare altri Hook nativi rispettando le regole degli Hook.",
+      "Deve essere una classe che estende React.Component.",
+      "Non può mai restituire valori primitivi.",
+      "Deve essere dichiarato dentro il blocco return JSX."
+    ],
+    "correctIndex": 0,
+    "explanation": "I Custom Hook devono iniziare con il prefisso \"use\" per permettere ai linter di applicare le regole degli Hook (chiamate non condizionali al livello superiore)."
+  },
+  {
+    "id": "react-20",
+    "subject": "React",
+    "chapter": "Error Boundaries",
+    "question": "Cosa cattura un Error Boundary in un'applicazione React?",
+    "codeSnippet": "class ErrorBoundary extends React.Component {\n  static getDerivedStateFromError(error) { return { hasError: true }; }\n  // ...\n}",
+    "options": [
+      "Errori JavaScript generati durante il rendering, nei metodi del ciclo di vita e nei costruttori dell'albero dei figli.",
+      "Errori all'interno di callback asincrone come setTimeout o fetch.",
+      "Errori di sintassi durante la fase di compilazione Vite.",
+      "Errori 404 della rete."
+    ],
+    "correctIndex": 0,
+    "explanation": "Gli Error Boundaries catturano errori nell'albero dei componenti durante il render, evitando il crash completo della UI e mostrando un fallback elegante."
+  },
+  {
+    "id": "sql-09",
+    "subject": "SQL",
+    "chapter": "JOINs (LEFT vs INNER)",
+    "question": "Qual è il risultato di una query con LEFT JOIN se una riga della tabella di sinistra non ha corrispondenze a destra?",
+    "codeSnippet": "SELECT u.name, o.id \nFROM users u \nLEFT JOIN orders o ON u.id = o.user_id;",
+    "options": [
+      "La riga della tabella utenti (sinistra) viene comunque restituita con i campi degli ordini impostati a NULL.",
+      "La riga utente viene scartata dal set dei risultati.",
+      "Il database restituisce un errore di vincolo di integrità.",
+      "Viene creata una riga fittizia automatica nella tabella orders."
+    ],
+    "correctIndex": 0,
+    "explanation": "La LEFT JOIN include sempre tutti i record della tabella sinistra. Se non c'è match nella tabella destra, i relativi attributi conterranno NULL."
+  },
+  {
+    "id": "sql-10",
+    "subject": "SQL",
+    "chapter": "GROUP BY & HAVING",
+    "question": "Perché non è possibile usare la clausola WHERE per filtrare i risultati di una funzione di aggregazione come COUNT()?",
+    "codeSnippet": "/* CORRETTO */\nSELECT category_id, COUNT(*)\nFROM products\nGROUP BY category_id\nHAVING COUNT(*) > 5;",
+    "options": [
+      "Perché WHERE filtra i singoli record prima che venga effettuato il raggruppamento; HAVING filtra i gruppi aggregati dopo il GROUP BY.",
+      "Perché WHERE funziona solo con stringhe e non con numeri.",
+      "Perché HAVING è un comando MySQL e WHERE è solo per PostgreSQL.",
+      "Non c'è motivo, WHERE e HAVING sono intercambiabili."
+    ],
+    "correctIndex": 0,
+    "explanation": "Nel lifecycle della query SQL la clausola WHERE opera sulle singole righe prima del raggruppamento. I filtri sui risultati aggregati (es. COUNT, AVG, SUM) richiedono tassativamente HAVING."
+  },
+  {
+    "id": "sql-11",
+    "subject": "SQL",
+    "chapter": "Funzioni di Aggregazione (COUNT)",
+    "question": "Qual è la differenza fondamentale tra COUNT(*) e COUNT(colonna)?",
+    "codeSnippet": "SELECT COUNT(*), COUNT(email) FROM users;",
+    "options": [
+      "COUNT(*) conta tutte le righe incluse quelle con valori NULL; COUNT(colonna) conta solo le righe in cui quella colonna non è NULL.",
+      "COUNT(*) conta solo le righe pari; COUNT(colonna) conta quelle dispari.",
+      "COUNT(colonna) restituisce sempre 0 se ci sono più di 10 utenti.",
+      "Nessuna differenza, restituiscono sempre esattamente lo stesso valore numerico."
+    ],
+    "correctIndex": 0,
+    "explanation": "COUNT(*) calcola il totale delle tuple; COUNT(nome_colonna) ignora e non conteggia le tuple dove il campo specificato ha valore NULL."
+  },
+  {
+    "id": "sql-12",
+    "subject": "SQL",
+    "chapter": "Foreign Key & ON DELETE CASCADE",
+    "question": "Cosa accade ai record collegati se una Foreign Key è definita con ON DELETE CASCADE e viene eliminato il record genitore?",
+    "codeSnippet": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;",
+    "options": [
+      "Tutti i record figli nella tabella dipendente vengono automaticamente eliminati insieme al record genitore.",
+      "Il database impedisce la cancellazione del genitore sollevando un errore.",
+      "I record figli mantengono il vecchio user_id orfano.",
+      "Il campo user_id dei figli viene impostato a 0."
+    ],
+    "correctIndex": 0,
+    "explanation": "ON DELETE CASCADE garantisce l'integrità referenziale propagando la cancellazione a cascata a tutti i record figli associati."
+  },
+  {
+    "id": "sql-13",
+    "subject": "SQL",
+    "chapter": "Indici & Ottimizzazione Query",
+    "question": "Qual è il vantaggio principale e il principale svantaggio nella creazione di un INDEX su una colonna?",
+    "codeSnippet": "CREATE INDEX idx_user_email ON users(email);",
+    "options": [
+      "Velocizza notevolmente le query di ricerca (SELECT), ma rallenta leggermente le operazioni di scrittura (INSERT/UPDATE) e occupa spazio su disco.",
+      "Rende il database crittografato ma impedisce le query con ordinamento ORDER BY.",
+      "Elimina automaticamente i record duplicati ma impedisce l'uso di chiavi primarie.",
+      "Raddoppia la velocità delle INSERT ma blocca le SELECT."
+    ],
+    "correctIndex": 0,
+    "explanation": "Gli indici (come gli alberi B-Tree) consentono accessi in O(log n) per le ricerche, ma ad ogni inserimento o modifica l'indice deve essere ricalcolato, comportando un piccolo overhead di scrittura."
+  },
+  {
+    "id": "sql-14",
+    "subject": "SQL",
+    "chapter": "Transazioni & Proprietà ACID",
+    "question": "Cosa garantisce la proprietà di \"Atomicità\" (Atomicity) in una transazione SQL?",
+    "codeSnippet": "START TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;",
+    "options": [
+      "Tutte le operazioni della transazione vengono completate con successo, oppure in caso di errore nessuna viene applicata (tutto o niente).",
+      "Le query vengono eseguite alla velocità della luce nei processori multi-core.",
+      "I dati vengono replicati automaticamente su 5 continenti.",
+      "Le tabelle non possono essere lette da altri utenti per 24 ore."
+    ],
+    "correctIndex": 0,
+    "explanation": "L'Atomicità fa sì che una sequenza di operazioni sia trattata come un'unica unità indivisibile: se anche una sola istruzione fallisce, si esegue il ROLLBACK totale."
+  },
+  {
+    "id": "sql-15",
+    "subject": "SQL",
+    "chapter": "Subquery & Operatore EXISTS",
+    "question": "Perché la clausola WHERE EXISTS (subquery) è spesso preferita a WHERE col IN (subquery) su grandi moli di dati?",
+    "codeSnippet": "SELECT * FROM customers c WHERE EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n);",
+    "options": [
+      "EXISTS si interrompe non appena trova la prima corrispondenza (short-circuit), risultando più efficiente.",
+      "Perché IN non supporta numeri interi.",
+      "Perché EXISTS converte la query in codice C++ compilato.",
+      "Non c'è alcuna differenza di piano di esecuzione."
+    ],
+    "correctIndex": 0,
+    "explanation": "EXISTS lavora in logica booleana a cortocircuito: appena individua un record valido nella subquery correlata valida la condizione senza scansionare l'intero insieme."
+  },
+  {
+    "id": "sql-16",
+    "subject": "SQL",
+    "chapter": "UNION vs UNION ALL",
+    "question": "Qual è la differenza fondamentale tra UNION e UNION ALL?",
+    "codeSnippet": "SELECT city FROM customers UNION SELECT city FROM suppliers;\nSELECT city FROM customers UNION ALL SELECT city FROM suppliers;",
+    "options": [
+      "UNION rimuove automaticamente le righe duplicate eseguendo un sort; UNION ALL restituisce tutte le righe inclusi i duplicati ed è più veloce.",
+      "UNION ALL funziona solo su tabelle con meno di 10 colonne.",
+      "UNION ordina in senso decrescente, UNION ALL in senso crescente.",
+      "UNION unisce le colonne orizzontalmente, UNION ALL verticalmente."
+    ],
+    "correctIndex": 0,
+    "explanation": "UNION elimina i duplicati effettuando un'operazione di deduplicazione/ordinamento implicita; UNION ALL accoda semplicemente i dataset preservando i duplicati senza overhead."
+  },
+  {
+    "id": "sql-17",
+    "subject": "SQL",
+    "chapter": "Pattern Matching con LIKE",
+    "question": "Cosa seleziona la condizione WHERE name LIKE \"_a%\"?",
+    "codeSnippet": "SELECT * FROM students WHERE name LIKE \"_a%\";",
+    "options": [
+      "Nomi che hanno una qualsiasi prima lettera, la lettera \"a\" in seconda posizione, seguita da zero o più caratteri.",
+      "Nomi che iniziano tassativamente con la lettera \"a\".",
+      "Nomi che contengono il carattere underscore \"_\".",
+      "Nomi che terminano con la lettera \"a\"."
+    ],
+    "correctIndex": 0,
+    "explanation": "In SQL il carattere wildcard underscore \"_\" rappresenta esattamente un singolo carattere qualsiasi, mentre \"%\" rappresenta zero o più caratteri."
+  },
+  {
+    "id": "sql-18",
+    "subject": "SQL",
+    "chapter": "DDL vs DML",
+    "question": "Quale delle seguenti istruzioni appartiene alla categoria DDL (Data Definition Language)?",
+    "codeSnippet": "/* Esempio */ ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;",
+    "options": [
+      "ALTER TABLE, CREATE TABLE, DROP TABLE",
+      "INSERT INTO, UPDATE, DELETE",
+      "SELECT, FROM, WHERE",
+      "GRANT, REVOKE"
+    ],
+    "correctIndex": 0,
+    "explanation": "Il DDL (Data Definition Language) comprende le istruzioni che definiscono o modificano la struttura dello schema del database (CREATE, ALTER, DROP, TRUNCATE)."
+  }
 ];
