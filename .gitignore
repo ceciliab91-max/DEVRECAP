@@ -43,3 +43,5 @@ lighthouse-*.report.*
 *.report.html
 *.report.json
 temp-*.json
+# Multi-Agent Architecture
+.agents/
