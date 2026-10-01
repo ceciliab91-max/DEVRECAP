@@ -405,16 +405,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         <div
           className={`flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
             isFullPage
-              ? 'sticky top-16 sm:top-20 w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-6.5rem)] shadow-xl'
-              : 'fixed inset-x-0 bottom-14 sm:bottom-6 sm:right-6 sm:inset-auto z-50 w-full sm:w-[520px] max-w-[calc(100vw-1rem)] h-[calc(100dvh-7.5rem)] sm:h-[620px] max-h-[calc(100dvh-5rem)] rounded-t-3xl sm:rounded-3xl animate-fadeIn'
+              ? 'w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-9.5rem)] sm:h-[calc(100dvh-8rem)] min-h-[460px] shadow-xl my-1'
+              : 'fixed inset-x-3 bottom-[4.5rem] sm:bottom-6 sm:right-6 sm:inset-auto z-50 w-auto sm:w-[520px] max-w-[calc(100vw-1.5rem)] h-[calc(100dvh-10rem)] sm:h-[580px] max-h-[calc(100dvh-7.5rem)] rounded-2xl sm:rounded-3xl animate-fadeIn'
           }`}
         >
-          {/* Mobile Handle Drag Bar */}
-          {!isFullPage && (
-            <div className="sm:hidden flex justify-center pt-2 pb-1 bg-slate-950/90">
-              <div className="w-12 h-1.5 rounded-full bg-slate-600" />
-            </div>
-          )}
 
           {/* Compact Header & Controls Bar */}
           <div className="px-3.5 py-2.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col gap-2">
