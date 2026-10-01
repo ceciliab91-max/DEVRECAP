@@ -4,7 +4,7 @@
  * Copre CSS, JavaScript, React, SQL, Node.js ed AI Engineering (40+ dispense verificate).
  * Validata formalmente con Zod per grounding e retrieval deterministico.
  */
-export const DISPENSE_KNOWLEDGE_BASE = DispenseKnowledgeBaseSchema.parse({
+export const DISPENSE_KNOWLEDGE_BASE = {
   css: {
     "moduleId": "css",
     "moduleName": "CSS Moderno, Layout & Responsive Design",
@@ -2013,7 +2013,7 @@ export const DISPENSE_KNOWLEDGE_BASE = DispenseKnowledgeBaseSchema.parse({
     ],
     "totalLessons": 3
 }
-});
+};
 
 /**
  * Helper per ottenere tutte le lezioni piatte.
