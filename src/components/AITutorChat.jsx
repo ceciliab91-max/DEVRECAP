@@ -26,7 +26,7 @@ import {
   generateAdaptiveQuiz,
   reviewAndDebugCode
 } from '../services/aiService';
-import { findTopicByKeyword, DISPENSE_KNOWLEDGE_BASE } from '../data/dispenseKnowledge';
+import { findTopicByKeyword } from '../data/dispenseKnowledge';
 import { questionsData } from '../data/questionsData';
 import MissingApiKeyModal from './MissingApiKeyModal';
 import { recordStudyActivity } from '../utils/storage';
@@ -72,18 +72,30 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
    * Generatore di risposta offline basato sulla Knowledge Base delle 24 dispense
    */
   const getOfflineSocraticResponse = (query) => {
-    const match = findTopicByKeyword(query) || {
-      module: "JavaScript Core",
-      lesson: DISPENSE_KNOWLEDGE_BASE.javascript.lessons[1]
-    };
-    const l = match.lesson;
+    const match = findTopicByKeyword(query);
+    if (match) {
+      const l = match.lesson;
+      return {
+        dispensaRef: `${l.pdfReference} (Knowledge Base Locale)`,
+        conceptExplanation: l.summary,
+        codeExample: l.codeSnippets?.[0]?.code || "",
+        examPitfall: l.examPitfalls?.[0] || "Attenzione ai dettagli sintattici e ai casi limite d'esame.",
+        checklist: l.keyPoints || [],
+        socraticQuestion: l.examQuestions?.[0] || "Quali differenze riscontri rispetto ai costrutti alternativi?",
+        isOffline: true
+      };
+    }
+
     return {
-      dispensaRef: `${l.pdfReference} (Knowledge Base Locale)`,
-      conceptExplanation: l.summary,
-      codeExample: l.codeSnippets?.[0]?.code || "",
-      examPitfall: l.examPitfalls?.[0] || "Attenzione all'ordine di esecuzione e alla gestione dell'asincronia.",
-      checklist: l.keyPoints || [],
-      socraticQuestion: l.examQuestions?.[0] || "Quali differenze riscontri rispetto agli altri metodi del linguaggio?",
+      dispensaRef: "Knowledge Base (24 Dispense)",
+      conceptExplanation: `In modalità offline non è stata individuata una sezione specifica per "${query}".\n\nPer fare domande aperte e ricevere risposte dinamiche e personalizzate con LangChain in tempo reale, inserisci la tua API Key Gemini gratuita nel Profilo.`,
+      codeExample: `/* Configura la tua API Key gratuita in Profilo per risposte dinamiche su qualsiasi argomento */\n/* Ad es: "parlami delle classi in css", "come funzionano le closures", ecc. */`,
+      examPitfall: "Le risposte offline sono generate consultando la Knowledge Base delle 24 dispense locali.",
+      checklist: [
+        "Prova a digitare parole chiave come 'Classi', 'Flexbox', 'Box Model', 'Event Loop', 'useState', 'JOIN'.",
+        "Oppure clicca sui suggerimenti rapidi in basso per visualizzare subito la relativa dispensa."
+      ],
+      socraticQuestion: "Vuoi consultare uno degli argomenti rapidi delle dispense in basso?",
       isOffline: true
     };
   };

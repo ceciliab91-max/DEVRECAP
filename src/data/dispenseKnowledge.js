@@ -8,8 +8,36 @@ const rawKnowledgeData = {
     moduleId: "css",
     moduleName: "CSS Moderno & Responsive Design",
     description: "Layout Flexbox, CSS Grid, Box Model, Posizionamento e Specificità dei selettori.",
-    totalLessons: 4,
+    totalLessons: 5,
     lessons: [
+      {
+        id: "css-selectors-classes",
+        title: "Selettori, Classi, ID e Specificità in CSS",
+        pdfReference: "Dispensa CSS — Selettori, Classi & Specificità",
+        summary: "I selettori di classe (.classe) permettono di applicare stili riutilizzabili a più elementi HTML. La specificità (Cascata) calcola il peso delle regole: inline style (1000) > ID (100) > Classi/Pseudo-classi/Attributi (10) > Tag/Pseudo-elementi (1).",
+        keyPoints: [
+          ".nome-classe seleziona tutti gli elementi che possiedono class='nome-classe'.",
+          "Un elemento HTML può contenere più classi separate da spazio (es: class='card active highlight').",
+          "I selettori di classe hanno specificità (0,1,0), superiore agli elementi (0,0,1) ma inferiore agli ID (1,0,0).",
+          "Classi concatenate (.card.primary) richiedono la presenza contemporanea di entrambe le classi sullo stesso elemento."
+        ],
+        examPitfalls: [
+          "Dimenticare il punto '.' all'inizio del nome della classe nel CSS (confondendola con un selettore di tag).",
+          "Abusare di '!important' invece di sfruttare la corretta specificità delle classi e la cascata naturale."
+        ],
+        codeSnippets: [
+          {
+            title: "Uso di Classi Singole e Multiple",
+            language: "css",
+            code: "/* Classe base */\n.badge {\n  padding: 4px 8px;\n  border-radius: 9999px;\n}\n\n/* Modificatore combinato */\n.badge.primary {\n  background-color: #4f46e5;\n  color: white;\n}",
+            explanation: "Pattern modulare per comporre stili riutilizzabili senza duplicare codice."
+          }
+        ],
+        examQuestions: [
+          "Come funziona il calcolo della specificità in CSS tra tag, classi e ID?",
+          "Cosa succede quando due regole con la stessa identica specificità competono sullo stesso elemento?"
+        ]
+      },
       {
         id: "css-box-model",
         title: "Box Model & Box-Sizing",
@@ -536,24 +564,59 @@ export function getTopicsByModule(moduleId) {
   return DISPENSE_KNOWLEDGE_BASE[moduleId]?.lessons || [];
 }
 
-/**
- * Helper per trovare un argomento correlato per parola chiave.
- */
 export function findTopicByKeyword(keyword) {
-  const term = keyword.toLowerCase();
+  if (!keyword || typeof keyword !== 'string') return null;
+  const clean = keyword.toLowerCase()
+    .replace(/[^a-z0-9àèéìòù\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  const stopWords = new Set([
+    'parlami', 'parla', 'dimmi', 'spiegami', 'spiega', 'cos', 'cosa', 'cose', 'come', 'perche',
+    'delle', 'della', 'dello', 'degli', 'dei', 'del', 'in', 'su', 'sul', 'sulla', 'sullo', 'sugli',
+    'un', 'uno', 'una', 'il', 'lo', 'la', 'i', 'gli', 'le', 'e', 'ed', 'o', 'od', 'con', 'per', 'tra', 'fra',
+    'differenza', 'differenze', 'significa', 'concetto', 'argomento', 'dispensa', 'dispense'
+  ]);
+  
+  const tokens = clean.split(' ').filter(t => t.length > 1 && !stopWords.has(t));
+  if (tokens.length === 0) return null;
+
+  // Subject boost detector
+  let subjectBoost = null;
+  if (clean.includes('css')) subjectBoost = 'css';
+  else if (clean.includes('react') || clean.includes('jsx')) subjectBoost = 'react';
+  else if (clean.includes('sql') || clean.includes('mysql') || clean.includes('join') || clean.includes('database')) subjectBoost = 'sql';
+  else if (clean.includes('javascript') || clean.includes('js') || clean.includes('dom')) subjectBoost = 'javascript';
+
+  let bestMatch = null;
+  let highestScore = 0;
+
   for (const moduleKey of Object.keys(DISPENSE_KNOWLEDGE_BASE)) {
     const mod = DISPENSE_KNOWLEDGE_BASE[moduleKey];
     for (const lesson of mod.lessons) {
-      if (
-        lesson.title.toLowerCase().includes(term) ||
-        lesson.summary.toLowerCase().includes(term) ||
-        lesson.keyPoints.some(k => k.toLowerCase().includes(term))
-      ) {
-        return { module: mod.moduleName, lesson };
+      let score = 0;
+      if (subjectBoost && moduleKey === subjectBoost) {
+        score += 20;
+      }
+
+      const titleLower = lesson.title.toLowerCase();
+      const summaryLower = lesson.summary.toLowerCase();
+      const keyPointsLower = lesson.keyPoints.map(k => k.toLowerCase()).join(' ');
+
+      for (const token of tokens) {
+        if (titleLower.includes(token)) score += 35;
+        if (summaryLower.includes(token)) score += 15;
+        if (keyPointsLower.includes(token)) score += 10;
+      }
+
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = { module: mod.moduleName, lesson, score };
       }
     }
   }
-  return null;
+
+  return highestScore >= 15 ? bestMatch : null;
 }
 
 /**
