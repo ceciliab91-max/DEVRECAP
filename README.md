@@ -1,88 +1,123 @@
-# DevExam PRO — Web Development Exam Simulator & AI Study Hub
+# DevExam PRO (Recap) — Web Development Exam Simulator & AI Socratic Study Hub
 
-Piattaforma e-learning interattiva e simulatore d'esame full-stack progettato per lo studio intensivo, la personalizzazione dell'apprendimento e la preparazione alle prove d'esame universitarie di **Sviluppo Web Front-End & Database**.
-
-L'applicazione include gestione delle sessioni con ruoli (Studente / Docente Admin), banche dati didattiche strutturate da dispense universitarie, motore di simulazione con timer, laboratorio di **Live Coding con correzione automatica tramite IA**, **Tutor didattico interattivo**, **Hub di Studio** con Flashcard e Mappe concettuali, e un **Pannello Amministratore** per la gestione dinamica di quiz e sfide pratiche.
-
----
-
-## Funzionalità Principali
-
-### 1. Autenticazione & Gestione Ruoli (RBAC)
-
-* **Accesso Multi-Ruolo:** Flusso di Login/Registrazione con profilazione differenziata:
-  * **Studente:** Accesso alle simulazioni, laboratorio di codice, statistiche personali, flashcard e cronologia esami.
-  * **Docente / Admin:** Accesso esclusivo all'Admin Hub per il monitoraggio analitico globale e la gestione CRUD dei contenuti.
-* **Profilo Studente Personalizzato:** Configurazione di Avatar, Bio, Obiettivo Voto (es. 30L) e Data Obiettivo dell'Esame con countdown automatico dei giorni rimanenti.
-
-### 2. Dashboard Analitica & Monitoraggio Performance
-
-* **Metriche Personali:** Monitoraggio in tempo reale di simulazioni completate, media punteggi (in trentesimi), tasso di accuratezza globale e conteggio degli errori.
-* **Moduli Didattici:** Card dedicate per le 4 materie con stato di avanzamento e accesso rapido all'allenamento mirato.
-
-### 3. Motore di Simulazione & Quiz Engine
-
-* **Modalità Flessibili:** Scelta tra *Esame Completo Mix* (30 quesiti casuali distribuiti tra tutte le materie) o *Allenamento Verticale* su singola materia.
-* **Gestione della Prova:** Timer con conto alla rovescia configurabile (30 min, 45 min o illimitato) e funzione per contrassegnare i quesiti dubbi (*Rivedi dopo*).
-* **Revisione Dettagliata:** Feedback istantaneo a fine test con calcolo del voto, confronto tra risposta data e corretta, e spiegazione tecnica estratta dalle dispense didattiche.
-* **Tutor IA On-Demand:** Pulsante dedicato accanto a ogni errore per richiedere al Tutor IA un approfondimento concettuale istantaneo.
-
-### 4. Laboratorio di Live Coding con Valutatore IA
-
-* **Editor di Codice Integrato:** Ambiente dedicato per risolvere sfide pratiche divise per materia.
-* **Correzione con LLM (Gemini / Claude / OpenAI):** Invio asincrono del codice con System Prompt da docente universitario.
-* **Report Strutturato:** Assegnazione di esito (Superato / Non Superato), voto in trentesimi, analisi sintattica, aderenza alla traccia e best practice consigliate.
-
-### 5. Hub di Studio, Flashcard & Active Recall
-
-* **Flashcard Interattive:** Schede didattiche fronte/retro (*Domanda/Concetto* vs *Risposta/Snippet*) con tracciamento dello stato di apprendimento (*"La so"* / *"Da rivedere"*).
-* **Mappe Concettuali:** Schemi riassuntivi ad albero per il ripasso visuale dei macro-argomenti.
-* **Integrazione Google NotebookLM:** Collegamento rapido alla piattaforma per la consultazione semantica avanzata delle dispense.
-
-### 6. Pannello Amministratore (Admin Panel)
-
-* **Metriche Piattaforma:** Statistiche aggregate su numero di studenti iscritti, volume di quesiti presenti, sfide attive e media voti complessiva.
-* **CRUD Banca Dati Quiz:** Interfaccia per visualizzare, filtrare, aggiungere, modificare o rimuovere domande a scelta multipla.
-* **CRUD Sfide Pratiche:** Gestione e inserimento di nuove tracce per il laboratorio di Live Coding.
+> **Piattaforma didattica interattiva, accessibile e ad alte prestazioni per la preparazione agli esami di sviluppo web full-stack.**
+> Include un simulatore quiz avanzato, laboratorio di Live Coding, consultazione dispense con Active Recall e un Tutor IA Socratico basato su LangChain e schemi Zod.
 
 ---
 
-## Materie & Programma Didattico
+## 🚀 Caratteristiche & Funzionalità Principali
 
-| Materia | Argomenti Chiave |
+### 1. 🎯 Simulatore d'Esame & Quiz Engine Avanzato
+
+- **Question Bank Completa (120 Quesiti):** Domande d'esame realistiche calibrate sull'intero programma delle 42 dispense ufficiali con spiegazioni socratiche dettagliate.
+- **Distribuzione Curriculare:**
+  - 🟡 **JavaScript, Express.js & LangChain (40 quesiti):** Event Loop, Closures, Middleware, Router modulare, Error Handler, Fetch e Body Parsing.
+  - 🔵 **React 19 & React Router (30 quesiti):** Hooks (`useState`, `useEffect`, `useContext`, `useTransition`), Routing v6, Gestione Form e Pattern di Stato.
+  - 🎨 **CSS 3 & Responsive Design (25 quesiti):** Selettori avanzati, Flexbox, CSS Grid, Media Queries e Specificità.
+  - 🟣 **SQL & Prisma ORM (25 quesiti):** JOINs, GROUP BY/HAVING, Integrità Referenziale, Modelli `@relation`, Eager Loading `include` e Migrazioni.
+- **Modalità di Simulazione:** Simulazione completa con timer d'esame (30/45 min) oppure allenamento mirato per singola materia con pool degli errori (*Spaced Repetition*).
+
+### 2. 🧠 Tutor IA Socratico (LangChain LCEL & Zod Structured Engine)
+
+- **4 Modalità di Studio Specializzate:**
+  - **💡 Spiega Teoria:** Spiegazioni chiare e socratiche con grounding esclusivo sulle 42 dispense del corso.
+  - **🎓 Simula Orale:** Domande aperte d'esame per testare la dialettica tecnica dello studente con feedback strutturato.
+  - **🎯 Genera Quiz:** Generazione dinamica di quiz a risposta multipla su argomenti specifici.
+  - **🛠️ Correggi Codice:** Analisi, debugging e refactoring di snippet con best practice moderne.
+- **Validazione Rigorosa:** Output strutturato con validazione Zod e gestione sicura delle API Key con fallback crittografico SHA-256 in locale.
+
+### 3. 💻 Laboratorio di Live Coding Interattivo
+
+- Esecuzione sandboxed in tempo reale per snippet HTML, CSS e JavaScript.
+- Valutatore algoritmico assistito da IA per analizzare correttezza logica, edge case e conformità alle specifiche dell'esercizio.
+
+### 4. 📚 Hub Dispense, Mappe Concettuali & Notebook
+
+- Accesso rapido alle **42 dispense didattiche** organizzate per modulo tematico.
+- Blocco note integrato con salvataggio automatico e funzionalità di **Backup/Restore JSON locale** (zero dipendenze esterne).
+
+### 5. ♿ Accessibilità Totale (WCAG 2.1 AA) & Privacy by Design
+
+- **Punteggio Lighthouse Accessibilità: 100 / 100** con navigazione completa da tastiera, landmark semantici e supporto screen reader.
+- **Privacy per Uso Interno:** Nessun tracciamento esterno o indicizzazione accidentale garantito dal meta tag `noindex, nofollow` e link canonico configurato.
+- **PWA Lean:** Installabile come Web App su dispositivi desktop e mobile tramite manifest statico.
+
+---
+
+## 🛠️ Stack Tecnologico
+
+| Layer | Tecnologie & Librerie |
 | :--- | :--- |
-| **CSS** | Box Model, Selettori avanzati (`:nth-child`, combinatori), Specificità, Unità relative/assolute (`rem`, `em`, `vw/vh`), Positioning (`relative`, `absolute`, `fixed`, `sticky`), Background, Pseudo-elementi (`::before`, `::after`), Clearfix e **Flexbox Layout completo**. |
-| **JavaScript** | Scope (`let`/`const` vs `var`), Tipi di dato, Array Methods (`map`, `filter`, `reduce`), Funzioni e Closure, Manipolazione DOM, Gestione Eventi, Asincronia (`Promises`, `async/await`, Event Loop) e Classi ES6. |
-| **React** | Flusso dati unidirezionale, JSX, Props e State, React Hooks (`useState`, `useEffect`, dipendenze), Riconciliazione & Virtual DOM, Rendering liste con `key` univoche e form controllati. |
-| **SQL** | Modello relazionale, Vincoli d'integrità (`PRIMARY KEY`, `FOREIGN KEY`), Query avanzate (`SELECT`, `WHERE`, `ORDER BY`), Funzioni aggregate, `GROUP BY`, `HAVING` e tipi di `JOIN` (`INNER`, `LEFT`, `RIGHT`). |
+| **Frontend Core** | **React 19**, **Vite 8** (Compilatore Rust SWC), **Tailwind CSS v4** |
+| **Icone & UI Helpers** | **Lucide React**, **LZ-String** (Compressione storage) |
+| **Intelligenza Artificiale** | **@langchain/google-genai**, **@langchain/core**, **Zod** |
+| **Backend & Cloud Sync** | **Netlify Functions**, **Netlify Blobs** |
+| **Linter & Qualità** | **Oxlint** (0 errori, 0 warning), **Lighthouse CI** |
+| **Crittografia & Sicurezza** | **Web Crypto API** con fallback Pure-JS SHA-256 nativo |
 
 ---
 
-## Architettura & Stack Tecnologico
-
-* **Front-End:** React 18, JavaScript ES6+ (Componenti modulari, Context API per Auth e State Management globale).
-* **Styling & UI:** Tailwind CSS (Dark Mode nativa, layout responsive mobile-first, design tipografico ispirato a Notion/Linear).
-* **Persistenza Dati:** `localStorage` API con schema dati relazionale predisposto per la futura migrazione a Database SQL / Supabase.
-* **AI & LLM Integration:** REST API asincrone (`fetch` / async-await), gestione token di autenticazione e rendering Markdown per i report di correzione.
-
----
-
-## Struttura del Progetto
+## 📁 Struttura del Progetto
 
 ```text
-devexam-pro/
-├── public/                 # Icone e risorse statiche
+DEVRECAP/
+├── .agents/                 # Architettura Multi-Agente (MAS), ruoli e state log
+├── dispense/                # Dispense didattiche ufficiali (CSS, JS, Node, React, SQL, AI)
+├── netlify/                 # Netlify Serverless Functions (Auth, Cloud Sync)
+│   └── functions/
+├── public/                  # Manifest PWA, icone SVG e asset statici
+├── scripts/                 # Test unitari snelli e runner di audit Lighthouse
 ├── src/
-│   ├── components/         # Componenti UI (Navbar, QuizEngine, LiveCoding, Flashcards, ChatTutor)
-│   ├── context/            # AuthContext e gestione dello stato globale dell'utente
-│   ├── data/               # Banche dati didattiche (questionsData.js, codingChallenges.js)
-│   ├── pages/              # Viste (Dashboard, SimulaEsame, LiveCoding, StudioHub, Profilo, AdminPanel)
-│   ├── services/           # Integrazione API AI (aiService.js) e gestione LocalStorage
-│   ├── styles/             # File di stile Tailwind / CSS
-│   ├── App.jsx             # Gestione del routing e viste protette
-│   └── main.jsx            # Entry point dell'applicazione
-├── .env.example            # Template configurazione API Key
-├── index.html              # Template HTML5
-├── package.json            # Dipendenze e script
-├── tailwind.config.js      # Configurazione Tailwind CSS
-└── README.md               # Documentazione ufficiale del progetto
+│   ├── components/          # Componenti React modulari (Tutor IA, Quiz, LiveCoding, Hub)
+│   ├── data/                # Question Bank (120 quesiti) e Dispense Knowledge Base
+│   ├── services/            # Layer di orchestrazione LangChain e Cloud Storage
+│   ├── utils/               # Storage compresso, hashing PIN e gestione stato
+│   ├── App.jsx              # Routing e viewport responsive
+│   └── main.jsx             # Entrypoint React con Global Error Boundary
+├── index.html               # Semantic HTML5 con accessibilità e meta tags
+├── package.json             # Script e dipendenze del progetto
+└── vite.config.js           # Configurazione Vite, SWC e compressione Brotli/Gzip
+```
+
+---
+
+## 🚀 Script & Comandi di Sviluppo
+
+```bash
+# Installazione dipendenze
+pnpm install
+
+# Avvio del server di sviluppo (locale)
+pnpm run dev
+
+# Avvio per test su rete locale (WiFi / Multi-device su porta 5173)
+pnpm run dev:host
+
+# Esecuzione linter Oxlint
+pnpm run lint
+
+# Esecuzione test unitari snelli (Core Crypto & Data Integrity)
+pnpm test
+
+# Build di produzione ottimizzata
+pnpm run build
+
+# Preview del bundle di produzione (porta 4173)
+pnpm run preview
+
+# Audit Lighthouse completo (Desktop & Mobile)
+pnpm run lighthouse:all
+
+# Audit Lighthouse sul bundle compilato di produzione
+pnpm run lighthouse:prod
+```
+
+---
+
+## 👥 Contributi & Governance
+
+Il progetto adotta un modello di sviluppo basato su standard industriali:
+
+- **Convenzione Commit:** Conventional Commits in lingua inglese (`feat:`, `fix:`, `refactor:`, `docs:`).
+- **Registro delle Modifiche:** Consulta [`CONTRIBUTION_LOG.md`](file:///C:/dev/projects/DEVRECAP/CONTRIBUTION_LOG.md) per lo storico dettagliato di tutte le milestone rilasciate.
+- **Linee Guida Anti-Overengineering:** Documentate e presidiate nel report [`.agents/BOTTLENECK.md`](file:///C:/dev/projects/DEVRECAP/.agents/BOTTLENECK.md).
