@@ -81,13 +81,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
   const chatEndRef = useRef(null);
 
   const starterTopics = [
-    { label: "⚡ Event Loop & Asincronia", subject: "javascript", prompt: "Spiegami come funziona l'Event Loop e la differenza tra Microtask e Macrotask in JavaScript" },
-    { label: "🚀 Express & Middleware", subject: "node", prompt: "Come funzionano i middleware in Express e la gestione centralizzata degli errori?" },
-    { label: "🤖 LangChain & Structured Output", subject: "ai", prompt: "Come funziona withStructuredOutput con Zod in LangChain per garantire risposte tipizzate?" },
-    { label: "⚛️ useState & Immutabilità", subject: "react", prompt: "Perché non si deve mai mutare lo stato direttamente in React e come funziona l'immutabilità con useState?" },
-    { label: "🗄️ Prisma & Relazioni MySQL", subject: "node", prompt: "Come si modella una relazione 1:N in Prisma e come si eseguono query con select annidate?" },
-    { label: "🔍 LEFT JOIN vs INNER JOIN", subject: "sql", prompt: "Qual è la differenza fondamentale tra INNER JOIN e LEFT JOIN in MySQL con esempi pratici?" },
-    { label: "🎨 Box Model & border-box", subject: "css", prompt: "Spiegami il Box Model e la differenza tra content-box e border-box in CSS" }
+    { label: "⚡ Event Loop", subject: "javascript", prompt: "Spiegami come funziona l'Event Loop e la differenza tra Microtask e Macrotask in JavaScript" },
+    { label: "🚀 Express", subject: "node", prompt: "Come funzionano i middleware in Express e la gestione centralizzata degli errori?" },
+    { label: "🤖 LangChain", subject: "ai", prompt: "Come funziona withStructuredOutput con Zod in LangChain per garantire risposte tipizzate?" },
+    { label: "⚛️ useState", subject: "react", prompt: "Perché non si deve mai mutare lo stato direttamente in React e come funziona l'immutabilità con useState?" },
+    { label: "🗄️ Prisma MySQL", subject: "node", prompt: "Come si modella una relazione 1:N in Prisma e come si eseguono query con select annidate?" },
+    { label: "🔍 SQL JOIN", subject: "sql", prompt: "Qual è la differenza fondamentale tra INNER JOIN e LEFT JOIN in MySQL con esempi pratici?" },
+    { label: "🎨 CSS Box Model", subject: "css", prompt: "Spiegami il Box Model e la differenza tra content-box e border-box in CSS" }
   ];
 
   const handleCopy = (code, id) => {
@@ -916,10 +916,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             <div ref={chatEndRef} />
           </div>
 
-          {/* Quick Starter Topics (Compact horizontal scroller chips) */}
+          {/* Quick Starter Topics (Fluid flex wrap chips, no horizontal scroll) */}
           {messages.length <= 2 && !isTyping && (
-            <div className="px-3 py-1.5 bg-slate-50/80 dark:bg-slate-950/60 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1">
+            <div className="px-3 py-1.5 bg-slate-50/80 dark:bg-slate-950/60 flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1 mr-0.5">
                 <Sparkles className="w-3 h-3 text-amber-500" />
                 <span>Suggerimenti:</span>
               </span>
@@ -931,7 +931,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                     setSelectedSubject(topic.subject);
                     handleSendMessage(topic.prompt, 'socratic');
                   }}
-                  className="shrink-0 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-800 text-[11px] font-medium transition-all shadow-2xs cursor-pointer truncate max-w-[200px]"
+                  className="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-800 text-[11px] font-medium transition-all shadow-2xs cursor-pointer whitespace-nowrap"
                   title={topic.prompt}
                 >
                   {topic.label}
