@@ -46,8 +46,8 @@ export const AdaptiveQuizResponseSchema = z.object({
 export const CodeEvaluationSchema = z.object({
   isSuccess: z.boolean().describe("true se il codice soddisfa tutti i requisiti, false altrimenti"),
   voto: z.string().describe("Voto in trentesimi da '15/30' a '30 e Lode'"),
-  profName: z.string().default("Prof. Loris"),
-  role: z.string().default("Docente Universitario di Sviluppo Web"),
+  profName: z.string().default("Tutor Loris"),
+  role: z.string().default("Tutor di Sviluppo Web"),
   analisiRequisiti: z.string().describe("Analisi puntuale del rispetto dei requisiti tecnici"),
   qualitaCodice: z.string().describe("Valutazione su naming, sintassi, best practices e formattazione"),
   ottimizzazioneSuggerita: z.string().optional().describe("Versione ottimizzata o idiomatica del codice"),

@@ -507,8 +507,8 @@ export default function LiveCoding({ onGoToProfile }) {
       setAiVerdict({
         isSuccess: isPass,
         voto: grade,
-        profName: "Prof. Loris",
-        role: "Docente Universitario di Sviluppo Web",
+        profName: "Tutor Loris",
+        role: "Tutor di Sviluppo Web",
         analisiRequisiti: isPass
           ? "Il codice presentato soddisfa appieno i requisiti tecnici imposti dalla traccia dell'esercizio."
           : "ATTENZIONE: Il codice inviato appare incompleto o privo di alcune istruzioni chiave richieste dalla dispensa didattica.",
@@ -557,7 +557,7 @@ export default function LiveCoding({ onGoToProfile }) {
               Sfida Pratica sulle 4 Materie
             </h1>
             <p className="text-slate-300 text-xs sm:text-base max-w-2xl leading-relaxed">
-              Metti alla prova le tue competenze di scrittura codice per **CSS, JavaScript, React ed SQL** e fatti valutare dal Docente Universitario IA!
+              Metti alla prova le tue competenze di scrittura codice per **CSS, JavaScript, React ed SQL** e ricevi feedback immediato dal Tutor IA!
             </p>
           </div>
 
