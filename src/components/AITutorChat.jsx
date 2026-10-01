@@ -3,12 +3,13 @@ import {
   Bot,
   X,
   Send,
+  Sparkles,
   Key,
   RotateCcw,
-  GraduationCap,
+  Lightbulb,
   Mic,
-  BrainCircuit,
-  Bug,
+  Target,
+  Wrench,
   BookOpen,
   CheckCircle2,
   AlertTriangle,
@@ -16,7 +17,9 @@ import {
   Copy,
   Check,
   HelpCircle,
-  ArrowRight
+  ArrowRight,
+  Smile,
+  Heart
 } from 'lucide-react';
 import {
   hasValidApiKey,
@@ -41,7 +44,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       id: 'welcome',
       sender: 'bot',
       type: 'socratic',
-      text: 'Ciao! Sono il tuo **Tutor Universitario IA**. Ho integrato l\'intera Knowledge Base delle **24 dispense didattiche** (CSS, JavaScript, React e MySQL).\n\nScegli una modalità di studio in alto per iniziare!',
+      text: 'Ciao! 👋 Sono il tuo **Tutor Amichevole per il Ripasso Web**! 🚀\n\nHo a disposizione tutte le **24 dispense didattiche** (CSS, JavaScript, React e MySQL) e sono qui per aiutarti a capire ogni concetto senza stress.\n\nScegli una modalità in alto o scrivimi pure una qualsiasi domanda!',
       time: 'Adesso'
     }
   ]);
@@ -110,7 +113,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           sender: 'bot',
           type: 'socratic',
           data: res.success ? res.data : null,
-          text: res.success ? null : (res.message || "Errore durante l'elaborazione."),
+          text: res.success ? null : (res.message || "Non sono riuscito a generare una risposta, riproviamo! 😊"),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setMessages(prev => [...prev, botMessage]);
@@ -159,7 +162,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           sender: 'bot',
           type: 'debug',
           data: res.success ? res.data : null,
-          text: res.success ? null : (res.message || "Errore nella code review."),
+          text: res.success ? null : (res.message || "Errore nella revisione del codice."),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setMessages(prev => [...prev, botMessage]);
@@ -169,7 +172,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         id: (Date.now() + 1).toString(),
         sender: 'bot',
         type: 'error',
-        text: `⚠️ Si è verificato un errore di connessione con LangChain: ${err.message || 'Riprova più tardi.'}`,
+        text: `⚠️ Si è verificato un piccolo intoppo: ${err.message || 'Riprova tra poco!'}`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMessage]);
@@ -191,7 +194,6 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     try {
       const res = await generateAdaptiveQuiz(topicTarget, "Intermedio");
       if (res.success && res.data) {
-        setActiveQuizData(res.data);
         const botMessage = {
           id: Date.now().toString(),
           sender: 'bot',
@@ -226,7 +228,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
     if (externalTriggerContext) {
       setIsOpen(true);
       setActiveMode('socratic');
-      const userPrompt = `Spiegami in modo approfondito questa domanda d'esame di ${externalTriggerContext.subject}:\n\n"${externalTriggerContext.question}"\nRisposta Corretta: "${externalTriggerContext.correctAnswer}"\n\nQual è il concetto teorico dietro e quali sono i trabocchetti più comuni?`;
+      const userPrompt = `Spiegami in modo semplice e chiaro questa domanda di ${externalTriggerContext.subject}:\n\n"${externalTriggerContext.question}"\nRisposta Corretta: "${externalTriggerContext.correctAnswer}"\n\nPerché è corretta e come posso ricordarla facilmente?`;
       handleSendMessage(userPrompt, 'socratic');
       if (onClearTriggerContext) {
         onClearTriggerContext();
@@ -251,10 +253,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group"
-          aria-label="Apri Tutor IA LangChain"
+          aria-label="Apri Tutor IA Amichevole"
         >
-          <Bot className="w-6 h-6 animate-pulse" />
-          <span className="hidden sm:inline font-bold pr-1">Tutor IA Pro</span>
+          <Bot className="w-6 h-6 animate-bounce" />
+          <span className="hidden sm:inline font-bold pr-1">Tutor IA ✨</span>
           <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -272,22 +274,22 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           }`}
         >
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 border-b border-slate-800 text-white flex flex-col space-y-3">
+          <div className="p-4 bg-gradient-to-r from-indigo-900/95 via-purple-900/90 to-slate-900 border-b border-indigo-800/40 text-white flex flex-col space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/20 text-white">
+                  <Smile className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-sm tracking-tight">Tutor IA LangChain</h3>
-                    <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">
-                      ZOD VALIDATED
-                    </span>
+                    <h3 className="font-bold text-sm tracking-tight flex items-center gap-1.5">
+                      <span>Tutor IA Amichevole</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                    </h3>
                   </div>
-                  <p className="text-[11px] text-emerald-400 flex items-center space-x-1.5 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>24 Dispense Grounded &bull; CSS, JS, React, MySQL</span>
+                  <p className="text-[11px] text-indigo-200 flex items-center space-x-1.5 font-medium">
+                    <Heart className="w-3 h-3 text-pink-400 fill-pink-400 shrink-0" />
+                    <span>Pronto per spiegare, allenare e incoraggiare su CSS, JS, React e SQL</span>
                   </p>
                 </div>
               </div>
@@ -303,18 +305,18 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                   }}
                   className={`p-2 rounded-xl transition-colors ${
                     hasValidApiKey()
-                      ? 'text-emerald-400 hover:bg-slate-800/80'
-                      : 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 animate-pulse'
+                      ? 'text-emerald-300 hover:bg-white/10'
+                      : 'text-amber-300 bg-amber-500/20 hover:bg-amber-500/30 animate-pulse'
                   }`}
-                  title={hasValidApiKey() ? "API Key Gemini Attiva" : "Configura Chiave API nel Profilo"}
+                  title={hasValidApiKey() ? "Chiave API Attiva" : "Configura Chiave API nel Profilo"}
                 >
                   <Key className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={() => setMessages([messages[0]])}
-                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors"
-                  title="Resetta Conversazione"
+                  className="p-2 text-indigo-200 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
+                  title="Nuova Conversazione"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -322,8 +324,8 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 {!isFullPage && (
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors"
-                    title="Chiudi Finestra"
+                    className="p-2 text-indigo-200 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
+                    title="Chiudi"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -332,61 +334,61 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             </div>
 
             {/* Mode Selectors */}
-            <div className="flex items-center space-x-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800 overflow-x-auto no-scrollbar">
+            <div className="flex items-center space-x-1.5 bg-black/20 p-1.5 rounded-2xl border border-white/10 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => setActiveMode('socratic')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeMode === 'socratic'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-white text-indigo-900 shadow-md'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Tutor Socratico</span>
+                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <span>💡 Spiegami un Concetto</span>
               </button>
 
               <button
                 onClick={() => setActiveMode('oral_exam')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeMode === 'oral_exam'
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-white text-purple-900 shadow-md'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Mic className="w-3.5 h-3.5" />
-                <span>Esame Orale (Voti 30L)</span>
+                <Mic className="w-3.5 h-3.5 text-purple-600" />
+                <span>🎙️ Simulazione Orale</span>
               </button>
 
               <button
                 onClick={() => handleStartAdaptiveQuiz()}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeMode === 'quiz'
-                    ? 'bg-amber-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-white text-amber-900 shadow-md'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <BrainCircuit className="w-3.5 h-3.5" />
-                <span>Quiz Adattivo</span>
+                <Target className="w-3.5 h-3.5 text-amber-600" />
+                <span>🎯 Quiz Veloce</span>
               </button>
 
               <button
                 onClick={() => setActiveMode('debug')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   activeMode === 'debug'
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-white text-emerald-900 shadow-md'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Bug className="w-3.5 h-3.5" />
-                <span>Code Debugger</span>
+                <Wrench className="w-3.5 h-3.5 text-emerald-600" />
+                <span>🛠️ Aiuto Codice</span>
               </button>
             </div>
 
             {/* Subject Filter Pills */}
             <div className="flex items-center space-x-1.5 text-[11px] overflow-x-auto no-scrollbar pt-0.5">
-              <span className="text-slate-400 font-medium">Filtra Dispensa:</span>
+              <span className="text-indigo-200 font-medium">Materia:</span>
               {[
-                { id: 'all', name: 'Tutte' },
+                { id: 'all', name: 'Tutte le Dispense' },
                 { id: 'javascript', name: 'JavaScript' },
                 { id: 'react', name: 'React' },
                 { id: 'sql', name: 'SQL' },
@@ -395,10 +397,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 <button
                   key={sub.id}
                   onClick={() => setSelectedSubject(sub.id)}
-                  className={`px-2 py-0.5 rounded-lg font-medium transition-colors ${
+                  className={`px-2.5 py-0.5 rounded-lg font-medium transition-colors ${
                     selectedSubject === sub.id
-                      ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-500/50'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      ? 'bg-white text-indigo-900 font-bold shadow-xs'
+                      : 'text-indigo-100 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   {sub.name}
@@ -408,7 +410,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
           </div>
 
           {/* Chat Messages Body */}
-          <div className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-4 bg-slate-50/50 dark:bg-slate-900/50 text-xs">
+          <div className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-4 bg-slate-50/70 dark:bg-slate-900/50 text-xs">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -428,15 +430,15 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
                 {/* BOT MESSAGE - SOCRATIC TUTOR */}
                 {msg.sender === 'bot' && msg.type === 'socratic' && msg.data && (
-                  <div className="max-w-[92%] p-5 rounded-3xl rounded-bl-none bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-md space-y-3.5 text-slate-800 dark:text-slate-100">
+                  <div className="max-w-[92%] p-5 rounded-3xl rounded-bl-none bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 shadow-md space-y-3.5 text-slate-800 dark:text-slate-100">
                     {/* Header pill with dispensa ref */}
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2.5">
                       <div className="flex items-center space-x-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">
                         <BookOpen className="w-4 h-4" />
                         <span>{msg.data.dispensaRef}</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                        LEZIONE CERTIFICATA
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        📖 Dalla Dispensa
                       </span>
                     </div>
 
@@ -451,7 +453,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                     {msg.data.codeExample && (
                       <div className="relative group rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden my-2">
                         <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 border-b border-slate-800 text-[10px] text-slate-400 font-mono">
-                          <span>Snippet Commentato</span>
+                          <span>Esempio Pratico</span>
                           <button
                             onClick={() => handleCopy(msg.data.codeExample, msg.id)}
                             className="flex items-center space-x-1 hover:text-white transition-colors"
@@ -471,7 +473,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 flex items-start space-x-2.5">
                         <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                         <div className="space-y-0.5">
-                          <span className="font-bold text-[11px] block">Trabocchetto d'Esame da Evitare:</span>
+                          <span className="font-bold text-[11px] block">⚠️ Occhio a questo tranello comune:</span>
                           <p className="text-[11px] leading-relaxed opacity-95">{msg.data.examPitfall}</p>
                         </div>
                       </div>
@@ -482,7 +484,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       <div className="space-y-1.5 pt-1">
                         <span className="font-bold text-[11px] text-slate-900 dark:text-slate-100 flex items-center space-x-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                          <span>Punti Chiave da Memorizzare:</span>
+                          <span>💡 Ricorda sempre questi punti:</span>
                         </span>
                         <ul className="grid grid-cols-1 gap-1 pl-4">
                           {msg.data.checklist.map((item, idx) => (
@@ -499,19 +501,19 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/30 text-purple-950 dark:text-purple-200 space-y-2">
                         <div className="flex items-center space-x-1.5 font-bold text-[11px]">
                           <HelpCircle className="w-4 h-4 text-purple-500" />
-                          <span>Domanda di Riflessione per lo Studente:</span>
+                          <span>🤔 Prova a pensare a questo:</span>
                         </div>
                         <p className="text-[11px] italic font-medium">"{msg.data.socraticQuestion}"</p>
                         <button
                           onClick={() => {
                             setActiveMode('oral_exam');
                             setActiveExamTopic(msg.data.socraticQuestion);
-                            setInput(`Riguardo alla tua domanda: `);
+                            setInput(`Secondo me: `);
                           }}
-                          className="flex items-center space-x-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline pt-1"
+                          className="flex items-center space-x-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline pt-1"
                         >
-                          <span>Rispondi come all'Esame Orale</span>
-                          <ArrowRight className="w-3 h-3" />
+                          <span>Rispondi al Tutor ✨</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
@@ -529,7 +531,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       <div className="flex items-center space-x-2">
                         <Award className="w-5 h-5 text-purple-500" />
                         <span className="font-bold text-sm text-purple-600 dark:text-purple-300">
-                          Valutazione Commissione d'Esame
+                          🎓 Valutazione e Consigli
                         </span>
                       </div>
                       <div className="px-3 py-1 rounded-xl font-extrabold text-xs bg-purple-600 text-white shadow-sm">
@@ -542,7 +544,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 dark:text-emerald-200 space-y-1">
                         <span className="font-bold text-[11px] flex items-center space-x-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                          <span>Cosa hai spiegato bene:</span>
+                          <span>🌟 Ottimi punti toccati:</span>
                         </span>
                         <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
                           {msg.data.puntiDiForza.map((item, i) => (
@@ -554,10 +556,10 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
                     {/* Lacune da Colmare */}
                     {msg.data.lacuneDaColmare?.length > 0 && (
-                      <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-200 space-y-1">
+                      <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-1">
                         <span className="font-bold text-[11px] flex items-center space-x-1">
-                          <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
-                          <span>Cosa approfondire:</span>
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                          <span>🌱 Come renderla ancora più completa:</span>
                         </span>
                         <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
                           {msg.data.lacuneDaColmare.map((item, i) => (
@@ -576,7 +578,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                     {msg.data.domandaSuccessiva && (
                       <div className="p-3.5 rounded-2xl bg-slate-900 text-white border border-slate-700 space-y-2">
                         <span className="text-[10px] font-bold tracking-wide uppercase text-indigo-400 block">
-                          Prossima Domanda per alzare il voto:
+                          💬 Continuiamo il discorso con questa domanda:
                         </span>
                         <p className="font-semibold text-xs leading-relaxed">
                           "{msg.data.domandaSuccessiva}"
@@ -595,8 +597,8 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                   <div className="max-w-[92%] p-5 rounded-3xl rounded-bl-none bg-white dark:bg-slate-800/90 border border-amber-200 dark:border-amber-800/60 shadow-md space-y-3.5 text-slate-800 dark:text-slate-100">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
                       <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center space-x-1.5">
-                        <BrainCircuit className="w-4 h-4" />
-                        <span>Quiz Adattivo: {msg.data.argomento}</span>
+                        <Target className="w-4 h-4" />
+                        <span>Quiz Veloce: {msg.data.argomento}</span>
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-300">
                         {msg.data.livello}
@@ -650,18 +652,18 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                     {selectedQuizOption !== null && (
                       <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 dark:text-emerald-200 text-[11px] leading-relaxed">
-                          <span className="font-bold block mb-0.5">Spiegazione della Risposta Esatta:</span>
+                          <span className="font-bold block mb-0.5">✨ Perché è corretta:</span>
                           {msg.data.spiegazioneDidattica}
                         </div>
                         <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
-                          <span className="font-bold block mb-0.5 text-rose-500">Perché le altre risposte erano errate (Distrattori):</span>
+                          <span className="font-bold block mb-0.5 text-amber-600 dark:text-amber-400">💡 Analisi delle altre opzioni:</span>
                           {msg.data.spiegazioneDistrattori}
                         </div>
                         <button
                           onClick={() => handleStartAdaptiveQuiz()}
                           className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
                         >
-                          Genera Prossima Domanda Adattiva
+                          🎯 Prossima Domanda del Quiz
                         </button>
                       </div>
                     )}
@@ -673,13 +675,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                   <div className="max-w-[92%] p-5 rounded-3xl rounded-bl-none bg-white dark:bg-slate-800/90 border border-emerald-200 dark:border-emerald-800/60 shadow-md space-y-3.5 text-slate-800 dark:text-slate-100">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center space-x-1.5">
-                        <Bug className="w-4 h-4" />
-                        <span>Diagnosi Codice & Soluzione</span>
+                        <Wrench className="w-4 h-4" />
+                        <span>💡 Diagnosi & Suggerimento</span>
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        msg.data.hasErrors ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        msg.data.hasErrors ? 'bg-amber-500/20 text-amber-600' : 'bg-emerald-500/20 text-emerald-600'
                       }`}>
-                        {msg.data.hasErrors ? 'Bug Rilevati' : 'Codice Ottimale'}
+                        {msg.data.hasErrors ? 'Miglioramenti Trovati' : 'Ottimo Codice!'}
                       </span>
                     </div>
 
@@ -690,7 +692,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                     {msg.data.fixedCode && (
                       <div className="relative group rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden">
                         <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 border-b border-slate-800 text-[10px] text-emerald-400 font-mono">
-                          <span>Codice Corretto & Refattorizzato</span>
+                          <span>Codice Pulito & Funzionante</span>
                           <button
                             onClick={() => handleCopy(msg.data.fixedCode, msg.id)}
                             className="flex items-center space-x-1 text-slate-400 hover:text-white"
@@ -713,7 +715,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
 
                     {msg.data.learnTip && (
                       <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-900 dark:text-indigo-200 text-[11px] font-medium">
-                        💡 <strong>Regola d'oro:</strong> {msg.data.learnTip}
+                        💡 <strong>Consiglio utile:</strong> {msg.data.learnTip}
                       </div>
                     )}
                   </div>
@@ -736,7 +738,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex items-center space-x-2.5 p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl w-36 text-slate-400 shadow-sm">
-                <span className="text-[11px] font-semibold text-indigo-500 animate-pulse">LangChain...</span>
+                <span className="text-[11px] font-semibold text-indigo-500 animate-pulse">Il Tutor pensa...</span>
                 <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -778,11 +780,11 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
                   activeMode === 'socratic'
-                    ? "Chiedi un concetto sulle dispense o una spiegazione tecnica..."
+                    ? "Chiedimi qualsiasi dubbio o concetto sulle dispense..."
                     : activeMode === 'oral_exam'
-                    ? "Scrivi la tua risposta all'interrogazione orale..."
+                    ? "Scrivi qui la tua risposta all'interrogazione..."
                     : activeMode === 'debug'
-                    ? "Incolla il frammento di codice da analizzare o correggere..."
+                    ? "Incolla il codice per cui ti serve una mano..."
                     : "Fai una domanda per il quiz..."
                 }
                 className="flex-1 px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner"
