@@ -14,7 +14,7 @@ export default function StreakWidget({ onActivityRecorded }) {
     }
   };
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const isStudiedToday = streakInfo.lastStudyDate === todayStr || streakInfo.weeklyActivity.includes(todayStr);
 
   return (

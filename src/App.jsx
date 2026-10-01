@@ -1,3 +1,4 @@
+const CURRENT_YEAR = new Date().getFullYear();
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
@@ -16,8 +17,6 @@ const StatisticheView = lazy(() => import('./components/StatisticheView'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
 const AdminHub = lazy(() => import('./components/AdminHub'));
 const StudyPlanner = lazy(() => import('./components/StudyPlanner'));
-const ErrorPool = lazy(() => import('./components/ErrorPool'));
-const HistoryView = lazy(() => import('./components/HistoryView'));
 
 import { questionsData } from './data/questionsData';
 import { 
@@ -48,114 +47,142 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  // Stats State
+  const [stats, setStats] = useState(() => getAggregateStats());
+  
+  // Active Quiz State (Lifted to App root to allow smooth transition)
   const [quizQuestions, setQuizQuestions] = useState([]);
-  const [quizModeInfo, setQuizModeInfo] = useState({ mode: 'full', subject: null, timerMinutes: 30 });
+  const [quizModeInfo, setQuizModeInfo] = useState(null);
   const [lastResult, setLastResult] = useState(null);
+
+  // External context trigger for AI Tutor (e.g. asking explanation on a missed quiz question)
   const [aiTutorTriggerContext, setAiTutorTriggerContext] = useState(null);
 
-  const [stats, setStats] = useState(() => getAggregateStats());
-
-
-  // Apply theme class 'dark' to document.documentElement (<html>)
+  // Initialize theme on mount
   useEffect(() => {
-    const isDark = themeState === 'dark';
-    document.documentElement.classList.toggle('dark', isDark);
     setTheme(themeState);
   }, [themeState]);
 
+  // Sync background cloud data on login / mount
+  useEffect(() => {
+    if (currentUser) {
+      cloudFetchUserData().then((cloudData) => {
+        if (cloudData && cloudData.updatedAt) {
+          console.log('[DevExam Cloud] Snapshot caricato con successo da Netlify Blobs.');
+          setStats(getAggregateStats());
+        }
+      }).catch(err => {
+        console.warn('[DevExam Cloud] Sincronizzazione offline attiva:', err?.message || err);
+      });
+    }
+  }, [currentUser]);
+
   const toggleTheme = () => {
-    setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
+    const nextTheme = themeState === 'dark' ? 'light' : 'dark';
+    setThemeState(nextTheme);
+    setTheme(nextTheme);
   };
 
   const refreshStats = () => {
     setStats(getAggregateStats());
+    // In background, sync snapshot on cloud
+    if (currentUser) {
+      cloudSyncUserData().catch(err => {
+        console.warn('[DevExam Cloud] Sync snapshot background fallita:', err);
+      });
+    }
   };
 
-  // Sync isolated user stats on user switch or auth state change
-  useEffect(() => {
-    refreshStats();
-  }, [currentUser]);
-
+  // Auth Handlers
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
-    setStats(getAggregateStats());
+    setIsAuthModalOpen(false);
+    refreshStats();
   };
 
   const handleLogout = () => {
     logoutUser();
     setCurrentUser(null);
-    if (activeTab === 'profile' || activeTab === 'admin') {
-      setActiveTab('dashboard');
-    }
+    setActiveTab('dashboard');
   };
 
   const handleUpdateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
   };
 
-  // Launch a new quiz session (merges base questions with custom admin questions)
-  const handleStartQuiz = ({ mode, subject, timerMinutes = 30 }) => {
-    const custom = getCustomQuestions();
-    let pool = [...questionsData, ...custom];
+  // Quiz Workflow Handlers
+  const handleStartQuiz = (modeInfo) => {
+    const allAvailable = [...questionsData, ...getCustomQuestions()];
+    let filtered = [];
 
-    if (mode === 'subject' && subject) {
-      pool = pool.filter(q => q.subject === subject);
-    } else if (mode === 'full') {
-      // Pick 30 random questions mixed from all subjects
-      pool = pool.sort(() => Math.random() - 0.5).slice(0, 30);
+    if (modeInfo.subject === 'ALL') {
+      filtered = allAvailable;
+    } else {
+      filtered = allAvailable.filter(q => q.subject.toLowerCase() === modeInfo.subject.toLowerCase());
     }
 
-    setQuizQuestions(pool);
-    setQuizModeInfo({ mode, subject: subject || null, timerMinutes });
+    // If filtering by chapter (from StudyPlanner / Roadmap)
+    if (modeInfo.chapter) {
+      const byChapter = filtered.filter(q => q.chapter === modeInfo.chapter);
+      if (byChapter.length > 0) filtered = byChapter;
+    }
+
+    // Shuffle questions
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+    const count = Math.min(modeInfo.count || 10, shuffled.length > 0 ? shuffled.length : 10);
+    const selected = shuffled.slice(0, count);
+
+    setQuizQuestions(selected.length > 0 ? selected : questionsData.slice(0, 10));
+    setQuizModeInfo(modeInfo);
     setActiveTab('quiz-run');
   };
 
-  // Launch error pool review quiz
   const handleStartErrorReview = () => {
-    const errorIds = getErrorPool();
-    const custom = getCustomQuestions();
-    const all = [...questionsData, ...custom];
-    const pool = all.filter(q => errorIds.includes(q.id));
-    if (pool.length === 0) return;
+    const errorPool = getErrorPool();
+    if (errorPool.length === 0) {
+      alert("Nessun errore salvato nella banca errori! Ottimo lavoro.");
+      return;
+    }
 
-    setQuizQuestions(pool);
-    setQuizModeInfo({ mode: 'error', subject: null, timerMinutes: 0 });
+    // Map errorPool items back to full question objects
+    const allAvailable = [...questionsData, ...getCustomQuestions()];
+    const errorQuestions = errorPool.map(err => {
+      const found = allAvailable.find(q => q.id === err.questionId);
+      return found || {
+        id: err.questionId,
+        subject: err.subject,
+        chapter: 'Recupero Errori',
+        question: err.question,
+        codeSnippet: null,
+        options: ['Opzione 1', 'Opzione 2', 'Opzione 3', 'Opzione 4'],
+        correctIndex: 0,
+        explanation: 'Domanda recuperata dalla banca errori.',
+        difficulty: 'Intermedio'
+      };
+    });
+
+    setQuizQuestions(errorQuestions);
+    setQuizModeInfo({
+      modeId: 'error-recovery',
+      title: 'Recupero Errori',
+      subject: 'ALL',
+      count: errorQuestions.length,
+      timeLimitMinutes: 0
+    });
     setActiveTab('quiz-run');
   };
 
-  // Load remote cloud data on login if available
-  useEffect(() => {
-    if (currentUser?.id) {
-      cloudFetchUserData(currentUser.id).then(cloudData => {
-        if (cloudData) {
-          // If remote stats exist, refresh local state
-          refreshStats();
-        }
-      });
-    }
-  }, [currentUser]);
-
-  // When user completes a quiz
-  const handleFinishQuiz = (resultData) => {
-    const savedEntry = saveTestResult(resultData);
-    setLastResult(savedEntry);
+  const handleFinishQuiz = (resultPayload) => {
+    saveTestResult(resultPayload);
+    setLastResult(resultPayload);
     refreshStats();
     setActiveTab('quiz-results');
-
-    // Cloud background sync
-    if (currentUser?.id) {
-      cloudSyncUserData(currentUser.id, {
-        stats: getAggregateStats(),
-        errorPool: getErrorPool(),
-        lastResult: savedEntry
-      });
-    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200">
       
-      {/* Top Sticky Header */}
+      {/* Navbar Header */}
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -206,12 +233,13 @@ export default function App() {
             )}
 
             {/* 5. Statistiche (Progressi, Errori, Storico) */}
-            {activeTab === 'statistiche' && (
+            {(activeTab === 'statistiche' || activeTab === 'errors' || activeTab === 'history') && (
               <StatisticheView 
                 stats={stats}
                 onStartErrorReview={handleStartErrorReview}
                 onRefreshStats={refreshStats}
                 setActiveTab={setActiveTab}
+                initialSubTab={activeTab === 'errors' ? 'errors' : activeTab === 'history' ? 'history' : 'overview'}
               />
             )}
 
@@ -251,18 +279,6 @@ export default function App() {
             {activeTab === 'planner' && (
               <StudyPlanner 
                 onStartQuiz={handleStartQuiz}
-              />
-            )}
-
-            {activeTab === 'errors' && (
-              <ErrorPool 
-                onStartErrorReview={handleStartErrorReview}
-              />
-            )}
-
-            {activeTab === 'history' && (
-              <HistoryView 
-                onRefreshStats={refreshStats}
               />
             )}
 
@@ -313,7 +329,7 @@ function Footer() {
   return (
     <footer className="py-3 sm:py-4 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1.5">
-        <span>DevExam Simulator & Study Planner &copy; {new Date().getFullYear()}</span>
+        <span>DevExam Simulator & Study Planner &copy; {CURRENT_YEAR}</span>
         <span className="hidden sm:inline">CSS &bull; JavaScript &bull; React &bull; SQL</span>
       </div>
     </footer>

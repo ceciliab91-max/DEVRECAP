@@ -9,10 +9,12 @@
     "build": "vite build",
     "build:watch": "vite build --watch",
     "lint": "oxlint",
+    "test": "node scripts/test-core.mjs",
     "preview": "vite preview",
-    "lighthouse:mobile": "npx lighthouse http://localhost:5173 --preset=mobile --chrome-flags=\"--headless\" --output=html --output-path=./lighthouse-mobile.report.html",
-    "lighthouse:desktop": "npx lighthouse http://localhost:5173 --preset=desktop --chrome-flags=\"--headless\" --output=html --output-path=./lighthouse-desktop.report.html",
-    "lighthouse:all": "pnpm run lighthouse:mobile && pnpm run lighthouse:desktop"
+    "lighthouse:mobile": "node scripts/run-lighthouse.mjs mobile",
+    "lighthouse:desktop": "node scripts/run-lighthouse.mjs desktop",
+    "lighthouse:all": "node scripts/run-lighthouse.mjs all",
+    "lighthouse:prod": "node scripts/run-lighthouse.mjs all 4173"
   },
   "dependencies": {
     "@langchain/core": "^1.2.13",

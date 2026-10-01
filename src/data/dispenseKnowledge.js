@@ -1,4 +1,3 @@
-import { DispenseKnowledgeBaseSchema } from "../schemas/dispensaSchema.js";
 
 /**
  * Knowledge Base completa e centralizzata delle Dispense Didattiche.

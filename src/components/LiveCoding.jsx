@@ -13,7 +13,7 @@ import {
   Loader2,
   BookOpen
 } from 'lucide-react';
-import { hasValidApiKey, evaluateCodeWithAi } from '../services/aiService';
+import { hasValidApiKey, evaluateLiveCodingChallenge } from '../services/aiService';
 import MissingApiKeyModal from './MissingApiKeyModal';
 
 export const challengesData = [
@@ -471,7 +471,7 @@ export default function LiveCoding({ onGoToProfile }) {
     setIsAiLoading(true);
     setAiVerdict(null);
 
-    const res = await evaluateCodeWithAi(userCode, currentChallenge);
+    const res = await evaluateLiveCodingChallenge(userCode, currentChallenge);
 
     if (res.error === 'MISSING_API_KEY') {
       setIsAiLoading(false);

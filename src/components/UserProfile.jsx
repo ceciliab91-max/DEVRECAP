@@ -12,7 +12,10 @@ import {
   Key, 
   Eye, 
   EyeOff, 
-  ExternalLink
+  ExternalLink,
+  Download,
+  Upload,
+  Database
 } from 'lucide-react';
 import { updateUserProfile } from '../utils/authStorage';
 import { getAggregateStats, getFlashcardStatus } from '../utils/storage';
@@ -61,272 +64,306 @@ export default function UserProfile({ currentUser, onUpdateUser }) {
     }
   };
 
-  const avatarOptions = ['👨‍💻', '👩‍💻', '👨‍🏫', '🎓', '⚡', '🚀', '🧠', '💻'];
-
-  // Achievement Badges calculation
-  const badges = [
-    {
-      id: 'b1',
-      title: 'Primo Passo 🏆',
-      desc: 'Hai completato la tua prima simulazione d\'esame.',
-      unlocked: stats.totalSimulations > 0,
-      icon: Award
-    },
-    {
-      id: 'b2',
-      title: 'Active Recall 📚',
-      desc: 'Hai contrassegnato almeno 5 flashcard come apprese.',
-      unlocked: knownCards >= 5,
-      icon: Layers
-    },
-    {
-      id: 'b3',
-      title: 'Studioso Costante ⏱️',
-      desc: 'Hai completato almeno 3 simulazioni d\'esame.',
-      unlocked: stats.totalSimulations >= 3,
-      icon: Clock
-    },
-    {
-      id: 'b4',
-      title: 'Voto Eccellente 🌟',
-      desc: 'Hai raggiunto la media globale di 27/30 o superiore.',
-      unlocked: stats.averageScore30 >= 27,
-      icon: Sparkles
+  // Lean & Pragmatic JSON Export
+  const handleExportBackup = () => {
+    try {
+      const backupData = {
+        version: "1.0",
+        timestamp: new Date().toISOString(),
+        user: {
+          name: formData.name,
+          bio: formData.bio,
+          avatar: formData.avatar,
+          examDate: formData.examDate,
+          targetGrade: formData.targetGrade
+        },
+        devexam_results: localStorage.getItem('devexam_results'),
+        devexam_error_pool: localStorage.getItem('devexam_error_pool'),
+        devexam_custom_questions: localStorage.getItem('devexam_custom_questions'),
+        devexam_notes: localStorage.getItem('devexam_notes'),
+        devexam_flashcards: localStorage.getItem('devexam_flashcards'),
+        devexam_study_streak: localStorage.getItem('devexam_study_streak'),
+        devexam_study_time: localStorage.getItem('devexam_study_time')
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `devexam-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Errore durante la generazione del file di backup.');
     }
+  };
+
+  // Lean & Pragmatic JSON Import
+  const handleImportBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (!data || !data.version) {
+          alert('Il file selezionato non è un backup valido di DevExam.');
+          return;
+        }
+        const keys = [
+          'devexam_results', 'devexam_error_pool', 'devexam_custom_questions',
+          'devexam_notes', 'devexam_flashcards', 'devexam_study_streak', 'devexam_study_time'
+        ];
+        keys.forEach(k => {
+          if (data[k] !== undefined && data[k] !== null) {
+            localStorage.setItem(k, data[k]);
+          }
+        });
+        alert('Backup ripristinato con successo! Ricarico la pagina.');
+        window.location.reload();
+      } catch {
+        alert('Errore nella lettura del file JSON di backup.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const avatars = ['👨‍💻', '👩‍💻', '🧑‍🎓', '🚀', '⚡', '🤖', '💡', '🔥'];
+
+  const badges = [
+    { id: 1, title: 'Primo Passo', desc: 'Completa la tua prima simulazione', unlocked: stats.totalSimulations > 0, icon: CheckCircle2 },
+    { id: 2, title: 'Cecchino del Codice', desc: 'Ottieni una media punteggio superiore a 25/30', unlocked: stats.averageScore30 >= 25, icon: Target },
+    { id: 3, title: 'Memoria d\'Acciaio', desc: 'Memorizza almeno 5 flashcard concettuali', unlocked: knownCards >= 5, icon: Layers },
+    { id: 4, title: 'Maratoneta dello Studio', desc: 'Mantieni una serie di studio attiva', unlocked: true, icon: Clock }
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-2 sm:pb-4 animate-fadeIn">
+    <div className="space-y-6">
       
-      {/* Profile Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-10 shadow-sm dark:shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-6">
-          
-          {/* Avatar Display */}
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-xl flex-shrink-0">
-            <div className="w-full h-full rounded-[18px] sm:rounded-[22px] bg-white dark:bg-slate-900 flex items-center justify-center text-3xl sm:text-4xl">
-              {formData.avatar}
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-indigo-100/80 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100/80 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-500/20">
+              <User className="w-3.5 h-3.5" />
+              <span>Profilo & Impostazioni</span>
             </div>
-          </div>
-
-          <div className="space-y-1.5 sm:space-y-2 text-center sm:text-left flex-1">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {safeUser.name || safeUser.username || 'Profilo Utente'}
-              </h1>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider border ${
-                safeUser.role === 'admin' 
-                  ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/40' 
-                  : 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/40'
-              }`}>
-                {safeUser.role === 'admin' ? 'Docente / Admin' : 'Studente'}
-              </span>
-            </div>
-
-            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium">
-              {safeUser.email || `${safeUser.username || 'studente'}@devexam.it`}
-            </p>
-
-            <p className="text-slate-600 dark:text-slate-300 text-xs max-w-lg leading-relaxed pt-1">
-              "{formData.bio}"
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Profilo Studente & Obiettivo Esame
+            </h1>
+            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
+              Personalizza i tuoi parametri di studio, la data del colloquio finale, la chiave API AI e il salvataggio dei tuoi dati.
             </p>
           </div>
 
-          {/* Exam Countdown Widget Box */}
-          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/90 dark:bg-slate-950/80 border border-indigo-100 dark:border-indigo-500/30 text-center w-full sm:w-auto sm:min-w-[180px] space-y-1 shadow-sm dark:shadow-lg">
-            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block flex items-center justify-center space-x-1">
-              <Clock className="w-3.5 h-3.5" />
-              <span>Countdown Esame</span>
-            </span>
-            <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent">
-              {daysRemaining} Giorni
-            </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-              Data: {formData.examDate}
+          <div className="flex items-center space-x-2 p-2 rounded-2xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
+            <Clock className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Mancano <strong className="text-indigo-600 dark:text-indigo-400 font-extrabold">{daysRemaining}</strong> giorni all'esame
             </span>
           </div>
-
         </div>
       </div>
 
-      {/* Main Grid: Form + Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
+      {/* Main Grid: Settings & Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column: Form Edit */}
-        <div className="md:col-span-2 space-y-4 sm:space-y-6">
-          <div className="p-4 sm:p-8 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2 pb-1 sm:pb-2">
-              <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400" />
-              <span>Personalizza il tuo Profilo</span>
-            </h2>
+        {/* Left 2 Cols: Profile Form */}
+        <div className="lg:col-span-2 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-5">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2 pb-2">
+              <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>Dati Personali & Target Accademico</span>
+            </h3>
 
-            {savedSuccess && (
-              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Profilo aggiornato con successo!</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              
-              {/* Name */}
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Nome Completo</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-
-              {/* Bio */}
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">Biografia / Note Personali</label>
-                <textarea
-                  rows={3}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  placeholder="Es. Sviluppatore Web Junior in preparazione per l'esame finale."
-                  className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 resize-none"
-                />
-              </div>
-
-              {/* Avatar Selector */}
-              <div className="space-y-2 pt-1">
-                <label className="font-semibold text-slate-700 dark:text-slate-300 block">Scegli Avatar:</label>
-                <div className="flex flex-wrap gap-2">
-                  {avatarOptions.map((av) => (
-                    <button
-                      key={av}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, avatar: av })}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border transition-all ${
-                        formData.avatar === av
-                          ? 'bg-indigo-500/20 border-indigo-500 scale-110'
-                          : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {av}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Exam Date & Target Grade Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
-                    <Calendar className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-                    <span>Data Obiettivo Esame</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.examDate}
-                    onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
-                    <Target className="w-3.5 h-3.5 text-pink-500 dark:text-pink-400" />
-                    <span>Target Voto Finale</span>
-                  </label>
-                  <select
-                    value={formData.targetGrade}
-                    onChange={(e) => setFormData({ ...formData, targetGrade: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500"
+            {/* Avatar Selector */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Avatar Profilo</label>
+              <div className="flex flex-wrap gap-2">
+                {avatars.map((av) => (
+                  <button
+                    type="button"
+                    key={av}
+                    onClick={() => setFormData({ ...formData, avatar: av })}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${
+                      formData.avatar === av
+                        ? 'bg-indigo-600 text-white shadow-md scale-110'
+                        : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                    }`}
                   >
-                    <option value="18/30">18 / 30 (Sufficiente)</option>
-                    <option value="24/30">24 / 30 (Buono)</option>
-                    <option value="28/30">28 / 30 (Ottimo)</option>
-                    <option value="30/30">30 / 30 (Eccellente)</option>
-                    <option value="30L">30 e Lode (Massimo)</option>
-                  </select>
-                </div>
-
+                    {av}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Card Configurazione AI & API Key */}
-              <div className="pt-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Key className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Configurazione AI & API Key</h3>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[10px] font-bold uppercase tracking-wider">
-                    BYOK Model
-                  </span>
-                </div>
-                <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
-                  Inserisci la tua API Key personale Google Gemini per sbloccare il Tutor IA e le valutazioni del Live Coding a costo zero.
-                </p>
+            {/* Name Input */}
+            <div>
+              <label htmlFor="user-fullname" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nome Completo</label>
+              <input
+                id="user-fullname"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Il tuo nome o nickname"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">Gemini API Key Personale</label>
-                  <div className="relative flex items-center">
-                    <input
-                      type={showApiKey ? "text" : "password"}
-                      value={formData.apiKey}
-                      onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                      placeholder="Inserisci la tua chiave API (es. AIzaSy...)"
-                      className="w-full pl-4 pr-12 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-purple-500 transition-colors font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg transition-colors"
-                      title={showApiKey ? "Nascondi chiave" : "Mostra chiave"}
-                    >
-                      {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
+            {/* Bio / Obiettivo */}
+            <div>
+              <label htmlFor="user-bio" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Bio / Obiettivo Professionale</label>
+              <textarea
+                id="user-bio"
+                rows={3}
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                placeholder="Descrivi brevemente i tuoi obiettivi..."
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+              />
+            </div>
 
-                <div className="pt-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-semibold underline underline-offset-4 transition-colors"
-                  >
-                    <span>Ottieni una chiave gratuita su Google AI Studio</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              <div className="pt-4 flex items-center space-x-3">
-                <button
-                  type="submit"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600 hover:from-indigo-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition-all"
+            {/* Target Grade & Exam Date Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="user-target-grade" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
+                  <Target className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Obiettivo Voto Esame</span>
+                </label>
+                <select
+                  id="user-target-grade"
+                  value={formData.targetGrade}
+                  onChange={(e) => setFormData({ ...formData, targetGrade: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>Salva Chiave & Profilo</span>
+                  <option value="Superamento (18-21)">Superamento (18-21)</option>
+                  <option value="Buono (22-25)">Buono (22-25)</option>
+                  <option value="Distinto (26-28)">Distinto (26-28)</option>
+                  <option value="28/30">28/30 (Consigliato)</option>
+                  <option value="30 e Lode">30 e Lode</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="user-exam-date" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">
+                  <Calendar className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Data Esame Finale</span>
+                </label>
+                <input
+                  id="user-exam-date"
+                  type="date"
+                  value={formData.examDate}
+                  onChange={(e) => setFormData({ ...formData, examDate: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Gemini API Key Config */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="user-api-key" className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Chiave API Google Gemini (Personale)</span>
+                </label>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1"
+                >
+                  <span>Ottieni gratis</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+              
+              <div className="relative">
+                <input
+                  id="user-api-key"
+                  type={showApiKey ? "text" : "password"}
+                  value={formData.apiKey}
+                  onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                  placeholder="Incolla qui la tua API Key Gemini..."
+                  className="w-full pl-3.5 pr-10 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                La chiave abilita il Tutor IA e le simulazioni orali. Viene salvata localmente nel tuo browser.
+              </p>
+            </div>
 
-            </form>
+            {/* Submit Button */}
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 flex items-center space-x-2 transition-all cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                <span>Salva Modifiche Profilo</span>
+              </button>
+
+              {savedSuccess && (
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center space-x-1 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Salvato con successo!</span>
+                </span>
+              )}
+            </div>
+          </form>
+
+          {/* Lean & Pragmatic Backup/Restore Section */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="flex items-center space-x-2">
+              <Database className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Portabilità & Backup Dati Locale (KISS)
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Esporta tutti i tuoi appunti, errori, statistiche e quiz in un unico file JSON scaricabile, oppure ripristina un backup per sincronizzare un altro dispositivo senza bisogno di cloud.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={handleExportBackup}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
+              >
+                <Download className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Esporta Backup JSON</span>
+              </button>
+
+              <label className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer border border-slate-200 dark:border-slate-700">
+                <Upload className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Ripristina da File JSON</span>
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleImportBackup}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Stats & Badges */}
+        {/* Right 1 Col: Summary & Badges */}
         <div className="space-y-6">
           
-          {/* Quick Stats Summary */}
+          {/* Quick Academic Summary */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-xs">
             <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center space-x-2 pb-1">
-              <Award className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-              <span>Statistiche di Studio</span>
+              <Award className="w-4 h-4 text-amber-500" />
+              <span>Riepilogo Avanzamento</span>
             </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
                 <span className="text-slate-600 dark:text-slate-400">Simulazioni Svolte:</span>
                 <strong className="text-slate-900 dark:text-white font-bold text-sm">{stats.totalSimulations}</strong>

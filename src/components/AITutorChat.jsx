@@ -7,7 +7,6 @@ import {
   Key,
   RotateCcw,
   Lightbulb,
-  Mic,
   Target,
   Wrench,
   BookOpen,
