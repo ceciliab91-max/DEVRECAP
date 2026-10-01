@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Base - Oggetti</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#oggetti">Oggetti</a></li>
+                <li><a href="#dot-notation">Dot notation</a></li>
+                <li><a href="#bracket-notation">Bracket notation</a></li>
+                <li><a href="#metodi">Metodi</a></li>
+                <li><a href="#innestati">Oggetti innestati</a></li>
+                <li><a href="#array-oggetti">Array di oggetti</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Oggetti in JavaScript</h1>
+            <p class="intro">Strutture dati con chiavi, dot notation, bracket notation, metodi, oggetti innestati e array di oggetti.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+
+            <section id="oggetti">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Oggetti come strutture dati</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un oggetto è una struttura dati formata da proprietà. Ogni proprietà ha una chiave e un valore: la chiave identifica l'informazione, il valore contiene il dato vero e proprio.</p>
+                </div>
+
+                <p>Gli array, già noti, raccolgono elementi accessibili tramite indice numerico. Gli oggetti funzionano in modo diverso: ogni dato ha un nome preciso chiamato chiave. Questo li rende più adatti quando vuoi descrivere qualcosa con caratteristiche specifiche, come una persona, un libro o un prodotto.</p>
+
+                <p>La sintassi di un oggetto usa le parentesi graffe. Dentro si scrivono le proprietà separate da virgole, sempre nella forma <code>chiave: valore</code>. Le chiavi devono essere scelte in modo chiaro, perché servono a capire subito cosa rappresenta ogni dato.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const libro = {
+    titolo: "Il nome della rosa",
+    autore: "Umberto Eco",
+    anno: 1980
+};</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un oggetto con le informazioni di uno studente: nome, età e corso.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const studente = {
+    nome: "Luca",
+    eta: 19,
+    corso: "Web Development"
+};</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dot-notation">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Accesso con dot notation</h2>
+                </header>
+
+                <div class="note">
+                    <p>La dot notation permette di leggere una proprietà di un oggetto scrivendo il nome dell'oggetto, un punto e la chiave della proprietà da leggere.</p>
+                </div>
+
+                <p>Per accedere a un valore si scrive prima il nome della variabile che contiene l'oggetto, poi un punto, poi la chiave desiderata. La sintassi è semplice e diretta, ed è la forma più usata per lavorare con gli oggetti quando si conosce già il nome della chiave.</p>
+
+                <p>Con la dot notation puoi usare il valore in una <code>console.log</code>, in un calcolo o dentro un template literal. La struttura è sempre la stessa: oggetto, punto, chiave.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studente = {
+    nome: "Luca",
+    eta: 19,
+    corso: "Web Development"
+};
+
+console.log(studente.nome);
+console.log(studente.corso);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dato un oggetto con i dati di una macchina, mostra a console marca e modello usando la dot notation.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const macchina = {
+    marca: "Fiat",
+    modello: "Panda",
+    anno: 2024
+};
+
+console.log(macchina.marca);
+console.log(macchina.modello);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bracket-notation">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Bracket notation</h2>
+                </header>
+
+                <div class="note">
+                    <p>La bracket notation è un modo alternativo per accedere alle proprietà di un oggetto. Si scrive il nome dell'oggetto seguito dalla chiave tra parentesi quadre e virgolette: <code>oggetto["chiave"]</code>.</p>
+                </div>
+
+                <p>La dot notation funziona bene nella maggior parte dei casi, ma ha un limite: la chiave deve essere un nome valido, senza spazi o caratteri speciali. Quando la chiave contiene spazi o caratteri particolari, la dot notation non funziona e bisogna usare la bracket notation.</p>
+
+                <p>L'altro caso in cui la bracket notation è indispensabile è quando la chiave non è scritta direttamente nel codice, ma è contenuta in una variabile. Questo accade, per esempio, quando la chiave viene chiesta all'utente tramite <code>prompt</code>: in quel momento non si sa in anticipo quale proprietà verrà richiesta, quindi non si può scrivere il nome fisso nel codice.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const prodotto = {
+    nome: "Tastiera",
+    "prezzo scontato": 39,
+    disponibile: true
+};
+
+// chiave con spazio: serve la bracket notation
+console.log(prodotto["prezzo scontato"]);
+
+// chiave dinamica tramite prompt
+const chiave = prompt("Quale proprietà vuoi leggere?");
+console.log(prodotto[chiave]);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un oggetto con una proprietà la cui chiave contiene uno spazio. Leggila con la bracket notation. Poi chiedi all'utente tramite <code>prompt</code> quale proprietà vuole vedere e mostrala a console.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const libro = {
+    titolo: "Dune",
+    "anno di pubblicazione": 1965,
+    autore: "Frank Herbert"
+};
+
+console.log(libro["anno di pubblicazione"]);
+
+const chiave = prompt("Quale informazione vuoi leggere?");
+console.log(libro[chiave]);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="metodi">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Metodi negli oggetti</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un metodo è una funzione definita come proprietà di un oggetto. Si comporta come le altre proprietà, ma il suo valore è una funzione che può essere chiamata con le parentesi.</p>
+                </div>
+
+                <p>Oltre a stringhe, numeri e booleani, il valore di una proprietà può essere anche una funzione. In questo caso la proprietà si chiama metodo. I metodi servono per associare un comportamento direttamente all'oggetto, cioè per fargli fare qualcosa in base ai propri dati.</p>
+
+                <p>Dentro un metodo è disponibile la parola chiave <code>this</code>, che fa riferimento all'oggetto stesso. Grazie a <code>this</code> il metodo può leggere le proprietà dell'oggetto in cui si trova, senza dover passare nulla dall'esterno. Per chiamare un metodo si usa la dot notation seguita dalle parentesi: <code>oggetto.metodo()</code>.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const persona = {
+    nome: "Anna",
+    annoNascita: 2000,
+    calcAge() {
+        return new Date().getFullYear() - this.annoNascita;
+    }
+};
+
+console.log(persona.nome);
+console.log(persona.calcAge());</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un oggetto che rappresenti un rettangolo con larghezza e altezza. Aggiungi un metodo che calcoli e restituisca l'area. Mostra il risultato a console.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const rettangolo = {
+    larghezza: 8,
+    altezza: 5,
+    calcolaArea() {
+        return this.larghezza * this.altezza;
+    }
+};
+
+console.log(rettangolo.calcolaArea());</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="innestati">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Oggetti innestati</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un oggetto innestato è un oggetto contenuto come valore di una proprietà di un altro oggetto. Serve quando un'informazione è essa stessa composta da più dettagli collegati.</p>
+                </div>
+
+                <p>Non tutti i valori di un oggetto devono essere stringhe o numeri: il valore di una proprietà può essere a sua volta un oggetto. In questo caso si parla di oggetto innestato, e la struttura diventa multilivello.</p>
+
+                <p>Per accedere ai dati di un oggetto innestato si usa ancora la dot notation, aggiungendo un secondo punto dopo la proprietà che contiene l'oggetto interno. Si scende di livello semplicemente continuando la catena di punti.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studente = {
+    nome: "Anna",
+    eta: 18,
+    indirizzo: {
+        citta: "Roma",
+        via: "Via del Corso"
+    }
+};
+
+console.log(studente.indirizzo.citta);
+console.log(studente.indirizzo.via);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un oggetto che rappresenti un corso con un oggetto innestato per il docente. Mostra a console il nome del docente.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const corso = {
+    nome: "JavaScript Base",
+    docente: {
+        nome: "Giulia",
+        cognome: "Rossi"
+    }
+};
+
+console.log(corso.docente.nome);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="array-oggetti">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Array di oggetti</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un array di oggetti è un array in cui ogni elemento non è un valore semplice, ma un oggetto. È una delle strutture più usate per rappresentare liste di entità con proprietà.</p>
+                </div>
+
+                <p>Gli array permettono di raccogliere più elementi in un unico contenitore accessibile tramite indice. Quando ogni elemento di quella lista deve avere più caratteristiche, conviene usare un oggetto al posto di un valore singolo. Il risultato è un array di oggetti: una lista dove ogni voce ha la propria struttura di chiavi e valori.</p>
+
+                <p>Per leggere un dato si combinano le due sintassi già note: prima si usa l'indice per accedere all'elemento dell'array, poi la dot notation per accedere alla proprietà dell'oggetto che si trova in quella posizione.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studenti = [
+    { nome: "Anna", eta: 18 },
+    { nome: "Marco", eta: 20 },
+    { nome: "Sara", eta: 19 }
+];
+
+console.log(studenti[0].nome);
+console.log(studenti[1].eta);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un array con tre prodotti, ognuno con nome e prezzo. Mostra a console il nome del primo prodotto e il prezzo del terzo.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodotti = [
+    { nome: "Tastiera", prezzo: 49 },
+    { nome: "Mouse", prezzo: 25 },
+    { nome: "Monitor", prezzo: 199 }
+];
+
+console.log(prodotti[0].nome);
+console.log(prodotti[2].prezzo);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+    <h3>Esercizio finale</h3>
+    <p>Crea un array di almeno quattro prodotti. Ogni prodotto deve avere nome, prezzo e un array di tag (come <code>"tech", "gaming", "accessori" o "display"</code>). Poi usa i metodi sugli array per:</p>
+
+    <ul>
+        <li>ottenere solo i prodotti che costano meno di 100€;</li>
+        <li>creare un array di stringhe nel formato <code>"Nome — X €"</code>;</li>
+        <li>trovare il primo prodotto che ha il tag <code>"gaming"</code>;</li>
+        <li>stampare a console tutti i tag del prodotto trovato.</li>
+    </ul>
+
+    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+    <div class="panel">
+        <pre><code class="language-javascript">const prodotti = [
+    { nome: "Tastiera meccanica", prezzo: 89, tag: ["tech", "gaming", "accessori"] },
+    { nome: "Monitor 4K", prezzo: 349, tag: ["tech", "gaming", "display"] },
+    { nome: "Mouse wireless", prezzo: 45, tag: ["tech", "accessori"] },
+    { nome: "Cuffie gaming", prezzo: 79, tag: ["gaming", "audio"] }
+];
+
+const economici = prodotti.filter(p => p.prezzo < 100);
+
+const etichette = economici.map(p => `${p.nome} — ${p.prezzo} €`);
+
+const gaming = prodotti.find(p => p.tag.includes("gaming"));
+
+for (let i = 0; i < gaming.tag.length; i++) {
+    console.log(gaming.tag[i]);
+}
+
+console.log(etichette);
+console.log(gaming.nome);</code></pre>
+    </div>
+</section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

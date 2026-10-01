@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express e Mistral: integrazione AI - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body><a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + Mistral</div>
+            <ul>
+                <li><a href="#idea">Flusso</a></li>
+                <li><a href="#env">Chiave API</a></li>
+                <li><a href="#service">Service</a></li>
+                <li><a href="#route">Rotta</a></li>
+                <li><a href="#test">Test</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Express e Mistral: integrazione AI</h1>
+            <p class="intro">Usare le API di Mistral dal backend Express, mantenendo la chiave API fuori dal frontend.
+            </p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="idea">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Il backend parla con l'AI</h2>
+                </header>
+                <div class="note">
+                    <p>La chiave API di Mistral deve restare nel <strong>backend</strong>. React o qualsiasi altro
+                        frontend invia il messaggio a Express; Express contatta Mistral e restituisce solo la risposta
+                        necessaria.</p>
+                </div>
+                <pre><code class="language-text">Frontend
+  │ POST /api/chat { message }
+  ▼
+Server Express
+  │ usa MISTRAL_API_KEY
+  ▼
+API Mistral
+  │ risposta del modello
+  ▼
+Server Express → Frontend</code></pre>
+                <p>Non chiamare Mistral direttamente dal browser e non inserire la chiave in file React, nel codice
+                    JavaScript pubblico o in una variabile che inizia con <code>VITE_</code>. Chi visita il sito
+                    potrebbe vedere e usare quella chiave.</p>
+                <p>In questa lezione creiamo un piccolo endpoint <code>POST /api/chat</code>. Riceve una domanda, la
+                    invia a Mistral tramite un service e restituisce la risposta in JSON.</p>
+            </section>
+            <section id="env">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Salvare la chiave nel file .env</h2>
+                </header>
+                <p>Non installiamo alcun package esterno. Node.js 18 o successivo include già <code>fetch()</code>.
+                    Mistral usa un formato compatibile con OpenAI Chat Completions: il service invierà direttamente una
+                    richiesta HTTP con quel formato.</p>
+                <p>Crea un file <code>.env</code> nella cartella principale del progetto. Incolla una chiave creata nel
+                    tuo account Mistral al posto del valore di esempio.</p>
+                <pre><code class="language-bash">MISTRAL_API_KEY="incolla-la-tua-chiave-qui"
+MISTRAL_MODEL="mistral-small-latest"</code></pre>
+                <p>Il comando Node deve leggere questo file prima di avviare <code>server.js</code>. Nel
+                    <code>package.json</code> aggiorna lo script di sviluppo:</p>
+                <pre><code class="language-json">{
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=.env --watch server.js"
+  }
+}</code></pre>
+                <p>Node carica le variabili in <code>process.env</code>. Per esempio, nel server leggiamo la chiave con
+                    <code>process.env.MISTRAL_API_KEY</code>.</p>
+                <pre><code class="language-text">express-ai/
+├── .env
+├── .gitignore
+├── services/
+│   └── mistral.js
+├── package.json
+└── server.js</code></pre>
+                <p>Aggiungi questa riga a <code>.gitignore</code>: il file non verrà caricato su GitHub.</p>
+                <pre><code class="language-text">.env</code></pre>
+                <div class="note">
+                    <p>Se una chiave finisce per errore su GitHub, revocala dal pannello Mistral e creane una nuova.
+                        Rimuoverla da un commit non basta: potrebbe essere già stata copiata.</p>
+                </div>
+            </section>
+            <section id="service">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Creare un service compatibile con OpenAI</h2>
+                </header>
+                <p>Un <strong>service</strong> raccoglie il codice che comunica con un servizio esterno. In questo modo
+                    <code>server.js</code> resta dedicato alle rotte, mentre <code>services/mistral.js</code> gestisce
+                    Mistral.</p>
+                <pre><code class="language-js">// services/mistral.js
+const apiKey = process.env.MISTRAL_API_KEY;
+const apiUrl = 'https://api.mistral.ai/v1/chat/completions';
+
+if (!apiKey) {
+  throw new Error('MISTRAL_API_KEY non trovata');
+}
+
+export async function askMistral({
+  message,
+  systemMessage = 'Rispondi in italiano in modo chiaro e breve.',
+  model = process.env.MISTRAL_MODEL || 'mistral-small-latest',
+  temperature = 0.7,
+  maxTokens = 200,
+}) {
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: message },
+      ],
+      temperature,
+      max_tokens: maxTokens,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Mistral ha risposto con status ' + response.status);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}</code></pre>
+                <p><code>askMistral()</code> riceve un oggetto con i parametri della richiesta. <code>message</code> è
+                    obbligatorio; <code>systemMessage</code>, <code>model</code>, <code>temperature</code> e
+                    <code>maxTokens</code> hanno valori predefiniti. Il messaggio <code>system</code> imposta il
+                    comportamento dell'assistente, mentre il messaggio <code>user</code> contiene la domanda.</p>
+                <div class="note">
+                    <p>Nessun package esterno è coinvolto: <code>fetch()</code> invia direttamente la richiesta. Il body
+                        usa i campi OpenAI-compatible <code>model</code>, <code>messages</code>,
+                        <code>temperature</code> e <code>max_tokens</code>.</p>
+                </div>
+            </section>
+            <section id="route">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Creare la rotta Express</h2>
+                </header>
+                <p>Importiamo il service e lo usiamo dentro la rotta <code>POST /api/chat</code>. Prima controlliamo che
+                    il client abbia inviato un messaggio; poi restituiamo la risposta dell'AI.</p>
+                <pre><code class="language-js">// server.js
+import express from 'express';
+import { askMistral } from './services/mistral.js';
+
+const app = express();
+const port = 3000;
+
+app.use(express.json());
+
+app.post('/api/chat', async (req, res) =&gt; {
+  const { message, systemMessage, model, temperature, maxTokens } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Il messaggio è obbligatorio' });
+  }
+
+  try {
+    const answer = await askMistral({
+      message,
+      systemMessage,
+      model,
+      temperature,
+      maxTokens,
+    });
+    res.json({ answer });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Errore nella richiesta a Mistral' });
+  }
+});
+
+app.listen(port, () =&gt; {
+  console.log(`Server pronto su http://localhost:${port}`);
+});</code></pre>
+                <p>La rotta passa i parametri ricevuti al service. Il frontend riceve soltanto
+                    <code>{ answer: '...' }</code>; non riceve mai la chiave API. In un progetto reale conviene decidere
+                    sul server quali modelli e quali limiti permettere, invece di fidarsi dei valori inviati dal client.
+                </p>
+            </section>
+            <section id="test">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Avviare e testare l'API</h2>
+                </header>
+                <p>Avvia Express con il comando seguente:</p>
+                <pre><code class="language-bash">pnpm dev</code></pre>
+                <p>Con Postman o LiteClient invia una richiesta alla rotta locale.</p>
+                <pre><code class="language-json">POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "message": "Spiegami cos'è un middleware in Express in una frase.",
+  "temperature": 0.3,
+  "maxTokens": 100
+}</code></pre>
+                <p>Una risposta riuscita ha questa forma:</p>
+                <pre><code class="language-json">{
+  "answer": "Un middleware è una funzione che gestisce una richiesta prima della risposta finale."
+}</code></pre>
+                <p>Se ricevi <code>MISTRAL_API_KEY non trovata</code>, controlla il nome del file, la posizione di
+                    <code>.env</code> e lo script con <code>--env-file=.env</code>. Se ricevi <code>401</code>, la
+                    chiave non è valida o è stata revocata.</p>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi una seconda rotta <code>POST /api/riassunto</code>. Deve ricevere <code>text</code> nel
+                        body e chiamare lo stesso service con un messaggio del tipo: <em>Riassumi questo testo in tre
+                            punti: ...</em>.</p>
+                </div>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: assistente per il catalogo libri</h3>
+                <p>Crea <code>POST /api/books/description</code>. La rotta riceve titolo, autore e genere di un libro e
+                    usa il service Mistral per generare una breve descrizione in italiano.</p>
+                <p>Valida tutti i campi, mantieni la chiave in <code>.env</code> e non inviarla mai al frontend.
+                    Restituisci il testo generato dentro una proprietà <code>description</code>.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

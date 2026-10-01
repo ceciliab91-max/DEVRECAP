@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Relazioni tra tabelle con MySQL - Dispensa didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">MySQL</div>
+                <ul>
+                    <li><a href="#relazioni">Relazioni</a></li>
+                    <li><a href="#chiavi">Chiavi</a></li>
+                    <li><a href="#uno-molti">Uno a molti</a></li>
+                    <li><a href="#azioni">Azioni</a></li>
+                    <li><a href="#molti-molti">Molti a molti</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>Relazioni tra tabelle con MySQL</h1>
+                <p class="intro">Come collegare dati distribuiti in tabelle diverse con chiavi esterne e cardinalit&agrave;.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="relazioni">
+                    <header>
+                        <p class="index">Capitolo 1</p>
+                        <h2>Perch&eacute; usare relazioni</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una relazione collega record di tabelle diverse senza duplicare gli stessi dati in pi&ugrave; punti.</p>
+                    </div>
+
+                    <p>In un database reale le informazioni appartengono spesso a entit&agrave; diverse. Un cliente e un ordine, per esempio, sono due cose distinte: ciascuna merita una tabella con i propri campi.</p>
+                    <p>Salvare i dati del cliente dentro ogni ordine produrrebbe duplicazioni. Se l'email cambia, sarebbe necessario correggerla in tutti gli ordini. Separando le tabelle, i dati del cliente vengono registrati una sola volta e gli ordini si collegano a quel record.</p>
+
+                    <pre><code class="language-text">clienti                         ordini
++----+----------------+          +----+------------+-------------+
+| id | email          |          | id | totale     | cliente_id  |
++----+----------------+          +----+------------+-------------+
+| 1  | mario@email.it |          | 1  | 49.90      | 1           |
++----+----------------+          +----+------------+-------------+</code></pre>
+                </section>
+
+                <section id="chiavi">
+                    <header>
+                        <p class="index">Capitolo 2</p>
+                        <h2>Chiave primaria e chiave esterna</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>La <strong>chiave esterna</strong> &egrave; un campo che contiene il valore della chiave primaria di un record presente in un'altra tabella.</p>
+                    </div>
+
+                    <p>La <strong>chiave primaria</strong> identifica in modo univoco un record nella propria tabella. In <code>clienti</code>, per esempio, <code>id</code> identifica un singolo cliente.</p>
+                    <p>La <strong>chiave esterna</strong>, o <em>foreign key</em>, crea il collegamento. In <code>ordini</code>, il campo <code>cliente_id</code> contiene l'<code>id</code> del cliente a cui appartiene l'ordine.</p>
+
+                    <pre><code class="language-text">clienti.id  ←  ordini.cliente_id</code></pre>
+
+                    <p>MySQL pu&ograve; controllare questo collegamento: un ordine non pu&ograve; riferirsi a un cliente che non esiste. Questa garanzia si chiama <strong>integrit&agrave; referenziale</strong>.</p>
+                </section>
+
+                <section id="uno-molti">
+                    <header>
+                        <p class="index">Capitolo 3</p>
+                        <h2>Relazione uno a molti</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>In una relazione uno-a-molti, un record della prima tabella pu&ograve; essere collegato a molti record della seconda; ogni record della seconda tabella appartiene a uno solo della prima.</p>
+                    </div>
+
+                    <p>Un cliente pu&ograve; effettuare molti ordini, ma ogni ordine appartiene a un solo cliente. La chiave esterna viene quindi inserita nella tabella che rappresenta la parte “molti”: <code>ordini</code>.</p>
+
+                    <pre><code class="language-sql">CREATE TABLE clienti (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE ordini (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    totale DECIMAL(10, 2) NOT NULL CHECK (totale &gt;= 0),
+    cliente_id INT NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clienti(id)
+);</code></pre>
+
+                    <p>Il tipo di <code>cliente_id</code> deve essere compatibile con il tipo della chiave primaria a cui si riferisce. Qui entrambi sono <code>INT</code>.</p>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Una categoria pu&ograve; contenere molti prodotti, mentre ogni prodotto appartiene a una sola categoria. In quale tabella inseriresti la chiave esterna?</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <p>La chiave esterna va nella tabella <code>prodotti</code>, per esempio nel campo <code>categoria_id</code>, perch&eacute; &egrave; la tabella sul lato “molti”.</p>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="uno-uno">
+                    <header>
+                        <p class="index">Capitolo 4</p>
+                        <h2>Relazione uno a uno</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>In una relazione uno-a-uno, un record pu&ograve; essere collegato al massimo a un solo record dell'altra tabella.</p>
+                    </div>
+
+                    <p>Questo tipo di relazione &egrave; meno frequente. Pu&ograve; essere utile quando alcuni dati sono opzionali, riservati o usati raramente. Per esempio, un utente pu&ograve; avere un solo profilo esteso.</p>
+                    <p>Per rendere univoco il collegamento, la chiave esterna deve avere anche il vincolo <code>UNIQUE</code>.</p>
+
+                    <pre><code class="language-sql">CREATE TABLE utenti (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE profili (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    biografia TEXT,
+    utente_id INT NOT NULL UNIQUE,
+    FOREIGN KEY (utente_id) REFERENCES utenti(id)
+);</code></pre>
+                </section>
+
+                <section id="azioni">
+                    <header>
+                        <p class="index">Capitolo 5</p>
+                        <h2>Modifiche e cancellazioni</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Le azioni della chiave esterna definiscono che cosa accade ai record collegati quando il record di riferimento viene modificato o eliminato.</p>
+                    </div>
+
+                    <p>Le azioni si dichiarano dopo <code>REFERENCES</code>. Devono rispecchiare la regola del dominio: non esiste una scelta sempre corretta.</p>
+
+                    <pre><code class="language-sql">FOREIGN KEY (cliente_id)
+    REFERENCES clienti(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE</code></pre>
+
+                    <ul>
+                        <li><code>RESTRICT</code> blocca l'operazione se esistono record collegati.</li>
+                        <li><code>CASCADE</code> propaga l'operazione ai record collegati.</li>
+                        <li><code>SET NULL</code> imposta a <code>NULL</code> la chiave esterna; il campo non pu&ograve; quindi avere <code>NOT NULL</code>.</li>
+                    </ul>
+
+                    <p><code>ON DELETE CASCADE</code> pu&ograve; eliminare molti record insieme: va usato soltanto quando quei record non hanno significato senza il record di riferimento.</p>
+                </section>
+
+                <section id="molti-molti">
+                    <header>
+                        <p class="index">Capitolo 6</p>
+                        <h2>Relazione molti a molti</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una relazione molti-a-molti richiede una terza tabella, chiamata <strong>tabella ponte</strong>, che contiene le due chiavi esterne.</p>
+                    </div>
+
+                    <p>Uno studente pu&ograve; frequentare molti corsi e un corso pu&ograve; avere molti studenti. Non &egrave; corretto salvare una lista di corsi in un solo campo dello studente: ogni campo deve contenere un solo valore.</p>
+
+                    <pre><code class="language-text">studenti  ←  iscrizioni  →  corsi</code></pre>
+
+                    <pre><code class="language-sql">CREATE TABLE studenti (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE corsi (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE iscrizioni (
+    studente_id INT NOT NULL,
+    corso_id INT NOT NULL,
+    data_iscrizione DATE NOT NULL,
+    PRIMARY KEY (studente_id, corso_id),
+    FOREIGN KEY (studente_id) REFERENCES studenti(id),
+    FOREIGN KEY (corso_id) REFERENCES corsi(id)
+);</code></pre>
+
+                    <p>La chiave primaria composta da <code>studente_id</code> e <code>corso_id</code> impedisce di registrare due volte la stessa iscrizione. La tabella ponte pu&ograve; inoltre avere attributi propri, come <code>data_iscrizione</code>.</p>
+                </section>
+
+                <section class="task" id="esercizio-finale">
+                    <h3>Esercizio finale</h3>
+                    <p>Un ristorante vuole gestire i tavoli e le prenotazioni. Progetta e crea le tabelle necessarie, definendo la relazione tra di esse con una chiave esterna.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-sql">CREATE TABLE tavoli (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    numero INT NOT NULL UNIQUE,
+    posti INT NOT NULL CHECK (posti &gt; 0)
+);
+
+CREATE TABLE prenotazioni (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome_cliente VARCHAR(100) NOT NULL,
+    data_ora DATETIME NOT NULL,
+    persone INT NOT NULL CHECK (persone &gt; 0),
+    tavolo_id INT NOT NULL,
+    FOREIGN KEY (tavolo_id) REFERENCES tavoli(id)
+);</code></pre>
+                    </div>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

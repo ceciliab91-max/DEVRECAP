@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing e Router in Express - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">ExpressJs</div>
+            <ul>
+                <li><a href="#routing">Routing</a></li>
+                <li><a href="#params">Parametri</a></li>
+                <li><a href="#crud">CRUD</a></li>
+                <li><a href="#rest">REST</a></li>
+                <li><a href="#router">Router</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Routing e Router in Express</h1>
+            <p class="intro">Organizzare gli endpoint di un'API con convenzioni REST e file router dedicati.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="routing">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Routing: dare una destinazione a ogni richiesta</h2>
+                </header>
+                <div class="note">
+                    <p>Il <strong>routing</strong> è il sistema di instradamento di Express: a ogni combinazione di
+                        metodo HTTP e percorso corrisponde una funzione che prepara la risposta.</p>
+                </div>
+                <p>Una rotta non è soltanto un URL. <code>GET /pizzas</code> e <code>POST /pizzas</code> hanno lo stesso
+                    percorso, ma sono due richieste diverse e possono svolgere due operazioni diverse.</p>
+                <pre><code class="language-javascript">// metodo HTTP + percorso + funzione da eseguire
+app.get('/pizzas', (req, res) =&gt; {
+  res.send('Lista delle pizze');
+});
+
+app.post('/pizzas', (req, res) =&gt; {
+  res.send('Creazione di una nuova pizza');
+});</code></pre>
+                <p>Quando arriva una richiesta, Express controlla le rotte nell'ordine in cui sono state dichiarate. Se
+                    trova metodo e percorso corrispondenti, esegue la funzione associata.</p>
+                <p>Se nessuna rotta corrisponde, Express non sa come rispondere e il client riceve un errore
+                    <code>404 Not Found</code>. Per questo ogni endpoint va scritto con attenzione e testato: una
+                    piccola differenza nel percorso o nel metodo HTTP rende la richiesta diversa.</p>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi le rotte <code>GET /chi-siamo</code> e <code>GET /contatti</code>. Devono rispondere con
+                        un messaggio testuale.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">app.get('/chi-siamo', (req, res) =&gt; {
+  res.send('Pagina chi siamo');
+});
+
+app.get('/contatti', (req, res) =&gt; {
+  res.send('Pagina contatti');
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="params">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Parametri dinamici</h2>
+                </header>
+                <p>Un parametro dinamico è una parte variabile del percorso. Si scrive con i due punti, per esempio
+                    <code>:id</code>. Express raccoglie il valore nell'oggetto <code>req.params</code>.</p>
+                <pre><code class="language-text">GET /products/7
+             └─ valore del parametro id</code></pre>
+                <pre><code class="language-javascript">app.get('/products/:id', (req, res) =&gt; {
+  console.log(req.params.id);
+  res.send(`Hai richiesto il prodotto con id ${req.params.id}`);
+});</code></pre>
+                <p>Visitando <code>/products/7</code>, <code>req.params.id</code> vale <code>'7'</code>. Per ora non
+                    cerchiamo il prodotto in un array: ci interessa riconoscere come il client può indicare una risorsa
+                    specifica nell'URL.</p>
+                <p>I parametri sono sempre ricevuti come testo. Quando in seguito confronteremo un id con un numero
+                    presente in un array o nel database, potremo convertirlo con <code>Number(req.params.id)</code>.</p>
+                <div class="note">
+                    <p>Una rotta con parametro, come <code>/pizzas/:id</code>, va dichiarata dopo la rotta più generale
+                        <code>/pizzas</code>.</p>
+                </div>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>GET /utenti/:id</code>. Rispondi con il messaggio <em>Dettagli utente X</em>,
+                        sostituendo X con il parametro ricevuto.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">app.get('/utenti/:id', (req, res) =&gt; {
+  res.send('Dettagli utente ' + req.params.id);
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="crud">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Risorse e operazioni CRUD</h2>
+                </header>
+                <p>In un'API una <strong>risorsa</strong> è un insieme di dati dello stesso tipo: pizze, post, utenti o
+                    prodotti. Le operazioni fondamentali che compiamo sulle risorse sono dette <strong>CRUD</strong>:
+                </p>
+                <ul>
+                    <li><strong>Create:</strong> creare una nuova risorsa.</li>
+                    <li><strong>Read:</strong> leggere una o più risorse.</li>
+                    <li><strong>Update:</strong> modificare una risorsa esistente.</li>
+                    <li><strong>Delete:</strong> eliminare una risorsa.</li>
+                </ul>
+                <p>Per ogni operazione scegliamo una combinazione precisa tra endpoint e metodo HTTP. Non stiamo ancora
+                    salvando dati: ogni rotta risponde soltanto con un testo che descrive il suo intento.</p>
+                <p>I nomi <em>index</em>, <em>show</em>, <em>store</em>, <em>update</em> e <em>destroy</em> sono
+                    convenzioni molto diffuse. Impararle ora rende più semplice leggere API e progetti altrui, perché la
+                    responsabilità di ogni rotta è immediatamente riconoscibile.</p>
+                <pre><code class="language-javascript">// Rotte CRUD per la risorsa pizzas
+
+// index: tutte le pizze
+app.get('/pizzas', (req, res) =&gt; res.send('Lista delle pizze'));
+
+// show: una pizza specifica
+app.get('/pizzas/:id', (req, res) =&gt; res.send('Dettagli della pizza ' + req.params.id));
+
+// store: nuova pizza
+app.post('/pizzas', (req, res) =&gt; res.send('Creazione nuova pizza'));
+
+// update: modifica integrale
+app.put('/pizzas/:id', (req, res) =&gt; res.send('Modifica integrale della pizza ' + req.params.id));
+
+// modify: modifica parziale
+app.patch('/pizzas/:id', (req, res) =&gt; res.send('Modifica parziale della pizza ' + req.params.id));
+
+// destroy: eliminazione
+app.delete('/pizzas/:id', (req, res) =&gt; res.send('Eliminazione della pizza ' + req.params.id));</code></pre>
+            </section>
+
+            <section id="rest">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Convenzioni REST</h2>
+                </header>
+                <p>REST è un insieme di convenzioni per rendere le API prevedibili. Usiamo il nome della risorsa al
+                    plurale nel percorso e il metodo HTTP per esprimere l'azione.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operazione</th>
+                            <th>Metodo</th>
+                            <th>Endpoint</th>
+                            <th>Significato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Index</td>
+                            <td><code>GET</code></td>
+                            <td><code>/pizzas</code></td>
+                            <td>Legge tutte le pizze</td>
+                        </tr>
+                        <tr>
+                            <td>Show</td>
+                            <td><code>GET</code></td>
+                            <td><code>/pizzas/:id</code></td>
+                            <td>Legge una pizza</td>
+                        </tr>
+                        <tr>
+                            <td>Store</td>
+                            <td><code>POST</code></td>
+                            <td><code>/pizzas</code></td>
+                            <td>Crea una pizza</td>
+                        </tr>
+                        <tr>
+                            <td>Update</td>
+                            <td><code>PUT</code></td>
+                            <td><code>/pizzas/:id</code></td>
+                            <td>Sostituisce una pizza</td>
+                        </tr>
+                        <tr>
+                            <td>Modify</td>
+                            <td><code>PATCH</code></td>
+                            <td><code>/pizzas/:id</code></td>
+                            <td>Modifica alcuni campi</td>
+                        </tr>
+                        <tr>
+                            <td>Destroy</td>
+                            <td><code>DELETE</code></td>
+                            <td><code>/pizzas/:id</code></td>
+                            <td>Elimina una pizza</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p>Evitiamo endpoint con verbi come <code>/get-pizzas</code> o <code>/delete-pizza/3</code>: il
+                        metodo HTTP comunica già l'azione. L'endpoint identifica la risorsa.</p>
+                </div>
+                <p><code>PUT</code> indica la sostituzione completa della risorsa, mentre <code>PATCH</code> viene usato
+                    quando aggiorniamo solo alcuni campi. In questa lezione entrambe le rotte rispondono con un testo;
+                    più avanti riceveranno i dati della richiesta e modificheranno davvero la risorsa.</p>
+                <p>Prova tutte le rotte con Postman o LiteClient. Per le richieste diverse da <code>GET</code>,
+                    seleziona prima il metodo corretto, poi inserisci l'URL e invia la richiesta.</p>
+            </section>
+
+            <section id="router">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Separare le rotte con Express Router</h2>
+                </header>
+                <p>Quando il progetto cresce, mantenere tutte le rotte in <code>server.js</code> rende l'entry point
+                    lungo e difficile da leggere. Un <strong>router</strong> è un file dedicato che raggruppa le rotte
+                    di una risorsa.</p>
+                <pre><code class="language-text">express-pizzeria/
+├── routers/
+│   └── pizzas.js
+└── server.js</code></pre>
+                <h3>1. Creare il router delle pizze</h3>
+                <p>Nel router usiamo <code>router</code> al posto di <code>app</code>. Il prefisso <code>/pizzas</code>
+                    non è più scritto nelle singole rotte: verrà aggiunto nel file principale.</p>
+                <pre><code class="language-javascript">// routers/pizzas.js
+import express from 'express';
+
+const router = express.Router();
+
+router.get('/', (req, res) =&gt; res.send('Lista delle pizze'));
+router.get('/:id', (req, res) =&gt; res.send('Dettagli della pizza ' + req.params.id));
+router.post('/', (req, res) =&gt; res.send('Creazione nuova pizza'));
+router.put('/:id', (req, res) =&gt; res.send('Modifica integrale della pizza ' + req.params.id));
+router.patch('/:id', (req, res) =&gt; res.send('Modifica parziale della pizza ' + req.params.id));
+router.delete('/:id', (req, res) =&gt; res.send('Eliminazione della pizza ' + req.params.id));
+
+export default router;</code></pre>
+                <h3>2. Registrare il router in <code>server.js</code></h3>
+                <p>Importiamo il router e lo montiamo con <code>app.use()</code>. La richiesta finale combina il
+                    prefisso e il percorso del router: <code>/pizzas</code> + <code>/:id</code> diventa
+                    <code>/pizzas/:id</code>.</p>
+                <p>Il file <code>server.js</code> resta così dedicato alla configurazione generale dell'applicazione:
+                    avvio del server, middleware e registrazione dei router. Ogni nuova risorsa potrà avere il suo file,
+                    per esempio <code>posts.js</code>, <code>users.js</code> o <code>products.js</code>.</p>
+                <pre><code class="language-javascript">// server.js
+import express from 'express';
+import pizzasRouter from './routers/pizzas.js';
+
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) =&gt; {
+  res.send('Server della mia pizzeria');
+});
+
+app.use('/pizzas', pizzasRouter);
+
+app.listen(port, () =&gt; {
+  console.log(`Server in ascolto su http://localhost:${port}`);
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>routers/posts.js</code> e sposta al suo interno le rotte <code>GET /posts</code> e
+                        <code>GET /posts/:id</code>. Registra il router con <code>app.use('/posts', postsRouter)</code>.
+                    </p><button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">// routers/posts.js
+import express from 'express';
+const router = express.Router();
+
+router.get('/', (req, res) =&gt; res.send('Lista dei post'));
+router.get('/:id', (req, res) =&gt; res.send('Dettagli del post ' + req.params.id));
+
+export default router;
+
+// server.js
+import postsRouter from './routers/posts.js';
+app.use('/posts', postsRouter);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale: Express Blog Routing</h3>
+                <p>Partendo dal progetto <code>express-blog-intro</code>, realizza le rotte REST per la risorsa
+                    <code>posts</code>: index, show, store, update, modify e destroy. Spostale in
+                    <code>routers/posts.js</code> e registra il router in <code>server.js</code> con il prefisso
+                    <code>/posts</code>.</p>
+                <p>Verifica ogni endpoint con Postman o LiteClient. Per ogni richiesta, controlla di aver scelto il
+                    metodo HTTP corretto e che la risposta descriva l'operazione eseguita.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

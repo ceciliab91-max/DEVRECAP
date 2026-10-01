@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express e Prisma: query e API REST dello store - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + Prisma</div>
+            <ul>
+                <li><a href="#modello">Modello</a></li>
+                <li><a href="#leggere">Leggere</a></li>
+                <li><a href="#filtri">Filtri</a></li>
+                <li><a href="#scrivere">Scrivere</a></li>
+                <li><a href="#relazioni">Relazioni</a></li>
+                <li><a href="#relazioni-filtri">Filtri relazione</a></li>
+                <li><a href="#aggregazioni">Aggregazioni</a></li>
+                <li><a href="#server">Server</a></li>
+                <li><a href="#crud-prodotti">Prodotti</a></li>
+                <li><a href="#crud-categorie">Categorie</a></li>
+                <li><a href="#crud-ordini">Ordini</a></li>
+                <li><a href="#crud-tag">Tag</a></li>
+                <li><a href="#paginazione">Query string</a></li>
+                <li><a href="#riepilogo">Riepilogo</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 3 · API</p>
+            <h1>Express e Prisma: query e API REST dello store</h1>
+            <p class="intro">Interrogare lo schema con Prisma Client — dalle query base ai filtri per relazione, alle
+                transazioni — e costruirci sopra l'API REST completa dello store con Express.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="modello">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Il modello mentale delle query</h2>
+                </header>
+                <div class="note">
+                    <p>Ogni query Prisma ha la stessa forma: <code>client.&lt;model&gt;.&lt;operazione&gt;({
+                            opzioni })</code> e ritorna una <strong>Promise</strong>. Cambiano il model e
+                        l'operazione, non la forma.</p>
+                </div>
+                <p>Lavoriamo sullo schema completo costruito nella dispensa precedente, <a href='/lezioni/prisma-tipi-annotazioni-relazioni'>Prisma: tipi, annotazioni e relazioni</a>: nove
+                    model, con <code>Category</code>, <code>Product</code>, <code>Tag</code>, <code>Order</code>,
+                    <code>User</code> e <code>Profile</code> collegati da relazioni 1:1, 1:N e M:N esplicite.</p>
+                <p>Le operazioni si dividono in due famiglie, a seconda che restituiscano una riga o molte:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Famiglia</th>
+                            <th>Operazioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Una riga</td>
+                            <td><code>findUnique</code>, <code>findFirst</code>, <code>create</code>,
+                                <code>update</code>, <code>upsert</code>, <code>delete</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Molte righe</td>
+                            <td><code>findMany</code>, <code>createMany</code>, <code>updateMany</code>,
+                                <code>deleteMany</code>, <code>count</code>, <code>aggregate</code>,
+                                <code>groupBy</code>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Tre famiglie di opzioni coprono quasi tutto: <code>where</code> decide <em>quali</em> righe,
+                    <code>orderBy</code>/<code>take</code>/<code>skip</code> decidono <em>ordine e quantità</em>,
+                    <code>include</code>/<code>select</code> decidono <em>quali campi e relazioni</em> tornano
+                    indietro.
+                </p>
+                <pre><code class="language-js">const economici = await client.product.findMany({
+  where: { inStock: true },       // quali righe
+  orderBy: { price: "asc" },      // ordine
+  take: 5,                        // quantità
+  include: { category: true }     // relazioni
+});</code></pre>
+            </section>
+            <section id="leggere">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Leggere una riga e leggere liste</h2>
+                </header>
+                <div class="note">
+                    <p><code>findUnique</code> accetta solo campi <code>@id</code> o <code>@unique</code>;
+                        <code>findFirst</code> accetta un filtro qualsiasi e usa <code>orderBy</code> per decidere chi
+                        è "il primo".
+                    </p>
+                </div>
+                <pre><code class="language-js">// findUnique: SOLO per @id o campi @unique.
+const p1 = await client.product.findUnique({ where: { id: 1 } });
+const c1 = await client.category.findUnique({ where: { name: "Periferiche" } });
+
+// findUniqueOrThrow: se non trova lancia P2025 (lo converte il middleware in 404).
+const p2 = await client.product.findUniqueOrThrow({ where: { id: 1 } });
+
+// findFirst: il primo che matcha un filtro qualsiasi (orderBy dice "primo" in che senso).
+const p3 = await client.product.findFirst({
+  where: { inStock: true },
+  orderBy: { price: "asc" }        // il più economico disponibile
+});</code></pre>
+                <p>Per le liste si aggiungono ordinamento multiplo, <code>skip</code>/<code>take</code> per la
+                    paginazione e <code>count</code> per il totale, separato dalla pagina di dati:</p>
+                <pre><code class="language-js">const page = await client.product.findMany({
+  where: { inStock: true },
+  orderBy: [{ price: "desc" }, { name: "asc" }],   // ordinamento multiplo
+  skip: 0,
+  take: 10
+});
+
+const total = await client.product.count({ where: { inStock: true } });</code></pre>
+            </section>
+            <section id="filtri">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>I filtri</h2>
+                </header>
+                <div class="note">
+                    <p>Più chiavi allo stesso livello di <code>where</code> sono in <strong>AND</strong> implicito;
+                        per un <strong>OR</strong> serve l'operatore esplicito <code>OR</code>.</p>
+                </div>
+                <pre><code class="language-js">await client.product.findMany({
+  where: {
+    name: { contains: "mouse" },           // LIKE '%mouse%' (MySQL è già case-insensitive)
+    price: { gte: "20.00", lte: "100.00" }, // range: Decimal come STRINGA
+    categoryId: { in: [1, 2] },
+    description: { not: null },            // chi HA la descrizione
+    inStock: { not: false },
+
+    // Più chiave alla radice = AND implicito. Per OR:
+    OR: [{ name: { startsWith: "Monitor" } }, { categoryId: 2 }]
+  }
+});</code></pre>
+                <div class="note">
+                    <p>Su MySQL <strong>non esiste</strong> <code>mode: "insensitive"</code> (solo
+                        PostgreSQL/MongoDB): non serve, la collation <code>utf8mb4_unicode_ci</code> delle tabelle
+                        Prisma è già case-insensitive.</p>
+                </div>
+            </section>
+            <section id="scrivere">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Scrivere</h2>
+                </header>
+                <p>Le operazioni di scrittura su una riga singola sono quattro, più <code>upsert</code> che le
+                    combina. Ogni violazione di vincolo diventa un codice Prisma preciso, che il middleware degli
+                    errori (capitolo 8) traduce in uno status HTTP.</p>
+                <pre><code class="language-js">// create — violazione @unique → P2002 (409 nel middleware).
+const cat = await client.category.create({ data: { name: "Accessori" } });
+
+// update — una riga per campo univoco; se non esiste → P2025.
+await client.product.update({ where: { id: 1 }, data: { price: "24.90" } });
+
+// upsert — aggiorna se c'è, altrimenti crea.
+await client.tag.upsert({
+  where: { name: "gaming" },
+  update: {},
+  create: { name: "gaming" }
+});
+
+// delete — una riga per campo univoco.
+await client.product.delete({ where: { id: 1 } });</code></pre>
+                <p>Esistono anche <code>createMany</code>, <code>updateMany</code> e <code>deleteMany</code> per
+                    operazioni di massa: stesso <code>where</code>, più righe insieme.</p>
+            </section>
+            <section id="relazioni">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Leggere le relazioni: <code>include</code> e <code>select</code></h2>
+                </header>
+                <div class="note">
+                    <p>Dentro <code>include</code> valgono le stesse opzioni di <code>findMany</code>
+                        (<code>where</code>, <code>orderBy</code>, <code>take</code>...): si può filtrare e ordinare
+                        anche la relazione, non solo la riga principale.</p>
+                </div>
+                <pre><code class="language-js">// 1:1 — profilo dell'utente.
+await client.user.findUnique({ where: { id: 1 }, include: { profile: true } });
+
+// 1:N — dentro include valgono LE STESSE OPZIONI di findMany.
+await client.category.findUnique({
+  where: { id: 1 },
+  include: { products: { where: { inStock: true }, orderBy: { price: "asc" }, take: 3 } }
+});
+
+// select: SOLO i campi elencati (payload minimale).
+await client.product.findMany({
+  select: { id: true, name: true, category: { select: { name: true } } }
+});
+
+// _count: contare i collegati senza caricarli.
+await client.category.findMany({ select: { name: true, _count: { select: { products: true } } } });
+
+// M:N esplicita — include annidato attraverso il ponte: Order → OrderItem → Product.
+await client.order.findUnique({
+  where: { id: 1 },
+  include: { items: { include: { product: { select: { name: true } } } } }
+});</code></pre>
+                <div class="note">
+                    <p>Nella stessa query scegli <code>include</code> oppure <code>select</code> allo stesso livello,
+                        mai insieme. Se usi <code>select</code>, indica al suo interno anche i campi della
+                        relazione.</p>
+                </div>
+            </section>
+            <section id="relazioni-filtri">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Filtrare e scrivere attraverso le relazioni</h2>
+                </header>
+                <p><strong>Filtri per relazione</strong>: il <code>where</code> ragiona sulle righe collegate, non
+                    sulla riga principale.</p>
+                <pre><code class="language-js">// some: ALMENO UN prodotto collegato è esaurito.
+await client.category.findMany({ where: { products: { some: { inStock: false } } } });
+
+// every: TUTTI i prodotti collegati costano meno di 100.
+await client.category.findMany({ where: { products: { every: { price: { lt: "100.00" } } } } });
+
+// none: NESSUN prodotto collegato disponibile (incluse categorie vuote).
+await client.category.findMany({ where: { products: { none: { inStock: true } } } });
+
+// is / forma corta: prodotti la CUI categoria è "Periferiche".
+await client.product.findMany({ where: { category: { name: "Periferiche" } } });</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operatore</th>
+                            <th>Domanda</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>some</code></td>
+                            <td>«ce n'è almeno uno che...?»</td>
+                        </tr>
+                        <tr>
+                            <td><code>every</code></td>
+                            <td>«li hanno tutti...?»</td>
+                        </tr>
+                        <tr>
+                            <td><code>none</code></td>
+                            <td>«nessuno di loro...?»</td>
+                        </tr>
+                        <tr>
+                            <td><code>is</code> / <code>isNot</code></td>
+                            <td>versione singolare (1:1 e lato «uno» di 1:N)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Scritture annidate</strong>: una sola operazione tocca più tabelle.</p>
+                <pre><code class="language-js">// connect: collega a una riga esistente (invece di passare la FK a mano).
+await client.product.create({
+  data: { name: "Webcam", price: "49.90", category: { connect: { name: "Periferiche" } } }
+});
+
+// create annidato: la categoria E il prodotto insieme.
+await client.category.create({
+  data: { name: "Cuffie", products: { create: { name: "Cuffie Bluetooth", price: "39.90" } } }
+});
+
+// Attraverso il ponte: crea le righe ProductTag per il prodotto 1.
+await client.product.update({
+  where: { id: 1 },
+  data: { tags: { create: [{ tagId: 1 }, { tagId: 2 }] } }
+});</code></pre>
+            </section>
+            <section id="aggregazioni">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Aggregazioni, <code>groupBy</code> e transazioni</h2>
+                </header>
+                <pre><code class="language-js">const stats = await client.product.aggregate({
+  where: { inStock: true },
+  _avg: { price: "0" },
+  _max: { price: "0" },
+  _count: true
+});
+
+// groupBy: prezzo medio per categoria.
+await client.product.groupBy({
+  by: ["categoryId"],
+  _avg: { price: "0" },
+  _count: { _all: true }
+});</code></pre>
+                <div class="note">
+                    <p><strong>Transazioni</strong>: più scritture che devono riuscire tutte insieme, o nessuna.
+                        Dentro la funzione si usa <code>tx</code>, non <code>client</code>: scrivere con
+                        <code>client</code> per errore uscirebbe dalla transazione.
+                    </p>
+                </div>
+                <pre><code class="language-js">const order = await client.$transaction(async (tx) =&gt; {
+  const created = await tx.order.create({ data: { userId: 1 } });
+  await tx.orderItem.create({
+    data: { quantity: 1, unitPrice: "29.90", orderId: created.id, productId: 1 }
+  });
+  return created;
+});</code></pre>
+            </section>
+            <section id="server">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Il server Express: setup e gestione errori</h2>
+                </header>
+                <div class="note">
+                    <p><code>Decimal</code> non è serializzabile in JSON: ogni risposta che contiene un prezzo passa
+                        da un helper che chiama <code>.toString()</code>. Il middleware finale traduce i codici
+                        Prisma in status HTTP, una volta sola per tutta l'app.</p>
+                </div>
+                <pre><code class="language-js">import "dotenv/config";
+import express from "express";
+import { Prisma, OrderStatus } from "@prisma/client";
+import { client } from "./prisma-client.js";
+
+const app = express();
+app.use(express.json());
+
+// Decimal non è serializzabile in JSON: ogni risposta passa da questi helper.
+const toProductJSON = (product) =&gt; ({
+  ...product,
+  price: product.price.toString(),
+  // Con la M:N esplicita, include.tags sono righe del ponte: teniamo il tag.
+  ...(product.tags &amp;&amp; { tags: product.tags.map((pt) =&gt; pt.tag) })
+});
+
+const toOrderJSON = (order) =&gt; ({
+  ...order,
+  items: (order.items ?? []).map(({ unitPrice, ...item }) =&gt; ({
+    ...item,
+    unitPrice: unitPrice.toString()
+  })),
+  total: (order.items ?? []).reduce(
+    (sum, item) =&gt; sum.add(item.unitPrice.mul(item.quantity)),
+    new Prisma.Decimal(0)
+  ).toString()
+});
+
+// Rotte qui sotto...
+
+// Rotta inesistente → 404 JSON.
+app.use((req, res) =&gt; res.status(404).json({ error: "Rotta non trovata." }));
+
+// Middleware di errore (4 argomenti, ultimo della catena).
+// Express 5 inoltra da solo le promise rifiutate delle rotte async.
+app.use((err, req, res, next) =&gt; {
+  console.error(err);
+
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Il corpo della richiesta non è JSON valido." });
+  }
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2025") return res.status(404).json({ error: "Record non trovato." });
+    if (err.code === "P2002") return res.status(409).json({ error: "Valore già esistente: il campo è univoco." });
+    if (err.code === "P2003") return res.status(409).json({ error: "Record collegato ad altri dati: operazione negata." });
+  }
+
+  const status = err.status ?? 500;
+  res.status(status).json({ error: status === 500 ? "Errore interno del server." : err.message });
+});
+
+app.listen(3000, () =&gt; console.log("Store API su http://localhost:3000"));</code></pre>
+                <p>Aggiungi lo script <code>"dev": "node --watch server.js"</code> in <code>package.json</code> (se
+                    non c'è) e avvia con <code>pnpm dev</code>.</p>
+            </section>
+            <section id="crud-prodotti">
+                <header>
+                    <p class="index">Capitolo 9</p>
+                    <h2>CRUD prodotti</h2>
+                </header>
+                <p>Le letture usano <code>include: { category: true }</code> per il prezzo con la categoria, e
+                    aggiungono i tag nel dettaglio:</p>
+                <pre><code class="language-js">app.get("/products", async (req, res) =&gt; {
+  const products = await client.product.findMany({
+    include: { category: true },
+    orderBy: { createdAt: "desc" }
+  });
+  res.json(products.map(toProductJSON));
+});
+
+app.get("/products/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ error: "L'id deve essere un numero intero." });
+  }
+  const product = await client.product.findUnique({
+    where: { id },
+    include: { category: true, tags: { include: { tag: true } } }
+  });
+  if (!product) return res.status(404).json({ error: "Prodotto non trovato." });
+  res.json(toProductJSON(product));
+});</code></pre>
+                <p>La creazione valida i campi a mano e controlla che la categoria esista <em>prima</em> di scrivere:
+                </p>
+                <pre><code class="language-js">app.post("/products", async (req, res) =&gt; {
+  const { name, price, description, inStock, categoryId } = req.body ?? {};
+  const errors = [];
+
+  if (typeof name !== "string" || !name.trim()) errors.push("name è obbligatorio e deve essere una stringa non vuota.");
+  if (typeof price !== "string" || !/^\d+(\.\d{1,2})?$/.test(price)) errors.push("price è obbligatorio, in formato '99.99'.");
+  if (!Number.isInteger(categoryId)) errors.push("categoryId è obbligatorio e deve essere un intero.");
+
+  if (errors.length === 0) {
+    const category = await client.category.findUnique({ where: { id: categoryId } });
+    if (!category) errors.push("La categoria indicata non esiste.");
+  }
+  if (errors.length &gt; 0) {
+    return res.status(400).json({ error: "Dati non validi.", details: errors });
+  }
+
+  const product = await client.product.create({
+    data: { name, price, description, inStock: inStock ?? true, categoryId },
+    include: { category: true }
+  });
+  res.status(201).json(toProductJSON(product));
+});</code></pre>
+                <p><code>PATCH</code> costruisce <code>data</code> un campo alla volta: solo i campi presenti nel
+                    body vengono validati e scritti.</p>
+                <pre><code class="language-js">app.patch("/products/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const { name, price, description, inStock, categoryId } = req.body ?? {};
+  const data = {};
+
+  if (name !== undefined) {
+    if (typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "name deve essere una stringa non vuota." });
+    data.name = name;
+  }
+  if (price !== undefined) {
+    if (typeof price !== "string" || !/^\d+(\.\d{1,2})?$/.test(price)) return res.status(400).json({ error: "price deve essere in formato '99.99'." });
+    data.price = price;
+  }
+  if (description !== undefined) data.description = description;
+  if (inStock !== undefined) {
+    if (typeof inStock !== "boolean") return res.status(400).json({ error: "inStock deve essere true o false." });
+    data.inStock = inStock;
+  }
+  if (categoryId !== undefined) {
+    if (!Number.isInteger(categoryId)) return res.status(400).json({ error: "categoryId deve essere un intero." });
+    const category = await client.category.findUnique({ where: { id: categoryId } });
+    if (!category) return res.status(400).json({ error: "La categoria indicata non esiste." });
+    data.categoryId = categoryId;
+  }
+
+  // P2025 → 404 e P2003 → 409 li gestisce il middleware.
+  const product = await client.product.update({ where: { id }, data, include: { category: true } });
+  res.json(toProductJSON(product));
+});
+
+app.delete("/products/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  // Se il prodotto compare in ordini, la FK Restrict di OrderItem
+  // fa scattare P2003 → 409 dal middleware.
+  await client.product.delete({ where: { id } });
+  res.status(204).end();
+});</code></pre>
+            </section>
+            <section id="crud-categorie">
+                <header>
+                    <p class="index">Capitolo 10</p>
+                    <h2>CRUD categorie</h2>
+                </header>
+                <pre><code class="language-js">app.get("/categories", async (req, res) =&gt; {
+  const categories = await client.category.findMany({
+    select: { id: true, name: true, _count: { select: { products: true } } },
+    orderBy: { name: "asc" }
+  });
+  res.json(categories);
+});
+
+app.post("/categories", async (req, res) =&gt; {
+  const { name } = req.body ?? {};
+  if (typeof name !== "string" || !name.trim()) {
+    return res.status(400).json({ error: "name è obbligatorio e deve essere una stringa non vuota." });
+  }
+  // Nome duplicato → P2002 → 409 dal middleware.
+  const category = await client.category.create({ data: { name } });
+  res.status(201).json(category);
+});
+
+app.patch("/categories/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const { name } = req.body ?? {};
+  if (typeof name !== "string" || !name.trim()) {
+    return res.status(400).json({ error: "name è obbligatorio e deve essere una stringa non vuota." });
+  }
+  const category = await client.category.update({ where: { id }, data: { name } });
+  res.json(category);
+});
+
+app.delete("/categories/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  // onDelete: Cascade: eliminare la categoria porta via anche i suoi prodotti.
+  await client.category.delete({ where: { id } });
+  res.status(204).end();
+});</code></pre>
+                <div class="note">
+                    <p><strong>Cascade in azione</strong>: dopo <code>DELETE /categories/1</code>, verifica in Prisma
+                        Studio (<code>pnpm studio</code>) che i prodotti della categoria siano stati eliminati anche
+                        loro. È il comportamento dichiarato nello schema nella dispensa precedente.</p>
+                </div>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>GET /categories/:id/products</code>: restituisce i prodotti (con i loro tag) di una
+                        categoria, con <code>404</code> se la categoria non esiste.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">app.get("/categories/:id/products", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const category = await client.category.findUnique({ where: { id } });
+  if (!category) return res.status(404).json({ error: "Categoria non trovata." });
+
+  const products = await client.product.findMany({
+    where: { categoryId: id },
+    include: { tags: { include: { tag: true } } },
+    orderBy: { createdAt: "desc" }
+  });
+  res.json(products.map(toProductJSON));
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+            <section id="crud-ordini">
+                <header>
+                    <p class="index">Capitolo 11</p>
+                    <h2>CRUD ordini</h2>
+                </header>
+                <div class="note">
+                    <p>Il prezzo lo decide il <strong>server</strong>, mai il client: <code>POST /orders</code> legge
+                        il prezzo attuale del prodotto e lo salva come <code>unitPrice</code>. Lettura e scrittura
+                        insieme richiedono una transazione interattiva.</p>
+                </div>
+                <pre><code class="language-js">app.get("/orders", async (req, res) =&gt; {
+  const orders = await client.order.findMany({
+    include: { items: { include: { product: { select: { id: true, name: true } } } } },
+    orderBy: { createdAt: "desc" }
+  });
+  res.json(orders.map(toOrderJSON));
+});
+
+app.get("/orders/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const order = await client.order.findUnique({
+    where: { id },
+    include: { items: { include: { product: { select: { id: true, name: true } } } } }
+  });
+  if (!order) return res.status(404).json({ error: "Ordine non trovato." });
+  res.json(toOrderJSON(order));
+});
+
+app.post("/orders", async (req, res) =&gt; {
+  const { userId, items } = req.body ?? {};
+  const errors = [];
+
+  if (!Number.isInteger(userId)) errors.push("userId è obbligatorio e deve essere un intero.");
+  if (!Array.isArray(items) || items.length === 0) {
+    errors.push("items è obbligatorio e deve essere un array non vuoto.");
+  } else {
+    items.forEach((item, i) =&gt; {
+      if (!Number.isInteger(item?.productId)) errors.push(`items[${i}].productId deve essere un intero.`);
+      if (!Number.isInteger(item?.quantity) || item.quantity &lt; 1) errors.push(`items[${i}].quantity deve essere un intero &gt;= 1.`);
+    });
+  }
+
+  // L'utente deve esistere: stesso controllo esplicito già visto per categoryId.
+  if (errors.length === 0) {
+    const user = await client.user.findUnique({ where: { id: userId } });
+    if (!user) errors.push("L'utente indicato non esiste.");
+  }
+  if (errors.length &gt; 0) return res.status(400).json({ error: "Dati non validi.", details: errors });
+
+  // Il prezzo lo decide il SERVER: snapshot del prezzo attuale del prodotto.
+  // Lettura + scrittura insieme → transazione interattiva (tx, non client).
+  const order = await client.$transaction(async (tx) =&gt; {
+    const products = await tx.product.findMany({
+      where: { id: { in: items.map((item) =&gt; item.productId) } }
+    });
+    const requested = new Set(items.map((item) =&gt; item.productId));
+    if (products.length !== requested.size) {
+      const err = new Error("Uno o più prodotti non esistono.");
+      err.status = 400;
+      throw err;
+    }
+    const priceById = new Map(products.map((p) =&gt; [p.id, p.price]));
+
+    return tx.order.create({
+      data: {
+        userId,
+        items: {
+          create: items.map((item) =&gt; ({
+            quantity: item.quantity,
+            unitPrice: priceById.get(item.productId),
+            productId: item.productId
+          }))
+        }
+      },
+      include: { items: { include: { product: { select: { id: true, name: true } } } } }
+    });
+  });
+
+  res.status(201).json(toOrderJSON(order));
+});
+
+app.patch("/orders/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const { status } = req.body ?? {};
+  const valid = Object.values(OrderStatus);
+  if (!valid.includes(status)) {
+    return res.status(400).json({ error: `status deve essere uno di: ${valid.join(", ")}.` });
+  }
+
+  const order = await client.order.update({ where: { id }, data: { status } });
+  res.json(order);
+});
+
+app.delete("/orders/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  // Cascade: le righe OrderItem vanno via con l'ordine.
+  await client.order.delete({ where: { id } });
+  res.status(204).end();
+});</code></pre>
+            </section>
+            <section id="crud-tag">
+                <header>
+                    <p class="index">Capitolo 12</p>
+                    <h2>CRUD tag</h2>
+                </header>
+                <pre><code class="language-js">app.get("/tags", async (req, res) =&gt; {
+  const tags = await client.tag.findMany({
+    select: { id: true, name: true, _count: { select: { products: true } } },
+    orderBy: { name: "asc" }
+  });
+  res.json(tags);
+});
+
+app.post("/tags", async (req, res) =&gt; {
+  const { name } = req.body ?? {};
+  if (typeof name !== "string" || !name.trim()) {
+    return res.status(400).json({ error: "name è obbligatorio e deve essere una stringa non vuota." });
+  }
+  const tag = await client.tag.create({ data: { name } });
+  res.status(201).json(tag);
+});
+
+app.delete("/tags/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  // Cascade dal ponte: i collegamenti in ProductTag vengono rimossi
+  // insieme al tag (ma non i prodotti).
+  await client.tag.delete({ where: { id } });
+  res.status(204).end();
+});
+
+// Sostituisce TUTTI i tag di un prodotto: { "tagIds": [1, 3] }
+app.put("/products/:id/tags", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const { tagIds } = req.body ?? {};
+  if (!Array.isArray(tagIds) || !tagIds.every((t) =&gt; Number.isInteger(t))) {
+    return res.status(400).json({ error: "tagIds è obbligatorio e deve essere un array di interi." });
+  }
+
+  const tags = await client.tag.findMany({ where: { id: { in: tagIds } } });
+  if (tags.length !== new Set(tagIds).size) {
+    return res.status(400).json({ error: "Uno o più tag non esistono." });
+  }
+
+  // Sostituzione atomica: via i collegamenti vecchi, dentro quelli nuovi.
+  const product = await client.$transaction(async (tx) =&gt; {
+    await tx.productTag.deleteMany({ where: { productId: id } });
+    return tx.product.update({
+      where: { id },
+      data: { tags: { create: tagIds.map((tagId) =&gt; ({ tagId })) } },
+      include: { tags: { include: { tag: true } } }
+    });
+  });
+
+  res.json(toProductJSON(product));
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>POST /products/:id/tags</code>: a differenza della <code>PUT</code> sopra,
+                        <em>aggiunge</em> i tag indicati senza cancellare i collegamenti esistenti.
+                    </p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">app.post("/products/:id/tags", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "L'id deve essere un numero intero." });
+
+  const { tagIds } = req.body ?? {};
+  if (!Array.isArray(tagIds) || !tagIds.every((t) =&gt; Number.isInteger(t))) {
+    return res.status(400).json({ error: "tagIds è obbligatorio e deve essere un array di interi." });
+  }
+
+  const tags = await client.tag.findMany({ where: { id: { in: tagIds } } });
+  if (tags.length !== new Set(tagIds).size) {
+    return res.status(400).json({ error: "Uno o più tag non esistono." });
+  }
+
+  // skipDuplicates: se un tag è già collegato, l'unique del ponte non fa fallire tutto.
+  await client.productTag.createMany({
+    data: tagIds.map((tagId) =&gt; ({ productId: id, tagId })),
+    skipDuplicates: true
+  });
+
+  const product = await client.product.findUnique({
+    where: { id },
+    include: { tags: { include: { tag: true } } }
+  });
+  res.json(toProductJSON(product));
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+            <section id="paginazione">
+                <header>
+                    <p class="index">Capitolo 13</p>
+                    <h2>Filtri e paginazione in query string</h2>
+                </header>
+                <p>Sostituisce l'handler di <code>GET /products</code> del capitolo 9 con questa versione, che
+                    costruisce <code>where</code> solo con i filtri presenti nella query string:</p>
+                <pre><code class="language-js">// GET /products?maxPrice=100&amp;available=true&amp;categoryId=1&amp;page=1&amp;limit=10
+app.get("/products", async (req, res) =&gt; {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+
+  // Il where si costruisce solo con i filtri presenti.
+  const where = {};
+  if (req.query.maxPrice) where.price = { lte: req.query.maxPrice };
+  if (req.query.available === "true") where.inStock = true;
+  if (req.query.available === "false") where.inStock = false;
+  if (req.query.categoryId) where.categoryId = Number(req.query.categoryId);
+
+  const [total, products] = await Promise.all([
+    client.product.count({ where }),
+    client.product.findMany({
+      where,
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  ]);
+
+  res.json({ page, limit, total, data: products.map(toProductJSON) });
+});</code></pre>
+            </section>
+            <section id="riepilogo">
+                <header>
+                    <p class="index">Capitolo 14</p>
+                    <h2>Riepilogo delle rotte e prova con curl</h2>
+                </header>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metodo</th>
+                            <th>Rotta</th>
+                            <th>Successo</th>
+                            <th>Note ed errori</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/products</code></td>
+                            <td>200 lista</td>
+                            <td>filtri e paginazione in query string</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/products/:id</code></td>
+                            <td>200 dettaglio</td>
+                            <td>con categoria e tag; 400 id, 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/products</code></td>
+                            <td>201</td>
+                            <td>400 validazione; categoria verificata</td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td><code>/products/:id</code></td>
+                            <td>200</td>
+                            <td>modifica parziale; 400, 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/products/:id</code></td>
+                            <td>204</td>
+                            <td>409 (P2003) se compare in ordini</td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT</code></td>
+                            <td><code>/products/:id/tags</code></td>
+                            <td>200</td>
+                            <td>sostituzione atomica dei tag</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/categories</code></td>
+                            <td>200</td>
+                            <td>con <code>_count</code> dei prodotti</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/categories</code></td>
+                            <td>201</td>
+                            <td>409 (P2002) nome duplicato</td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td><code>/categories/:id</code></td>
+                            <td>200</td>
+                            <td>400, 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/categories/:id</code></td>
+                            <td>204</td>
+                            <td><strong>cascade</strong>: elimina anche i prodotti</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/tags</code></td>
+                            <td>200</td>
+                            <td>con <code>_count</code> dei prodotti</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/tags</code></td>
+                            <td>201</td>
+                            <td>409 (P2002) nome duplicato</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/tags/:id</code></td>
+                            <td>204</td>
+                            <td>cascade: rimuove i collegamenti del ponte</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/orders</code></td>
+                            <td>200 lista</td>
+                            <td>annidata: righe + prodotto + totale</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/orders/:id</code></td>
+                            <td>200 dettaglio</td>
+                            <td>400, 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td><code>/orders</code></td>
+                            <td>201</td>
+                            <td>transazione, prezzo lato server, <code>userId</code> verificato</td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td><code>/orders/:id</code></td>
+                            <td>200</td>
+                            <td>status validato contro l'enum</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td><code>/orders/:id</code></td>
+                            <td>204</td>
+                            <td>cascade sulle righe</td>
+                        </tr>
+                        <tr>
+                            <td>qualsiasi</td>
+                            <td>rotta inesistente</td>
+                            <td>—</td>
+                            <td>404 JSON</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre><code class="language-bash">pnpm dev
+
+curl http://localhost:3000/products
+curl "http://localhost:3000/products?maxPrice=100&amp;available=true&amp;page=1&amp;limit=5"
+curl http://localhost:3000/products/1
+curl http://localhost:3000/orders
+
+curl -X POST -H "Content-Type: application/json" -d '{"name":"Cuffie"}' http://localhost:3000/categories
+curl -X POST -H "Content-Type: application/json" -d '{"name":"Tastiera RGB","price":"119.90","categoryId":1}' http://localhost:3000/products
+curl -X POST -H "Content-Type: application/json" -d '{"userId":1,"items":[{"productId":1,"quantity":2}]}' http://localhost:3000/orders
+curl -X POST -H "Content-Type: application/json" -d '{"name":"ergonomia"}' http://localhost:3000/tags
+curl -X PUT -H "Content-Type: application/json" -d '{"tagIds":[1,3]}' http://localhost:3000/products/1/tags
+
+curl -X PATCH -H "Content-Type: application/json" -d '{"status":"SHIPPED"}' http://localhost:3000/orders/1
+curl -X PATCH -H "Content-Type: application/json" -d '{"price":"19.90"}' http://localhost:3000/products/2
+curl -i -X DELETE http://localhost:3000/tags/1</code></pre>
+                <p>Le stesse richieste si provano da VS Code con un REST client (per esempio LiteClient o Thunder
+                    Client): per <code>POST</code>, <code>PATCH</code> e <code>PUT</code> ricordati l'header
+                    <code>Content-Type: application/json</code>.
+                </p>
+                <h3>Errori in una riga</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sintomo</th>
+                            <th>Rimedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>client.order</code> è <code>undefined</code></td>
+                            <td>Schema della dispensa precedente migrato? Poi <code>pnpm generate</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>TypeError: Cannot read properties of undefined (reading 'toString')</code></td>
+                            <td>Stai serializzando un <code>Decimal</code> senza l'helper (<code>toProductJSON</code>
+                                / <code>toOrderJSON</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>409 Valore già esistente</code> su POST</td>
+                            <td><code>P2002</code>: nome duplicato su <code>@unique</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>409 Record collegato</code> su DELETE</td>
+                            <td><code>P2003</code>: il prodotto è referenziato da righe d'ordine</td>
+                        </tr>
+                        <tr>
+                            <td><code>404</code> su PATCH/DELETE</td>
+                            <td><code>P2025</code>: l'id non esiste</td>
+                        </tr>
+                        <tr>
+                            <td>L'ordine viene creato ma senza righe</td>
+                            <td><code>items</code> mancante o non array nel body: controlla il JSON e l'header</td>
+                        </tr>
+                        <tr>
+                            <td>Decimal con mille zeri nel JSON</td>
+                            <td>Converti <strong>sempre</strong> con <code>.toString()</code>, mai lasciare l'oggetto
+                                Decimal</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="task">
+                <h3>Esercizi per casa</h3>
+                <p><strong>Ordini per stato</strong>: <code>GET /orders?status=PAID</code> — filtro in query string
+                    validato contro <code>OrderStatus</code> (stessa idea del capitolo 13, ma sul valore di un
+                    enum).</p>
+                <p><strong>Statistiche</strong>: <code>GET /stats</code> — con <code>aggregate</code> e
+                    <code>groupBy</code>: prezzo medio complessivo dei prodotti, prodotto più costoso e numero di
+                    prodotti per categoria in un'unica risposta.
+                </p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

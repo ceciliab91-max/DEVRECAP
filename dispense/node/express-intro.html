@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduzione a Express - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">ExpressJs</div>
+            <ul>
+                <li><a href="#api">API</a></li>
+                <li><a href="#setup">Setup</a></li>
+                <li><a href="#server">Server</a></li>
+                <li><a href="#response">Response</a></li>
+                <li><a href="#client">Test</a></li>
+                <li><a href="#statici">Asset</a></li>
+                <li><a href="#request">Request</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Introduzione a Express</h1>
+            <p class="intro">Creare le API che il frontend consumerà tramite richieste HTTP.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="api">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>L'obiettivo: costruire API</h2>
+                </header>
+                <div class="note">
+                    <p>Il backend è la parte dell'applicazione che gestisce dati, regole e operazioni non affidate al
+                        browser. L'API è il canale con cui client e backend comunicano.</p>
+                </div>
+                <p>Il <strong>frontend</strong> mostra pagine, pulsanti e form. Il <strong>backend</strong> lavora
+                    dietro le quinte: può leggere e salvare dati nel database, verificare credenziali e permessi,
+                    applicare regole come prezzi e sconti, inviare email e gestire gli errori. Le API non sono quindi
+                    tutto il backend: sono l'interfaccia che permette al frontend di usare queste funzionalità.</p>
+                <p>Per esempio, una pagina React chiede le pizze con <code>GET /api/pizze</code>. Il server Express
+                    riceve la richiesta, recupera o prepara i dati e invia una risposta JSON. Il frontend usa quei dati
+                    per costruire l'interfaccia.</p>
+                <pre><code class="language-text">Frontend React / client HTTP
+        |
+        | GET http://localhost:3000/api/pizze
+        v
+Server Express (backend)
+        |
+        | esegue la logica e prepara i dati
+        v
+Risposta HTTP: JSON con le pizze
+        |
+        v
+Frontend: mostra i dati nella pagina</code></pre>
+                <p>In questa lezione i dati saranno scritti direttamente in <code>server.js</code>. Il flusso rimane:
+                    <strong>richiesta → logica del backend → risposta</strong>. Express è il framework Node.js che ci
+                    aiuta ad avviare il server e definire le rotte, cioè combinazioni di metodo HTTP e percorso come
+                    <code>GET /api/pizze</code>.</p>
+            </section>
+
+            <section id="setup">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Installare e configurare Express</h2>
+                </header>
+                <p>Creiamo una cartella di progetto, inizializziamo <code>package.json</code> con <code>pnpm</code> e
+                    installiamo Express. Useremo gli <strong>ES Modules</strong>, cioè la sintassi moderna
+                    <code>import</code>/<code>export</code> già usata nei progetti front-end.</p>
+                <pre><code class="language-bash">mkdir express-intro
+cd express-intro
+pnpm init
+pnpm add express</code></pre>
+                <p>Crea un file <code>server.js</code> e aggiungi lo script <code>start</code> al
+                    <code>package.json</code>.</p>
+                <pre><code class="language-json">{
+  "type": "module",
+  "scripts": {
+    "start": "node --watch server.js"
+  }
+}</code></pre>
+                <p>La proprietà <code>"type": "module"</code> informa Node che i file <code>.js</code> del progetto
+                    devono essere interpretati come ES Modules. Senza questa impostazione Node si aspetterebbe CommonJS
+                    e non accetterebbe <code>import express from 'express'</code>.</p>
+                <p>Nel comando <code>node --watch server.js</code>, il flag <code>--watch</code> chiede a Node di tenere
+                    sotto osservazione i file usati dal programma. Quando salvi una modifica a <code>server.js</code> o
+                    a un file importato da esso, Node termina il processo precedente e lo avvia di nuovo
+                    automaticamente. È utile durante lo sviluppo perché permette di vedere le modifiche senza
+                    interrompere manualmente il server e rieseguire <code>pnpm start</code>.</p>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea il progetto, installa Express con <code>pnpm add express</code> e aggiungi lo script
+                        <code>start</code>.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-bash">pnpm init
+pnpm add express</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="server">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Avviare un server e creare una rotta</h2>
+                </header>
+                <p>Una <strong>porta</strong> identifica il programma che deve ricevere la richiesta sul nostro
+                    computer; useremo <code>3000</code>. Con <code>app.get()</code> definiamo una rotta per richieste
+                    GET.</p>
+                <pre><code class="language-javascript">// server.js
+import express from 'express';
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
+app.listen(port, () => {
+  console.log('Server in ascolto su http://localhost:' + port);
+});</code></pre>
+                <pre><code class="language-bash">pnpm start</code></pre>
+                <p>Con il server avviato apri <code>http://localhost:3000</code>. Per fermarlo premi
+                    <code>Ctrl + C</code>. L'opzione <code>--watch</code> osserva i file del progetto e riavvia
+                    automaticamente il server quando salvi una modifica: non serve fermare e rilanciare il comando a
+                    ogni cambiamento.</p>
+                <pre><code class="language-javascript">app.get('/chi-siamo', (req, res) => {
+  res.send('Pagina chi siamo');
+});
+
+app.get('/contatti', (req, res) => {
+  res.send('Pagina contatti');
+});</code></pre>
+            </section>
+
+            <section id="response">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Request, response e risposte</h2>
+                </header>
+                <div class="note">
+                    <p>La funzione di una rotta riceve due oggetti: <code>req</code> contiene le informazioni della
+                        richiesta; <code>res</code> contiene i metodi per costruire e inviare la risposta.</p>
+                </div>
+                <p>Possiamo temporaneamente scrivere <code>console.log(res)</code> per osservare l'oggetto response:
+                    l'output è molto grande, ma ci basta sapere che è lo strumento con cui rispondiamo al client.</p>
+                <h3>HTML: <code>res.type()</code> e <code>res.send()</code></h3>
+                <pre><code class="language-javascript">app.get('/', (req, res) => {
+  res.type('html').send('&lt;h1&gt;Titolo di una pagina HTML!&lt;/h1&gt;');
+});</code></pre>
+                <h3>JSON: <code>res.type()</code> e <code>res.send()</code></h3>
+                <pre><code class="language-javascript">app.get('/api/persona', (req, res) => {
+  const person = { name: 'Ted', lastname: 'Lasso' };
+  res.type('json').send(person);
+});</code></pre>
+                <h3><code>res.json()</code>: la scelta più chiara per le API</h3>
+                <p><code>res.json()</code> converte il dato in JSON e imposta il tipo corretto. Per una risposta API è
+                    il metodo che preferiremo.</p>
+                <pre><code class="language-javascript">app.get('/api/persona', (req, res) => {
+  const person = { name: 'Ted', lastname: 'Lasso' };
+  res.json(person);
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>/api/film-preferito</code>. La rotta deve rispondere con <code>title</code>,
+                        <code>year</code> e <code>genre</code>.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">app.get('/api/film-preferito', (req, res) => {
+  res.json({ title: 'La città incantata', year: 2001, genre: 'Animazione' });
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="client">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Testare le API con un client HTTP</h2>
+                </header>
+                <p>Il browser è utile per visitare HTML, ma per verificare le API usiamo un <strong>client
+                        HTTP</strong>, come Postman o LiteClient.</p>
+                <ul>
+                    <li><strong>Postman:</strong> scegli il metodo HTTP (per ora <code>GET</code>), inserisci l'URL e
+                        premi <em>Send</em>.</li>
+                    <li><strong>LiteClient:</strong> estensione per l'IDE; cercala come
+                        <code>liteclienthq.liteclient</code> nel pannello delle estensioni.</li>
+                </ul>
+                <p>Prova <code>GET http://localhost:3000/api/persona</code>. Controlla corpo, status e header. Se la
+                    risposta è HTML, usa il tab <em>Preview</em> di Postman.</p>
+                <div class="note">
+                    <p>Una rotta backend va testata con un client HTTP anche se risponde con HTML: così verifichiamo
+                        l'API indipendentemente dal frontend.</p>
+                </div>
+            </section>
+
+            <section id="statici">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Rendere accessibili gli asset statici</h2>
+                </header>
+                <p>Un asset statico è un file che il server consegna così com'è, senza calcoli: immagini, CSS,
+                    JavaScript o font. Questi file non sono una risposta API e non rappresentano la pagina del frontend:
+                    sono risorse che il frontend potrà richiedere e usare nella propria interfaccia.</p>
+                <pre><code class="language-text">express-intro/
+├── public/imgs/boolean.jpg
+├── package.json
+└── server.js</code></pre>
+                <p>Aggiungi questa riga prima delle rotte: abilita la cartella <code>public</code>; i file sono
+                    disponibili senza scrivere <code>public</code> nell'URL.</p>
+                <pre><code class="language-javascript">app.use(express.static('public'));</code></pre>
+                <p>Con questa configurazione Express consegna il file quando un client richiede il suo percorso. Per
+                    esempio, <code>GET http://localhost:3000/imgs/boolean.jpg</code> restituisce direttamente il file
+                    immagine. Il frontend potrà poi visualizzarlo usando quell'URL nel proprio codice.</p>
+                <div class="note">
+                    <p>Non scriviamo HTML in <code>server.js</code>: in un'applicazione con frontend separato, Express
+                        espone dati e file; il frontend decide come visualizzarli.</p>
+                </div>
+            </section>
+
+            <section id="request">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Leggere dati dalla request</h2>
+                </header>
+                <p>La query string aggiunge informazioni all'URL dopo <code>?</code>. I valori sono coppie
+                    <code>chiave=valore</code>, separate da <code>&amp;</code>.</p>
+                <pre><code class="language-text">http://tuosito.com/ricerca?termine=javascript&amp;pagina=2</code></pre>
+                <p>Express raccoglie questi valori in <code>req.query</code>. Arrivano come stringhe: se serve un
+                    numero, usa <code>Number()</code>.</p>
+                <pre><code class="language-javascript">app.get('/ricerca', (req, res) => {
+  const termine = req.query.termine;
+  const pagina = req.query.pagina;
+  res.send('Stai cercando: ' + termine + ', pagina: ' + pagina);
+});</code></pre>
+                <div class="exercise">
+                    <h3>Live coding: Express Pizzeria</h3>
+                    <p>Crea <code>/api/pizze</code>, che restituisce un array, e <code>/ricerca-pizze</code>, che legge
+                        <code>termine</code> dalla query string.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const pizze = [
+  { id: 1, nome: 'Margherita' },
+  { id: 2, nome: 'Diavola' },
+  { id: 3, nome: 'Quattro formaggi' }
+];
+
+app.get('/api/pizze', (req, res) => {
+  res.json(pizze);
+});
+
+app.get('/ricerca-pizze', (req, res) => {
+  res.send('Stai cercando pizze con: ' + req.query.termine);
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio: Express Blog Intro</h3>
+                <p>Crea un progetto <code>express-blog-intro</code> usando <code>pnpm</code>. Realizza
+                    <code>GET /</code> (HTML), <code>GET /api/posts</code> (array JSON di almeno 3 post),
+                    <code>GET /ricerca</code> (legge <code>termine</code>) e una cartella <code>public</code> con
+                    un'immagine mostrata in <code>/</code>. Testa tutte le rotte con Postman o LiteClient e avvia con
+                    <code>pnpm start</code>.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

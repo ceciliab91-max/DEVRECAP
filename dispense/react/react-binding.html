@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">React Base</div>
+            <ul>
+                <li><a href="#binding">Data binding</a></li>
+                <li><a href="#input">Input</a></li>
+                <li><a href="#select">Select</a></li>
+                <li><a href="#radio">Radio</a></li>
+                <li><a href="#checkbox">Checkbox</a></li>
+                <li><a href="#textarea">Textarea</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Data binding nei form React</h1>
+            <p class="intro">Concetto base del binding e uso controllato di input, select, radio, checkbox, textarea e form.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="binding">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Cos'è il data binding</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il data binding collega i dati dello stato a ciò che viene mostrato nella pagina.</p>
+                    <p>Quando lo stato cambia, la UI si aggiorna in automatico.</p>
+                </div>
+
+                <p>
+                    Il data binding è il collegamento tra i dati gestiti da un componente e ciò che viene mostrato nella pagina.
+                    In React questo collegamento si costruisce di solito con lo stato: il valore vive nello stato e la UI legge quel valore per mostrarsi.
+                    Quando lo stato cambia, la parte visibile della pagina si aggiorna automaticamente.
+                </p>
+                <p>
+                    Questo meccanismo è importante perché rende l'interfaccia prevedibile e facile da controllare.
+                    L'utente modifica un campo, React aggiorna lo stato e la pagina mostra subito il nuovo valore.
+                    Il componente diventa così il punto centrale della gestione dei dati.
+                </p>
+            </section>
+
+            <section id="input">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Data binding con input</h2>
+                </header>
+
+                <div class="note">
+                    <p>L'input controllato legge il valore da uno stato.</p>
+                    <p><code>onChange</code> aggiorna lo stato a ogni digitazione.</p>
+                </div>
+
+                <p>
+                    Un input controllato è un campo il cui valore dipende dallo stato del componente.
+                    Il testo digitato dall'utente viene letto con <code>onChange</code> e salvato nello stato con <code>setState</code>.
+                    In questo modo il contenuto dell'input e quello mostrato a schermo restano sempre sincronizzati.
+                </p>
+                <p>
+                    Questo approccio è utile quando bisogna mostrare subito il testo digitato, contare i caratteri o filtrare dati in tempo reale.
+                    L'input non viene letto solo al momento dell'invio, ma ad ogni modifica.
+                    Il componente diventa quindi la fonte unica del dato.
+                </p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">import { useState } from "react";
+
+function LiveText() {
+    const [text, setText] = useState("");
+
+    return (
+        &lt;div&gt;
+            &lt;input
+                type="text"
+                value={text}
+                onChange={(event) =&gt; setText(event.target.value)}
+            /&gt;
+            &lt;p&gt;{text}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>
+                        Filtra istantaneamente un array di nomi visualizzati a schermo mostrando solo quelli che contengono la stringa digitata nell'input.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function NameFilter() {
+    const [search, setSearch] = useState("");
+    const names = ["Anna", "Marco", "Marta", "Luca"];
+
+    const filteredNames = names.filter((name) =>
+        name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        &lt;div&gt;
+            &lt;input
+                type="text"
+                value={search}
+                onChange={(event) =&gt; setSearch(event.target.value)}
+            /&gt;
+            &lt;ul&gt;
+                {filteredNames.map((name) =&gt; (
+                    &lt;li key={name}&gt;{name}&lt;/li&gt;
+                ))}
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="select">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Data binding con select</h2>
+                </header>
+
+                <div class="note">
+                    <p>La select limita la scelta a opzioni definite.</p>
+                    <p>Lo stato conserva il valore selezionato.</p>
+                </div>
+
+                <p>
+                    Una select controllata funziona come un input controllato, ma il valore arriva da un menu a tendina.
+                    Lo stato contiene l'opzione selezionata e <code>onChange</code> aggiorna quel valore quando l'utente sceglie una voce diversa.
+                    Il contenuto mostrato a schermo cambia subito in base alla selezione.
+                </p>
+                <p>
+                    La select è utile quando le scelte possibili sono già definite, come una lingua, una valuta o un filtro.
+                    In questo modo l'utente non scrive un valore libero, ma seleziona una delle opzioni disponibili.
+                    Il controllo del dato resta comunque nello stato del componente.
+                </p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">import { useState } from "react";
+
+function PriceConverter() {
+    const [currency, setCurrency] = useState("eur");
+    const price = 10;
+
+    const values = {
+        eur: price,
+        usd: price * 1.1,
+        gbp: price * 0.85
+    };
+
+    return (
+        &lt;div&gt;
+            &lt;select value={currency} onChange={(event) =&gt; setCurrency(event.target.value)}&gt;
+                &lt;option value="eur"&gt;EUR&lt;/option&gt;
+                &lt;option value="usd"&gt;USD&lt;/option&gt;
+                &lt;option value="gbp"&gt;GBP&lt;/option&gt;
+            &lt;/select&gt;
+
+            &lt;p&gt;{values[currency].toFixed(2)}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>
+                        Visualizza gli elementi di una lista e, tramite select, filtrali per un suo attributo.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function FilterByType() {
+    const [type, setType] = useState("tutti");
+    const items = [
+        { name: "Mela", category: "frutta" },
+        { name: "Pane", category: "cibo" },
+        { name: "Pera", category: "frutta" }
+    ];
+
+    const filteredItems =
+        type === "tutti" ? items : items.filter((item) => item.category === type);
+
+    return (
+        &lt;div&gt;
+            &lt;select value={type} onChange={(event) =&gt; setType(event.target.value)}&gt;
+                &lt;option value="tutti"&gt;Tutti&lt;/option&gt;
+                &lt;option value="frutta"&gt;Frutta&lt;/option&gt;
+                &lt;option value="cibo"&gt;Cibo&lt;/option&gt;
+            &lt;/select&gt;
+
+            &lt;ul&gt;
+                {filteredItems.map((item) =&gt; (
+                    &lt;li key={item.name}&gt;{item.name}&lt;/li&gt;
+                ))}
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="radio">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Data binding con radio</h2>
+                </header>
+
+                <div class="note">
+                    <p>I radio button permettono una sola scelta per gruppo.</p>
+                    <p>Si controllano con <code>checked</code> e <code>onChange</code>.</p>
+                </div>
+
+                <p>
+                    I radio button servono quando l'utente deve scegliere una sola opzione tra più possibilità.
+                    Lo stato contiene il valore selezionato e ogni radio condivide lo stesso nome logico di scelta.
+                    Quando cambia l'opzione, cambia anche il contenuto mostrato nella pagina.
+                </p>
+                <p>
+                    Questo tipo di controllo è adatto per scelte alternative come allineamento, dimensione del testo o tema.
+                    La logica è sempre la stessa: si memorizza il valore selezionato e si usa quel valore per decidere cosa mostrare o come formattare la UI.
+                    Ogni radio rappresenta una sola possibilità del gruppo.
+                </p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">import { useState } from "react";
+
+function TextSize() {
+    const [size, setSize] = useState("16");
+
+    return (
+        &lt;div&gt;
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="size"
+                    value="14"
+                    checked={size === "14"}
+                    onChange={(event) =&gt; setSize(event.target.value)}
+                /&gt;
+                Piccolo
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="size"
+                    value="20"
+                    checked={size === "20"}
+                    onChange={(event) =&gt; setSize(event.target.value)}
+                /&gt;
+                Grande
+            &lt;/label&gt;
+
+            &lt;p style={{ fontSize: `${size}px` }}&gt;Testo da ridimensionare&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>
+                        Cambia l'allineamento del testo di un paragrafo scegliendo l'opzione corrispondente da un gruppo di radio button.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function ParagraphAlignment() {
+    const [alignment, setAlignment] = useState("left");
+
+    return (
+        &lt;div&gt;
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="alignment"
+                    value="left"
+                    checked={alignment === "left"}
+                    onChange={(event) =&gt; setAlignment(event.target.value)}
+                /&gt;
+                Sinistra
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="alignment"
+                    value="center"
+                    checked={alignment === "center"}
+                    onChange={(event) =&gt; setAlignment(event.target.value)}
+                /&gt;
+                Centro
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="alignment"
+                    value="right"
+                    checked={alignment === "right"}
+                    onChange={(event) =&gt; setAlignment(event.target.value)}
+                /&gt;
+                Destra
+            &lt;/label&gt;
+
+            &lt;p style={{ textAlign: alignment }}&gt;Paragrafo di esempio&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="checkbox">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Data binding con checkbox</h2>
+                </header>
+
+                <div class="note">
+                    <p>La checkbox rappresenta uno stato vero o falso.</p>
+                    <p><code>checked</code> indica se è selezionata.</p>
+                </div>
+
+                <p>
+                    La checkbox serve per uno stato binario: attiva oppure disattiva.
+                    In React il valore non si legge da <code>value</code>, ma da <code>checked</code>, e la modifica passa da <code>onChange</code>.
+                    Questo rende semplice gestire conferme, opzioni visibili o stili da applicare al testo.
+                </p>
+                <p>
+                    Le checkbox sono utili anche per abilitare o disabilitare azioni.
+                    Lo stato booleano può controllare il comportamento di un pulsante o l'aspetto di un elemento della pagina.
+                    Ogni click aggiorna un valore vero o falso nello stato.
+                </p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">import { useState } from "react";
+
+function TextStyleToggle() {
+    const [bold, setBold] = useState(false);
+
+    return (
+        &lt;div&gt;
+            &lt;label&gt;
+                &lt;input
+                    type="checkbox"
+                    checked={bold}
+                    onChange={(event) =&gt; setBold(event.target.checked)}
+                /&gt;
+                Grassetto
+            &lt;/label&gt;
+
+            &lt;p style={{ fontWeight: bold ? "bold" : "normal" }}&gt;Testo target&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>
+                        Mantieni disabilitato un pulsante di azione finché l'utente non spunta una specifica casella di controllo per confermare la volontà di procedere.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function ActionGate() {
+    const [confirmed, setConfirmed] = useState(false);
+
+    return (
+        &lt;div&gt;
+            &lt;label&gt;
+                &lt;input
+                    type="checkbox"
+                    checked={confirmed}
+                    onChange={(event) =&gt; setConfirmed(event.target.checked)}
+                /&gt;
+                Confermo di voler procedere
+            &lt;/label&gt;
+
+            &lt;button disabled={!confirmed}&gt;Continua&lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="textarea">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Data binding con textarea</h2>
+                </header>
+
+                <div class="note">
+                    <p>La textarea serve per testi più lunghi.</p>
+                    <p>Il valore si controlla con lo stato come per l'input.</p>
+                </div>
+
+                <p>
+                    La textarea funziona come un input più adatto ai testi lunghi.
+                    Anche qui il contenuto viene controllato dallo stato e aggiornato con <code>onChange</code>.
+                    Ogni modifica rende possibile mostrare il testo scritto, il numero di caratteri o un avviso sulla lunghezza.
+                </p>
+                <p>
+                    Con la textarea si lavora spesso su testi più estesi, come messaggi, descrizioni o commenti.
+                    Il valore viene letto dallo stato e non lasciato al solo comportamento interno del campo.
+                    In questo modo si possono mostrare feedback immediati durante la scrittura.
+                </p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">import { useState } from "react";
+
+function RemainingCharacters() {
+    const [text, setText] = useState("");
+    const maxLength = 100;
+
+    return (
+        &lt;div&gt;
+            &lt;textarea
+                value={text}
+                onChange={(event) =&gt; setText(event.target.value)}
+            /&gt;
+            &lt;p&gt;Caratteri rimanenti: {maxLength - text.length}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>
+                        Mostra degli avvisi riguardo la quantità di testo scritto in una textarea, ad esempio troppo corto, troppo lungo o lunghezza ottimale.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function TextWarning() {
+    const [text, setText] = useState("");
+
+    let warning = "Lunghezza ottimale";
+    if (text.length < 10) warning = "Testo troppo corto";
+    if (text.length > 50) warning = "Testo troppo lungo";
+
+    return (
+        &lt;div&gt;
+            &lt;textarea
+                value={text}
+                onChange={(event) =&gt; setText(event.target.value)}
+            /&gt;
+            &lt;p&gt;{warning}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="final" class="task">
+                <div class="exercise">
+                    <h3>Esercizio finale</h3>
+                    <p>
+                        Crea una scheda di personalizzazione del profilo che usi un input controllato per il nome, una select per la lingua preferita, un gruppo di radio per la dimensione del testo, una checkbox per attivare il tema scuro e una textarea per una breve biografia.
+                        Ogni campo deve aggiornare lo stato immediatamente, senza usare un pulsante di invio, e il riepilogo dei dati inseriti deve essere mostrato in tempo reale sotto i campi.
+                    </p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">import { useState } from "react";
+
+function ProfileCard() {
+    const [name, setName] = useState("");
+    const [language, setLanguage] = useState("it");
+    const [size, setSize] = useState("16");
+    const [darkTheme, setDarkTheme] = useState(false);
+    const [bio, setBio] = useState("");
+
+    return (
+        &lt;div&gt;
+            &lt;input
+                type="text"
+                value={name}
+                onChange={(event) =&gt; setName(event.target.value)}
+                placeholder="Nome"
+            /&gt;
+
+            &lt;select value={language} onChange={(event) =&gt; setLanguage(event.target.value)}&gt;
+                &lt;option value="it"&gt;Italiano&lt;/option&gt;
+                &lt;option value="en"&gt;Inglese&lt;/option&gt;
+            &lt;/select&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="size"
+                    value="14"
+                    checked={size === "14"}
+                    onChange={(event) =&gt; setSize(event.target.value)}
+                /&gt;
+                Piccolo
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="size"
+                    value="16"
+                    checked={size === "16"}
+                    onChange={(event) =&gt; setSize(event.target.value)}
+                /&gt;
+                Medio
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="radio"
+                    name="size"
+                    value="20"
+                    checked={size === "20"}
+                    onChange={(event) =&gt; setSize(event.target.value)}
+                /&gt;
+                Grande
+            &lt;/label&gt;
+
+            &lt;label&gt;
+                &lt;input
+                    type="checkbox"
+                    checked={darkTheme}
+                    onChange={(event) =&gt; setDarkTheme(event.target.checked)}
+                /&gt;
+                Tema scuro
+            &lt;/label&gt;
+
+            &lt;textarea
+                value={bio}
+                onChange={(event) =&gt; setBio(event.target.value)}
+                placeholder="Breve biografia"
+            /&gt;
+
+            &lt;div
+                style={{
+                    fontSize: `${size}px`,
+                    background: darkTheme ? "#222" : "#fff",
+                    color: darkTheme ? "#fff" : "#222"
+                }}
+            &gt;
+                &lt;p&gt;Nome: {name}&lt;/p&gt;
+                &lt;p&gt;Lingua: {language}&lt;/p&gt;
+                &lt;p&gt;Biografia: {bio}&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

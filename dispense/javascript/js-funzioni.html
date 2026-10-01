@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funzioni in JavaScript - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+
+    <header>
+        <nav>
+            <div class="brand">JavaScript — Funzioni</div>
+            <ul>
+                <li><a href="#funzioni">Funzioni</a></li>
+                <li><a href="#return">Return</a></li>
+                <li><a href="#parametri">Parametri</a></li>
+                <li><a href="#scope">Scope</a></li>
+                <li><a href="#regole">Regole d'oro</a></li>
+                <li><a href="#eventi-tag">Eventi</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Funzioni in JavaScript</h1>
+            <p class="intro">Definizione, parametri, scope, regole di progettazione ed eventi sul DOM.</p>
+        </div>
+    </header>
+
+    <main id="content">
+        <article>
+
+            <!-- CAPITOLO 1 — Che cos'è una funzione -->
+            <section id="funzioni">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Che cos'è una funzione</h2>
+                </header>
+
+                <div class="note">
+                    <p>Una funzione è un blocco di codice con un nome. Viene eseguita <strong>solo quando viene invocata</strong>. Se non la chiami, il codice al suo interno non verrà mai eseguito.</p>
+                </div>
+
+                <p>Una funzione è un modo per raggruppare istruzioni sotto un nome, così da poterle richiamare ogni volta che servono senza riscriverle da capo. È il meccanismo base del riutilizzo del codice: scrivi la logica una volta sola, e la usi quante volte vuoi, in qualsiasi punto del programma.</p>
+                <p>Per definire una funzione si usa la keyword <code>function</code>, seguita dal nome scelto, dalle parentesi tonde <code>()</code> e dalle parentesi graffe <code>{}</code> che racchiudono il corpo. Per eseguirla si scrive il nome seguito dalle parentesi tonde: questa operazione si chiama <strong>invocazione</strong>. Senza l'invocazione, il codice dentro la funzione non viene mai eseguito.</p>
+                <p>Il nome di una funzione deve essere <strong>univoco</strong>, non puoi avere due funzioni con lo stesso nome, non può contenere spazi, e non può coincidere con una parola che JavaScript riserva per sé. Per nomi composti da più parole si usa la convenzione <strong>camelCase</strong>.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// Definizione: il codice qui dentro NON viene ancora eseguito
+function getAnnoCorrente() {
+    console.log(2026);
+}
+
+// Invocazione: solo qui il codice viene eseguito
+getAnnoCorrente(); // 2026
+</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una funzione chiamata <code>miaEta</code> che stampa la tua età, infine invocala.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function miaEta() {
+    console.log(25);
+}
+
+miaEta();</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 2 — Return -->
+            <section id="return">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Il valore di ritorno: <code>return</code></h2>
+                </header>
+
+                <div class="note">
+                    <p><code>return</code> termina l'esecuzione della funzione e restituisce un valore al codice che l'ha invocata. Senza <code>return</code>, la funzione restituisce <code>undefined</code>.</p>
+                </div>
+
+                <p>Una funzione può non solo eseguire istruzioni, ma anche <strong>produrre un valore</strong> e restituirlo a chi la chiama. Per farlo si usa la keyword <code>return</code>. Quando JavaScript incontra <code>return</code>, interrompe immediatamente l'esecuzione della funzione e restituisce indietro il valore specificato. Quel valore può essere salvato in una variabile, usato in un calcolo, oppure passato a un'altra funzione.</p>
+                <p>Una funzione ben progettata si occupa <strong>solo di elaborare una logica</strong> e di restituire il risultato. Leggere dati dall'utente (<code>prompt</code>) o scrivere output (<code>console.log</code>, <code>alert</code>) non è compito suo: appartiene al codice esterno che usa la funzione. Questo approccio rende la funzione indipendente dal contesto e riutilizzabile ovunque: riceve valori tramite i parametri, li elabora e li restituisce con <code>return</code>. Il codice esterno decide poi cosa farne.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// La funzione si occupa solo del calcolo
+function miaEta() {
+    return 25;
+}
+
+function mioNome() {
+    return "Marco";
+}
+
+// Il codice esterno decide cosa fare con i risultati
+const nome = mioNome();
+const eta = miaEta();
+
+console.log('Età: ' + eta); // 25
+console.log('Nome: ' + nome); // Marco</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una funzione <code>calcolaEta</code> che effettua la sottrazione tra l'anno attuale e l'anno di nascita. Poi, fuori la funzione, salva il risultato in una variabile e stampalo in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function calcolaEta() {
+    return 2026 - 1995;
+}
+
+const eta = calcolaEta();
+console.log(eta); // 31</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 3 — Parametri -->
+            <section id="parametri">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Parametri</h2>
+                </header>
+                <div class="note">
+                    <p>I <strong>parametri</strong> sono nomi segnaposto dichiarati nella definizione della funzione. Gli <strong>argomenti</strong> sono i valori reali passati durante l'invocazione.</p>
+                </div>
+                <p>Finora le funzioni che abbiamo scritto non ricevevano nulla dall'esterno. Per renderle davvero flessibili, possiamo dichiararle con uno o più parametri: nomi segnaposto scritti tra le parentesi tonde, separati da virgola. Nel momento in cui scrivi la funzione, i parametri non hanno ancora nessun valore, sono solo dei nomi riservati per i dati che arriveranno in seguito.</p>
+
+<p>Il valore reale arriva quando la funzione viene invocata: i valori passati tra le parentesi tonde dell'invocazione si chiamano argomenti. All'atto dell'invocazione, ogni argomento viene associato al parametro corrispondente per posizione: il primo argomento va al primo parametro, il secondo al secondo, e così via. Dentro il corpo della funzione, i parametri si comportano esattamente come variabili locali. La stessa funzione, chiamata con argomenti diversi, produce risultati diversi: è questo che la rende riutilizzabile.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">function saluta(nome) {
+    return 'Ciao, ' + nome + '!';
+}
+
+const messaggio1 = saluta('Mario'); // Ciao, Mario!
+const messaggio2 = saluta('Luigi'); // Ciao, Luigi!
+
+// 'prezzoNetto' e 'iva' sono parametri (segnaposto senza valore)
+function calcolaPrezzoLordo(prezzoNetto, iva) {
+    return prezzoNetto + (prezzoNetto * iva / 100);
+}
+
+// 100 e 22 sono argomenti: vanno rispettivamente a 'prezzoNetto' e 'iva'
+const lordo1 = calcolaPrezzoLordo(100, 22); // 122
+const lordo2 = calcolaPrezzoLordo(50, 10);  // 55
+</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una funzione <code>calcolaArea</code> che riceve base e altezza e restituisce l'area del rettangolo. Non stampare nulla dentro la funzione. Poi, fuori, salva il risultato in una variabile e stampalo in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function calcolaArea(base, altezza) {
+    return base * altezza;
+}
+
+const area = calcolaArea(6, 4);
+console.log(area); // 24</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 4 — Scope -->
+            <section id="scope">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Scope e visibilità</h2>
+                </header>
+
+                <div class="note">
+                    <p>Le variabili dichiarate <em>dentro</em> una funzione non sono visibili all'esterno. Le variabili dichiarate <em>fuori</em> sono visibili anche dentro le funzioni, ma dipendere da esse è una cattiva pratica.</p>
+                </div>
+
+                <p>Lo <strong>scope</strong> è la regola che determina da dove si può accedere ad una variabile. Una variabile dichiarata con <code>let</code> o <code>const</code> all'interno di una funzione esiste soltanto lì: nasce quando la funzione viene invocata e sparisce quando termina. Se provi ad accedervi dall'esterno, JavaScript lancia un errore di tipo <code>ReferenceError</code>.</p>
+                <p>Vale anche il contrario: una funzione <strong>vede le variabili dichiarate fuori da essa</strong>. Tecnicamente funziona, ma dipendere da variabili esterne rende la funzione fragile e difficile da riutilizzare, il suo comportamento cambia a seconda di cosa c'è scritto fuori, e non è più prevedibile. La pratica corretta è passare tutto ciò di cui la funzione ha bisogno tramite i parametri, in modo che sia completamente autosufficiente.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">const aliquotaDefault = 22; // variabile esterna, visibile anche dentro le funzioni
+
+function calcolaIvaDipendente(imponibile) {
+    // Funziona, ma dipende da una variabile esterna: cattiva pratica
+    return imponibile * aliquotaDefault / 100;
+}
+
+function calcolaIva(imponibile, aliquota) {
+    // Riceve tutto tramite parametri: indipendente e riutilizzabile
+    const risultato = imponibile * aliquota / 100;
+    return risultato;
+}
+
+// 'risultato' non esiste qui fuori: è una variabile locale della funzione
+// console.log(risultato); // ReferenceError</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una funzione <code>convertiInEuro</code> che riceve un importo in dollari e un tasso di cambio e restituisce l'equivalente in euro. Usa solo parametri, senza leggere variabili esterne. Invocala e salva il risultato.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function convertiInEuro(dollari, tasso) {
+    return dollari / tasso;
+}
+
+const euro = convertiInEuro(100, 1.08);
+console.log(euro); // ~92.59</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 5 — Regole d'oro -->
+            <section id="regole">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Le quattro regole d'oro</h2>
+                </header>
+
+                <div class="note">
+                    <p>Quattro principi guidano la progettazione di una buona funzione: <strong>isolamento della logica</strong>, <strong>riutilizzabilità</strong>, <strong>indipendenza</strong> e <strong>atomicità</strong>.</p>
+                </div>
+
+                <p><strong>Isolamento della logica.</strong> La funzione gestisce solo l'elaborazione dei dati. Non legge input dall'utente e non scrive output sulla pagina o in console. Riceve dati tramite parametri, li elabora e restituisce un risultato con <code>return</code>. Il codice esterno si occupa di tutto il resto.</p>
+                <p><strong>Riutilizzabilità.</strong> Una funzione ben scritta può essere invocata in punti diversi del programma, con valori diversi, senza essere modificata. Questo è possibile solo se riceve tutto ciò di cui ha bisogno tramite parametri, senza dipendere da variabili o contesti specifici.</p>
+                <p><strong>Indipendenza.</strong> La funzione non legge né modifica variabili dichiarate fuori da essa. Dato lo stesso input, produce sempre lo stesso output, indipendentemente da cosa c'è intorno. Una funzione indipendente è prevedibile: il suo comportamento dipende solo dagli argomenti che riceve.</p>
+                <p><strong>Atomicità.</strong> Ogni funzione deve fare <em>una cosa sola</em> e farla bene. Se una funzione calcola un valore, lo formatta e lo stampa, va suddivisa in tre funzioni separate. Funzioni piccole e focalizzate sono più semplici da leggere, da correggere e da combinare tra loro per costruire logiche più complesse.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// Tre funzioni atomiche, ognuna fa una cosa sola
+function calcolaSubtotale(prezzo, quantita) {
+    return prezzo * quantita;
+}
+
+function calcolaIva(imponibile, aliquota) {
+    return imponibile * aliquota / 100;
+}
+
+function calcolaTotale(subtotale, iva) {
+    return subtotale + iva;
+}
+
+// Il codice esterno combina le funzioni e gestisce l'output
+const subtotale = calcolaSubtotale(30, 4);       // 120
+const iva       = calcolaIva(subtotale, 22);     // 26.4
+const totale    = calcolaTotale(subtotale, iva); // 146.4
+console.log('Totale ordine: ' + totale + ' euro');</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Riscrivi questa funzione separandola in due funzioni atomiche: una che calcola la media e una che verifica se è sufficiente (≥ 6).</p>
+                    <pre><code class="language-javascript">function valutaStudente(voto1, voto2, voto3) {
+    const media = (voto1 + voto2 + voto3) / 3;
+    if (media >= 6) {
+        return 'Promosso con media ' + media;
+    } else {
+        return 'Bocciato con media ' + media;
+    }
+}</code></pre>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function calcolaMedia(voto1, voto2, voto3) {
+    return (voto1 + voto2 + voto3) / 3;
+}
+
+function isPromosso(media) {
+    return media >= 6;
+}
+
+const media = calcolaMedia(7, 5, 8);
+const promosso = isPromosso(media);
+
+if (promosso === true) {
+    console.log('Promosso con media ' + media);
+} else {
+    console.log('Bocciato con media ' + media);
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 6 — Eventi sui tag HTML -->
+            <section id="eventi-tag">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Eventi sui tag HTML</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un <strong>evento</strong> è qualcosa che succede sulla pagina: un click, la pressione di un tasto, il passaggio del mouse su un elemento. È possibile reagire a questi eventi collegando una funzione direttamente a un tag HTML tramite attributi come <code>onclick</code>, <code>onkeypress</code>, <code>onmouseover</code>.</p>
+                </div>
+
+                <p>Il modo più diretto per far reagire un elemento della pagina a un'azione dell'utente è aggiungere un <strong>attributo evento</strong> direttamente sul tag HTML. Il nome di questi attributi inizia sempre con <code>on</code> seguito dal nome dell'evento — ad esempio <code>onclick</code> per il click, <code>onmouseover</code> quando il puntatore entra nell'elemento. Il valore dell'attributo è il codice JavaScript da eseguire: di solito l'invocazione di una funzione già definita nello script, completa di parentesi tonde.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-html">&lt;button onclick="tiraDado()"&gt;Tira il dado&lt;/button&gt;
+&lt;input type="text" onkeypress="contaCaratteri()"&gt;
+&lt;img src="foto.jpg" onmouseover="ingrandisci()" onmouseout="rimpicciolisci()"&gt;</code></pre>
+                    <pre><code class="language-javascript">function generaFaccia() {
+    return Math.floor(Math.random() * 6) + 1;
+}
+
+function tiraDado() {
+    const faccia = generaFaccia();
+    alert('Hai ottenuto: ' + faccia);
+}
+
+function contaCaratteri() {
+    // logica per contare i caratteri digitati
+}
+
+function ingrandisci() {
+    // logica per ingrandire l'immagine
+}
+
+function rimpicciolisci() {
+    // logica per ridurre l'immagine
+}</code></pre>
+                </section>
+
+                <p>Gli attributi evento più comuni:</p>
+                <ul>
+                    <li><code>onclick</code> — click del mouse o tap su touch screen</li>
+                    <li><code>ondblclick</code> — doppio click</li>
+                    <li><code>onmouseover</code> — puntatore entra nell'area dell'elemento</li>
+                    <li><code>onmouseout</code> — puntatore lascia l'area dell'elemento</li>
+                    <li><code>onkeypress</code> — tasto premuto e rilasciato</li>
+                    <li><code>onkeydown</code> — tasto premuto (si attiva prima di <code>onkeypress</code>)</li>
+                    <li><code>onkeyup</code> — tasto rilasciato</li>
+                    <li><code>oninput</code> — il valore di un campo di testo cambia</li>
+                    <li><code>onchange</code> — il valore di un campo cambia e perde il focus</li>
+                    <li><code>onsubmit</code> — un form viene inviato</li>
+                </ul>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una funzione <code>generaNumero</code> che restituisce un intero casuale tra 1 e 6, e una funzione <code>tiraDado</code> che la usa e mostra il risultato con <code>alert</code>. Scrivi poi l'HTML del pulsante che invoca <code>tiraDado</code> al click.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;button onclick="tiraDado()"&gt;Tira il dado&lt;/button&gt;</code></pre>
+                        <pre><code class="language-javascript">function generaNumero() {
+    return Math.floor(Math.random() * 6) + 1;
+}
+
+function tiraDado() {
+    const risultato = generaNumero();
+    alert('Hai ottenuto: ' + risultato);
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESERCIZIO FINALE -->
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Crea una pagina con tre pulsanti: uno per calcolare l'area di un rettangolo (base 12, altezza 7), uno per tirare un dado da 6 facce, uno per calcolare il prezzo con IVA al 22% di 85 euro. Per ogni pulsante scrivi una funzione atomica che si occupa solo del calcolo e una che la usa e mostra il risultato con <code>alert</code>. Collega le funzioni ai pulsanti tramite attributo <code>onclick</code>.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-html">&lt;button onclick="mostraArea()"&gt;Calcola area&lt;/button&gt;
+&lt;button onclick="mostraDado()"&gt;Tira il dado&lt;/button&gt;
+&lt;button onclick="mostraIva()"&gt;Calcola prezzo con IVA&lt;/button&gt;</code></pre>
+                    <pre><code class="language-javascript">function calcolaArea(base, altezza) {
+    return base * altezza;
+}
+
+function generaFaccia() {
+    return Math.floor(Math.random() * 6) + 1;
+}
+
+function calcolaPrezzoIva(imponibile, aliquota) {
+    return imponibile + (imponibile * aliquota / 100);
+}
+
+function mostraArea() {
+    const area = calcolaArea(12, 7);
+    alert('Area: ' + area + ' m²');
+}
+
+function mostraDado() {
+    const faccia = generaFaccia();
+    alert('Hai ottenuto: ' + faccia);
+}
+
+function mostraIva() {
+    const totale = calcolaPrezzoIva(85, 22);
+    alert('Prezzo con IVA: ' + totale + ' euro');
+}
+</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React - Form, onSubmit e immutabilità</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">React Base</div>
+            <ul>
+                <li><a href="#form-onsubmit">Form</a></li>
+                <li><a href="#controlled-form">Campi</a></li>
+                <li><a href="#immutabilita">Immutabilità</a></li>
+                <li><a href="#aggiungere-array">Aggiungere</a></li>
+                <li><a href="#rimuovere-array">Rimuovere</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Form completi e array nello stato</h1>
+            <p class="intro">Gestione dell'invio di un form con onSubmit e aggiornamento immutabile degli array in React.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="form-onsubmit">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>onSubmit e gestione del form</h2>
+                </header>
+
+                <div class="note">
+                    <p>L'evento <code>onSubmit</code> viene eseguito quando un form viene inviato.</p>
+                    <p>In React serve per raccogliere i dati dei campi e gestirli in una funzione, senza lasciare al browser il comportamento predefinito.</p>
+                </div>
+
+                <p>Un form non è solo un insieme di input separati. È un blocco unico che ha uno scopo preciso, per esempio registrare un utente, aggiungere un prodotto o inviare un messaggio. Per questo motivo React permette di ascoltare l'evento <code>onSubmit</code> direttamente sul tag <code>form</code>.</p>
+
+                <p>Quando il form viene inviato, il browser prova normalmente a ricaricare la pagina. In un'applicazione React questo comportamento non è utile, perché farebbe perdere lo stato corrente. Per evitarlo si usa il metodo <code>event.preventDefault()</code>, che blocca il comportamento automatico del browser e lascia a React il controllo dell'operazione.</p>
+
+                <p>In pratica si scrive una funzione, ad esempio <code>handleSubmit</code>, e la si collega al form con <code>onSubmit={handleSubmit}</code>. Dentro quella funzione si leggono i valori già presenti nello stato, si eseguono eventuali controlli e poi si decide cosa fare, per esempio stampare i dati in console oppure aggiornare un array.</p>
+
+                <section>
+                    <h3>esempio</h3>
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [nome, setNome] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log('Nome inviato:', nome);
+    }
+
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;label&gt;Nome&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={nome}
+                onChange={(event) =&gt; setNome(event.target.value)}
+            /&gt;
+            &lt;button type="submit"&gt;Invia&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+                </section>
+
+                <div class="exercise">
+                    <h3>esercizio</h3>
+                    <p>Crea un form con un input per il cognome. Collega il campo a <code>useState</code> e, al submit, stampa in console il valore inserito senza ricaricare la pagina.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [cognome, setCognome] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log('Cognome inviato:', cognome);
+    }
+
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;label&gt;Cognome&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={cognome}
+                onChange={(event) =&gt; setCognome(event.target.value)}
+            /&gt;
+            &lt;button type="submit"&gt;Invia&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="controlled-form">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Gestire più campi nello stesso form</h2>
+                </header>
+
+                <div class="note">
+                    <p>Quando un form contiene più input, ogni campo può essere collegato a una parte dello stato.</p>
+                    <p>Al submit, tutti i valori vengono letti insieme e trattati come dati di un unico form.</p>
+                </div>
+
+                <p>Un form reale contiene spesso più informazioni, ad esempio nome ed email. In questo caso ogni input continua ad avere il proprio <code>value</code> e il proprio <code>onChange</code>, ma il submit avviene una sola volta sul form completo. Questo approccio mantiene ordinata la logica: i campi aggiornano lo stato durante la scrittura, mentre <code>onSubmit</code> si occupa del momento finale dell'invio.</p>
+
+                <p>È importante capire la differenza tra questi due momenti. <code>onChange</code> reagisce ogni volta che il valore cambia, quindi serve per tenere aggiornato lo stato. <code>onSubmit</code>, invece, interviene quando l'utente conferma il form, quindi serve per usare quei dati insieme.</p>
+
+                <section>
+                    <h3>esempio</h3>
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log('Nome:', nome);
+        console.log('Email:', email);
+    }
+
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;label&gt;Nome&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={nome}
+                onChange={(event) =&gt; setNome(event.target.value)}
+            /&gt;
+
+            &lt;label&gt;Email&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={email}
+                onChange={(event) =&gt; setEmail(event.target.value)}
+            /&gt;
+
+            &lt;button type="submit"&gt;Invia&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+                </section>
+
+                <div class="exercise">
+                    <h3>esercizio</h3>
+                    <p>Crea un form con due input: uno per il nome del corso e uno per il nome del docente. Al submit stampa entrambi i valori in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [corso, setCorso] = useState('');
+    const [docente, setDocente] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log('Corso:', corso);
+        console.log('Docente:', docente);
+    }
+
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;label&gt;Corso&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={corso}
+                onChange={(event) =&gt; setCorso(event.target.value)}
+            /&gt;
+
+            &lt;label&gt;Docente&lt;/label&gt;
+            &lt;input
+                type="text"
+                value={docente}
+                onChange={(event) =&gt; setDocente(event.target.value)}
+            /&gt;
+
+            &lt;button type="submit"&gt;Invia&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="immutabilita">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Immutabilità dello stato</h2>
+                </header>
+
+                <div class="note">
+                    <p>In React lo stato non si modifica direttamente.</p>
+                    <p>Quando un dato deve cambiare, si crea un nuovo valore e lo si passa alla funzione di aggiornamento dello stato.</p>
+                </div>
+
+                <p>Immutabilità significa che il valore salvato nello stato non deve essere cambiato direttamente. Se nello stato c'è un array, non si deve aggiungere o togliere elementi modificando quell'array originale. Bisogna invece costruire un nuovo array e usare il setter di <code>useState</code> per sostituire il vecchio valore.</p>
+
+                <p>Questo principio è importante perché React controlla i cambiamenti di stato per capire quando aggiornare l'interfaccia. Se si modifica direttamente il dato esistente, il cambiamento può diventare poco chiaro e il comportamento dell'applicazione può risultare scorretto o difficile da gestire.</p>
+
+                <p>Per questo motivo vanno evitati aggiornamenti diretti come riassegnazioni manuali dell'array originale. L'idea corretta è: partire dal valore attuale, creare una copia aggiornata e passare quella copia a <code>setState</code>.</p>
+
+                <section>
+                    <h3>esempio</h3>
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [studenti, setStudenti] = useState(['Anna', 'Luca']);
+
+    function aggiungiStudente() {
+        const nuovoArray = [...studenti, 'Marco'];
+        setStudenti(nuovoArray);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;button onClick={aggiungiStudente}&gt;Aggiungi&lt;/button&gt;
+            {studenti.map((studente, index) =&gt; (
+                &lt;p key={index}&gt;{studente}&lt;/p&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                </section>
+
+                <div class="exercise">
+                    <h3>esercizio</h3>
+                    <p>Crea uno stato con un array di colori. Aggiungi un pulsante che inserisce il colore <code>'blu'</code> creando un nuovo array, senza modificare direttamente quello esistente.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [colori, setColori] = useState(['rosso', 'verde']);
+
+    function aggiungiColore() {
+        const nuovoArray = [...colori, 'blu'];
+        setColori(nuovoArray);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;button onClick={aggiungiColore}&gt;Aggiungi colore&lt;/button&gt;
+            {colori.map((colore, index) =&gt; (
+                &lt;p key={index}&gt;{colore}&lt;/p&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="aggiungere-array">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Aggiungere elementi a un array</h2>
+                </header>
+
+                <div class="note">
+                    <p>Per aggiungere un elemento a un array nello stato si crea un nuovo array che contiene i vecchi elementi più quello nuovo.</p>
+                    <p>Lo strumento più semplice, a questo livello, è lo spread operator dentro un nuovo array.</p>
+                </div>
+
+                <p>Quando si vuole salvare un nuovo elemento, per esempio il testo scritto in un input, si prende l'array attuale e lo si ricopia dentro un nuovo array. Alla fine si aggiunge il nuovo valore. In questo modo l'array originale resta intatto e React riceve un nuovo stato completo.</p>
+
+                <p>Questo schema è molto utile quando un form serve ad aggiungere elementi a una lista. L'utente compila l'input, preme il pulsante di invio, la funzione <code>handleSubmit</code> blocca il refresh della pagina e costruisce un nuovo array con il vecchio contenuto più il nuovo elemento.</p>
+
+                <section>
+                    <h3>esempio</h3>
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [attivita, setAttivita] = useState(['Studiare']);
+    const [nuovaAttivita, setNuovaAttivita] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        setAttivita([...attivita, nuovaAttivita]);
+        setNuovaAttivita('');
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;form onSubmit={handleSubmit}&gt;
+                &lt;label&gt;Nuova attivita'&lt;/label&gt;
+                &lt;input
+                    type="text"
+                    value={nuovaAttivita}
+                    onChange={(event) =&gt; setNuovaAttivita(event.target.value)}
+                /&gt;
+                &lt;button type="submit"&gt;Aggiungi&lt;/button&gt;
+            &lt;/form&gt;
+
+            {attivita.map((attivitaSingola, index) =&gt; (
+                &lt;p key={index}&gt;{attivitaSingola}&lt;/p&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                </section>
+
+                <div class="exercise">
+                    <h3>esercizio</h3>
+                    <p>Crea un input collegato a <code>useState</code> e un array iniziale con un solo film. Al submit del form aggiungi il nuovo film all'array e svuota l'input.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [films, setFilms] = useState(['Inception']);
+    const [nuovoFilm, setNuovoFilm] = useState('');
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        setFilms([...films, nuovoFilm]);
+        setNuovoFilm('');
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;form onSubmit={handleSubmit}&gt;
+                &lt;label&gt;Nuovo film&lt;/label&gt;
+                &lt;input
+                    type="text"
+                    value={nuovoFilm}
+                    onChange={(event) =&gt; setNuovoFilm(event.target.value)}
+                /&gt;
+                &lt;button type="submit"&gt;Aggiungi&lt;/button&gt;
+            &lt;/form&gt;
+
+            {films.map((film, index) =&gt; (
+                &lt;p key={index}&gt;{film}&lt;/p&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="rimuovere-array">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Rimuovere elementi da un array</h2>
+                </header>
+
+                <div class="note">
+                    <p>Per rimuovere un elemento da un array nello stato non si cancella direttamente il dato esistente.</p>
+                    <p>Si crea invece un nuovo array che contiene solo gli elementi da mantenere.</p>
+                </div>
+
+                <p>Per togliere un elemento si usa spesso <code>filter()</code>. Questo metodo crea un nuovo array prendendo solo gli elementi che rispettano una condizione. Il vantaggio è che non modifica l'array originale, quindi rispetta l'immutabilità dello stato.</p>
+
+                <p>Se, per esempio, si vuole eliminare un elemento in base alla sua posizione, si può confrontare l'indice dell'elemento corrente con l'indice da rimuovere. Tutti gli elementi diversi da quell'indice restano nel nuovo array, mentre quello scelto viene escluso.</p>
+
+                <section>
+                    <h3>esempio</h3>
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [frutti, setFrutti] = useState(['Mela', 'Pera', 'Banana']);
+
+    function rimuoviFrutto(indiceDaRimuovere) {
+        const nuovoArray = frutti.filter((frutto, index) =&gt; {
+            return index !== indiceDaRimuovere;
+        });
+
+        setFrutti(nuovoArray);
+    }
+
+    return (
+        &lt;div&gt;
+            {frutti.map((frutto, index) =&gt; (
+                &lt;div key={index}&gt;
+                    &lt;p&gt;{frutto}&lt;/p&gt;
+                    &lt;button onClick={() =&gt; rimuoviFrutto(index)}&gt;Rimuovi&lt;/button&gt;
+                &lt;/div&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                </section>
+
+                <div class="exercise">
+                    <h3>esercizio</h3>
+                    <p>Crea un array con tre nomi e mostrali con <code>map()</code>. Accanto a ogni nome aggiungi un pulsante che lo rimuove creando un nuovo array con <code>filter()</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [nomi, setNomi] = useState(['Anna', 'Luca', 'Marco']);
+
+    function rimuoviNome(indiceDaRimuovere) {
+        const nuovoArray = nomi.filter((nome, index) =&gt; {
+            return index !== indiceDaRimuovere;
+        });
+
+        setNomi(nuovoArray);
+    }
+
+    return (
+        &lt;div&gt;
+            {nomi.map((nome, index) =&gt; (
+                &lt;div key={index}&gt;
+                    &lt;p&gt;{nome}&lt;/p&gt;
+                    &lt;button onClick={() =&gt; rimuoviNome(index)}&gt;Rimuovi&lt;/button&gt;
+                &lt;/div&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Crea un'app con un form per gestire una lista di partecipanti. Il form deve avere un input collegato a <code>useState</code> e usare <code>onSubmit</code> per aggiungere un nuovo nome a un array nello stato senza modificarlo direttamente. Sotto il form, mostra tutti i partecipanti con <code>map()</code> e aggiungi un pulsante per rimuovere ciascun nome usando <code>filter()</code>.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+    const [nome, setNome] = useState('');
+    const [partecipanti, setPartecipanti] = useState(['Sara', 'Paolo']);
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        setPartecipanti([...partecipanti, nome]);
+        setNome('');
+    }
+
+    function rimuoviPartecipante(indiceDaRimuovere) {
+        const nuovoArray = partecipanti.filter((partecipante, index) =&gt; {
+            return index !== indiceDaRimuovere;
+        });
+
+        setPartecipanti(nuovoArray);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;form onSubmit={handleSubmit}&gt;
+                &lt;label&gt;Nome partecipante&lt;/label&gt;
+                &lt;input
+                    type="text"
+                    value={nome}
+                    onChange={(event) =&gt; setNome(event.target.value)}
+                /&gt;
+                &lt;button type="submit"&gt;Aggiungi&lt;/button&gt;
+            &lt;/form&gt;
+
+            {partecipanti.map((partecipante, index) =&gt; (
+                &lt;div key={index}&gt;
+                    &lt;p&gt;{partecipante}&lt;/p&gt;
+                    &lt;button onClick={() =&gt; rimuoviPartecipante(index)}&gt;Rimuovi&lt;/button&gt;
+                &lt;/div&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+    </script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

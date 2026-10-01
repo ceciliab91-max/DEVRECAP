@@ -44,7 +44,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       id: 'welcome',
       sender: 'bot',
       type: 'socratic',
-      text: 'Ciao! Sono il tuo **Tutor IA per lo Sviluppo Web**.\n\nHo integrato la Knowledge Base completa delle **24 dispense didattiche** (CSS, JavaScript, React e MySQL).\n\nScegli una modalità in alto per iniziare lo studio o fai una domanda direttamente.',
+      text: 'Ciao! Sono il tuo **Tutor IA per lo Sviluppo Web**.\n\nHo integrato la Knowledge Base completa di oltre **40 dispense didattiche** (CSS, JavaScript, React, MySQL, Node.js, Express, Prisma ed AI Engineering con LangChain).\n\nScegli una modalità in alto per iniziare lo studio o fai una domanda direttamente.',
       time: 'Adesso'
     }
   ]);
@@ -56,10 +56,13 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
   const chatEndRef = useRef(null);
 
   const starterTopics = [
-    { label: "⚡ Event Loop & Microtask", subject: "javascript", prompt: "Spiegami come funziona l'Event Loop e la differenza tra Microtask e Macrotask" },
+    { label: "⚡ Event Loop & Asincronia", subject: "javascript", prompt: "Spiegami come funziona l'Event Loop e la differenza tra Microtask e Macrotask in JavaScript" },
+    { label: "🚀 Express & Middleware", subject: "node", prompt: "Come funzionano i middleware in Express e la gestione centralizzata degli errori?" },
+    { label: "🤖 LangChain & Structured Output", subject: "ai", prompt: "Come funziona withStructuredOutput con Zod in LangChain per garantire risposte tipizzate?" },
     { label: "⚛️ useState & Immutabilità", subject: "react", prompt: "Perché non si deve mai mutare lo stato direttamente in React e come funziona l'immutabilità con useState?" },
+    { label: "🗄️ Prisma & Relazioni MySQL", subject: "node", prompt: "Come si modella una relazione 1:N in Prisma e come si eseguono query con select annidate?" },
     { label: "🔍 LEFT JOIN vs INNER JOIN", subject: "sql", prompt: "Qual è la differenza fondamentale tra INNER JOIN e LEFT JOIN in MySQL con esempi pratici?" },
-    { label: "🎨 Box Model & border-box", subject: "css", prompt: "Spiegami il Box Model e la differenza tra content-box e border-box" }
+    { label: "🎨 Box Model & border-box", subject: "css", prompt: "Spiegami il Box Model e la differenza tra content-box e border-box in CSS" }
   ];
 
   const handleCopy = (code, id) => {

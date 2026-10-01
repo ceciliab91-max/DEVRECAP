@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Middleware in Express - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body><a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">ExpressJs</div>
+            <ul>
+                <li><a href="#env">Variabili d'ambiente</a></li>
+                <li><a href="#idea">Idea</a></li>
+                <li><a href="#built-in">Middleware inclusi</a></li>
+                <li><a href="#custom">Middleware personali</a></li>
+                <li><a href="#errors">Errori</a></li>
+                <li><a href="#not-found">404</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Middleware in Express</h1>
+            <p class="intro">Funzioni che intercettano le richieste, preparano l'app e gestiscono errori e rotte non
+                trovate.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="env">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Variabili d'ambiente con dotenv</h2>
+                </header>
+                <p>Un file di <strong>environment</strong> (<code>.env</code>) contiene le variabili di configurazione del
+                    progetto: porte, credenziali, chiavi API e altri valori che cambiano tra sviluppo e produzione. Si
+                    tengono fuori dal codice per non scriverli direttamente nei file JavaScript e per non pubblicarli su
+                    GitHub.</p>
+                <pre><code class="language-bash">SERVER_PORT="3000"</code></pre>
+                <p>Il file va creato nella cartella principale del progetto, accanto a <code>server.js</code> e
+                    <code>package.json</code>.</p>
+                <pre><code class="language-text">express-app/
+├── .env
+├── package.json
+└── server.js</code></pre>
+                <p>Oltre al flag <code>--env-file</code> di Node, possiamo usare il package <code>dotenv</code>, che legge
+                    il file <code>.env</code> e popola <code>process.env</code> non appena viene importato.</p>
+                <pre><code class="language-bash">pnpm add dotenv</code></pre>
+                <pre><code class="language-javascript">import 'dotenv/config';
+
+const port = process.env.SERVER_PORT || 3000;
+
+app.listen(port, () => {
+  console.log(`Server in ascolto su http://localhost:${port}`);
+});</code></pre>
+                <div class="note">
+                    <p>L'import <code>'dotenv/config'</code> va messo <strong>prima</strong> di ogni altro codice che
+                        legge <code>process.env</code>, così le variabili sono già disponibili quando servono. Non
+                        pubblicare mai il file <code>.env</code> su GitHub: aggiungilo al <code>.gitignore</code>.</p>
+                </div>
+            </section>
+            <section id="idea">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Che cos'è un middleware</h2>
+                </header>
+                <div class="note">
+                    <p>Un <strong>middleware</strong> è una funzione eseguita tra l'arrivo della richiesta e la risposta
+                        finale. Può leggere o modificare <code>req</code> e <code>res</code>, terminare la richiesta
+                        oppure passarla alla funzione successiva.</p>
+                </div>
+                <p>In Express una richiesta attraversa una sequenza di funzioni. Una rotta è anch'essa parte di questa
+                    sequenza: normalmente è l'ultima funzione e invia la risposta.</p>
+                <pre><code class="language-text">Client
+  │ richiesta HTTP
+  ▼
+middleware 1 → middleware 2 → rotta → risposta
+                         │
+                         └→ middleware di errore (se qualcosa va storto)</code></pre>
+                <p>Un middleware normale riceve tre argomenti: <code>req</code>, <code>res</code> e <code>next</code>.
+                    Chiama <code>next()</code> quando il suo lavoro è terminato e vuole lasciare proseguire la
+                    richiesta.</p>
+                <pre><code class="language-javascript">function saluta(req, res, next) {
+  console.log('Richiesta ricevuta per:', req.path);
+  next();
+}
+
+app.use(saluta);
+
+app.get('/', (req, res) => {
+  res.send('Ciao!');
+});</code></pre>
+                <p>Se dimentichiamo <code>next()</code> e non inviamo una risposta, la richiesta resta in attesa. Se
+                    invece il middleware risponde con <code>res.send()</code>, <code>res.json()</code> o simili, la
+                    catena termina e non deve chiamare <code>next()</code>.</p>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un middleware <code>logMethod</code> che stampi nella console il metodo HTTP e il percorso,
+                        per esempio <code>GET /products</code>. Registralo per tutta l'app.</p><button class="toggle"
+                        type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function logMethod(req, res, next) {
+  console.log(req.method, req.path);
+  next();
+}
+
+app.use(logMethod);</code></pre>
+                    </div>
+                </div>
+            </section>
+            <section id="built-in">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Middleware già inclusi in Express</h2>
+                </header>
+                <p>Abbiamo già usato middleware senza chiamarli così. Le funzioni <code>express.static()</code> ed
+                    <code>express.json()</code> restituiscono middleware che registriamo con <code>app.use()</code>.
+                </p>
+                <h3>Asset statici</h3>
+                <p><code>express.static('public')</code> controlla se la richiesta corrisponde a un file nella cartella
+                    <code>public</code>. Se lo trova, invia il file; se non lo trova, lascia proseguire la richiesta.
+                </p>
+                <pre><code class="language-javascript">app.use(express.static('public'));
+
+// GET /images/logo.png → invia public/images/logo.png</code></pre>
+                <h3>Body parser JSON</h3>
+                <p>Il body di una richiesta arriva come dati grezzi. <code>express.json()</code> legge i body con
+                    <code>Content-Type: application/json</code>, li trasforma in un oggetto JavaScript e lo salva in
+                    <code>req.body</code>.
+                </p>
+                <pre><code class="language-javascript">app.use(express.json());
+
+app.post('/products', (req, res) => {
+  console.log(req.body); // { name: 'Tastiera', price: 59.9 }
+  res.status(201).json(req.body);
+});</code></pre>
+                <div class="note">
+                    <p><code>express.json()</code> va registrato <strong>prima</strong> delle rotte che usano
+                        <code>req.body</code>. L'ordine di <code>app.use()</code> e delle rotte conta sempre.
+                    </p>
+                </div>
+                <pre><code class="language-json">POST http://localhost:3000/products
+Content-Type: application/json
+
+{ "name": "Tastiera", "price": 59.9 }</code></pre>
+            </section>
+            <section id="custom">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Creare e registrare un middleware</h2>
+                </header>
+                <p>Possiamo registrare un middleware per ogni richiesta con <code>app.use()</code>, per un gruppo di URL
+                    con un prefisso, oppure soltanto su una o più rotte.</p>
+                <pre><code class="language-javascript">function richiedeToken(req, res, next) {
+  const token = req.headers.authorization;
+
+  if (token !== 'Bearer segreto') {
+    return res.status(401).json({ error: 'Token non valido' });
+  }
+
+  next();
+}
+
+// Solo questa rotta è protetta
+app.get('/admin', richiedeToken, (req, res) => {
+  res.json({ message: 'Area riservata' });
+});
+
+// Lo stesso middleware su più rotte
+app.post('/products', richiedeToken, creaProdotto);
+app.delete('/products/:id', richiedeToken, eliminaProdotto);</code></pre>
+                <p>Quando la condizione non è rispettata, il middleware invia <code>401 Unauthorized</code> e usa
+                    <code>return</code>: così la funzione finisce e la rotta protetta non viene eseguita.
+                </p>
+                <p>Per applicarlo a tutte le richieste che iniziano con <code>/admin</code>, montiamolo con un prefisso.
+                </p>
+                <pre><code class="language-javascript">app.use('/admin', richiedeToken);
+
+app.get('/admin/dashboard', (req, res) => {
+  res.send('Dashboard');
+});
+
+app.get('/admin/users', (req, res) => {
+  res.send('Gestione utenti');
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un middleware <code>controllaEmail</code> per la rotta <code>POST /newsletter</code>. Deve
+                        rispondere con <code>400</code> se <code>req.body.email</code> non è presente; altrimenti deve
+                        aggiungere <code>req.body.email</code> a <code>req.email</code> e lasciare proseguire la rotta.
+                    </p><button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function controllaEmail(req, res, next) {
+  if (!req.body.email) {
+    return res.status(400).json({ error: 'Email obbligatoria' });
+  }
+
+  req.email = req.body.email;
+  next();
+}
+
+app.post('/newsletter', controllaEmail, (req, res) => {
+  res.json({ message: `Iscrizione completata per ${req.email}` });
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+            <section id="errors">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Intercettare gli errori</h2>
+                </header>
+                <p>Quando un middleware o una rotta incontra un problema, chiama <code>next(error)</code>. Express salta
+                    i middleware normali successivi e cerca un middleware di gestione errori.</p>
+                <p>Un error handler si riconosce dai <strong>quattro</strong> parametri, nell'ordine esatto:
+                    <code>err, req, res, next</code>. Anche se non usiamo <code>next</code>, deve essere presente nella
+                    firma.
+                </p>
+                <pre><code class="language-javascript">app.get('/divisione', (req, res, next) => {
+  const divisore = Number(req.query.divisore);
+
+  if (!divisore) {
+    return next(new Error('Il divisore deve essere diverso da zero'));
+  }
+
+  res.json({ risultato: 100 / divisore });
+});
+
+// Va dichiarato dopo le rotte e gli altri middleware normali.
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  res.status(500).json({ error: 'Errore interno del server' });
+});</code></pre>
+                <p>Al client non inviamo dettagli tecnici come stack trace, password o query al database. Li registriamo
+                    sul server con <code>console.error()</code>, mentre restituiamo un messaggio generico e uno status
+                    appropriato.</p>
+                <div class="note">
+                    <p>Con le route <code>async</code>, gli errori generati da un <code>await</code> devono arrivare a
+                        <code>next(error)</code>. Il modo più esplicito per iniziare è usare
+                        <code>try</code>/<code>catch</code>.
+                    </p>
+                </div>
+                <pre><code class="language-javascript">app.get('/products/:id', async (req, res, next) => {
+  try {
+    const product = await trovaProdotto(req.params.id);
+    res.json(product);
+  } catch (error) {
+    next(error);
+  }
+});</code></pre>
+            </section>
+            <section id="not-found">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Gestire le rotte inesistenti: 404</h2>
+                </header>
+                <p>Il middleware 404 non è un error handler: riceve tre parametri perché interviene quando nessuna rotta
+                    precedente ha inviato una risposta. Per questo deve stare <strong>dopo tutte le rotte
+                        valide</strong>.</p>
+                <pre><code class="language-javascript">app.get('/products', (req, res) => {
+  res.json([]);
+});
+
+// Ultimo middleware normale: intercetta tutto ciò che non ha trovato una rotta.
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Risorsa non trovata',
+    path: req.originalUrl,
+  });
+});</code></pre>
+                <p>L'ordine completo dell'applicazione è quindi: configurazione, middleware generali, rotte, middleware
+                    404 e infine error handler.</p>
+                <pre><code class="language-javascript">import express from 'express';
+
+const app = express();
+const port = 3000;
+
+app.use(express.static('public'));
+app.use(express.json());
+
+function logger(req, res, next) {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+}
+
+app.use(logger);
+
+app.get('/api/products', (req, res) => {
+  res.json([{ id: 1, name: 'Tastiera' }]);
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Rotta non trovata' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Errore interno del server' });
+});
+
+app.listen(port, () => {
+  console.log(`Server in ascolto su http://localhost:${port}`);
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi una risposta 404 JSON alla tua API. Verifica con Postman
+                        <code>GET /una-rotta-che-non-esiste</code>: deve restituire status <code>404</code> e un oggetto
+                        con la proprietà <code>error</code>.
+                    </p>
+                </div>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: middleware per Express Blog</h3>
+                <p>Nel progetto <code>express-blog</code>, registra <code>express.json()</code> e un logger che stampi
+                    metodo e URL di ogni richiesta. Crea il middleware <code>controllaTitolo</code> e applicalo a
+                    <code>POST /posts</code>: se <code>req.body.title</code> manca, rispondi con <code>400</code>;
+                    altrimenti lascia proseguire la rotta.
+                </p>
+                <p>Aggiungi infine un middleware 404 JSON e un error handler finale che registri l'errore nel terminale
+                    e risponda con <code>500</code>. Prova una rotta valida, una richiesta <code>POST</code> senza
+                    titolo e un URL inesistente.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

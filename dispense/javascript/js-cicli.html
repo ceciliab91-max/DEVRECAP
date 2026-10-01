@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript - Cicli, Incrementi e Scope</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#while">while</a></li>
+                <li><a href="#do-while">do / while</a></li>
+                <li><a href="#for">for</a></li>
+                <li><a href="#scope">Scope</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Cicli, incremento e scope</h1>
+            <p class="intro">Ripetere istruzioni con while, do / while e for, gestire i contatori e capire dove vivono le variabili.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+
+            <!-- ============================================================
+                 CAPITOLO 1 — while
+            ============================================================ -->
+            <section id="while">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Il ciclo while</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un ciclo è una struttura che esegue più volte un blocco di istruzioni finché una condizione rimane vera. Quando la condizione diventa falsa, il ciclo si ferma e il programma prosegue con le istruzioni successive.</p>
+                </div>
+
+                <p>In JavaScript esistono tre tipi di ciclo: <code>while</code>, <code>do / while</code> e <code>for</code>. I primi due sono adatti quando non si sa in anticipo quante volte il blocco dovrà essere ripetuto. Nel ciclo <code>while</code> la condizione viene controllata prima di ogni iterazione: se è falsa fin dall'inizio, il blocco non viene mai eseguito.</p>
+
+                <p>Dentro il blocco è fondamentale che qualcosa cambi ad ogni giro, altrimenti la condizione resterebbe sempre vera e il ciclo non terminerebbe mai. Di solito si aggiorna una variabile numerica o un valore booleano.</p>
+
+                <h3>Esempio</h3>
+                <p>Un programma deve cercare il primo numero intero maggiore di <code>100</code> divisibile per <code>7</code>. Non sappiamo quante iterazioni servono, sappiamo solo la condizione di uscita.</p>
+                <pre><code class="language-javascript">let numero = 101;
+
+while (numero % 7 !== 0) {
+    numero = numero + 1;
+}
+
+console.log("Primo numero divisibile per 7 dopo 100: " + numero);</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Chiedi all'utente di inserire i suoi voti uno alla volta. Continua a chiedere finché non inserisce <code>0</code>. Quando inserisce <code>0</code>, stampa la media di tutti i voti inseriti.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">let somma = 0;
+let contatore = 0;
+let voto = Number(prompt("Inserisci un voto (0 per terminare):"));
+
+while (voto !== 0) {
+    somma = somma + voto;
+    contatore = contatore + 1;
+    voto = Number(prompt("Inserisci un voto (0 per terminare):"));
+}
+
+if (contatore > 0) {
+    console.log("Media: " + somma / contatore);
+} else {
+    console.log("Nessun voto inserito.");
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============================================================
+                 CAPITOLO 2 — do / while
+            ============================================================ -->
+            <section id="do-while">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Il ciclo do / while</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il ciclo <code>do / while</code> esegue prima il blocco e controlla la condizione solo dopo. Questo garantisce che il blocco venga eseguito almeno una volta, indipendentemente dalla condizione.</p>
+                </div>
+
+                <p>La differenza rispetto a <code>while</code> riguarda il momento del controllo. Con <code>while</code> la condizione viene verificata prima ancora di entrare nel blocco: se è falsa, il blocco non parte mai. Con <code>do / while</code> il blocco parte sempre, e solo alla fine si decide se ripeterlo. Questo lo rende la scelta giusta quando la prima esecuzione deve avvenire comunque. Un esempio classico è l'acquisizione dei dati da parte dell'utente: la richiesta di input deve essere mostrata almeno una volta; successivamente, l'algoritmo verifica se il dato è valido e decide se reiterare la domanda. finché l'utente non inserisce un valore valido.</p>
+
+                <p>Il blocco si apre con <code>do</code> e la condizione si scrive alla fine, dopo la parentesi graffa di chiusura, seguita da punto e virgola.</p>
+
+                <h3>Esempio</h3>
+                <p>Un programma chiede all'utente di inserire un numero tra <code>1</code> e <code>10</code>. La richiesta viene ripetuta finché il valore non rientra nell'intervallo valido. La domanda deve comparire almeno una volta, quindi <code>do / while</code> è la scelta più adatta.</p>
+                <pre><code class="language-javascript">let numero;
+
+do {
+    numero = Number(prompt("Inserisci un numero tra 1 e 10:"));
+} while (numero < 1 || numero > 10);
+
+console.log("Hai inserito: " + numero);</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Chiedi all'utente di inserire il PIN. Se inserisce un valore diverso da <code>1234</code>, stampa un messaggio di errore e ripeti la richiesta. Quando il valore è corretto, stampa un messaggio di benvenuto.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">let pin;
+
+do {
+    pin = prompt("Inserisci il PIN:");
+
+    if (pin !== "1234") {
+        console.log("Errore: PIN errato. Riprova.");
+    }
+
+} while (pin !== "1234");
+
+console.log("Benvenuto!");</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============================================================
+                 CAPITOLO 3 — for
+            ============================================================ -->
+            <section id="for">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Il ciclo for</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il ciclo <code>for</code> è un ciclo controllato: si usa quando si sa già quante volte il blocco deve essere ripetuto. Raccoglie inizializzazione, condizione e aggiornamento in un'unica riga, rendendo il codice più compatto e leggibile.</p>
+                </div>
+
+                <p>La struttura è composta da tre parti scritte tra parentesi e separate da punto e virgola. La prima parte dichiara e inizializza la variabile di controllo e viene eseguita una sola volta all'inizio. La seconda parte è la condizione, che viene verificata prima di ogni iterazione. La terza parte aggiorna la variabile al termine di ogni iterazione.</p>
+
+                <p>La variabile dichiarata nella prima parte del <code>for</code> con <code>let</code> esiste solo all'interno del ciclo. Fuori dal blocco non è accessibile.</p>
+
+                <p>Per l'aggiornamento si usano spesso le scorciatoie <code>i++</code> e <code>i--</code>, equivalenti a <code>i = i + 1</code> e <code>i = i - 1</code>. Quando <code>++</code> è scritto prima della variabile (<code>++i</code>), il valore viene incrementato prima di essere usato nell'espressione; quando è scritto dopo (<code>i++</code>), viene prima usato il valore attuale e poi incrementato.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">let ingressi = 0;
+
+console.log(ingressi);    // 0
+console.log(ingressi++);  // 0 — viene usato prima, poi incrementato
+console.log(ingressi);    // 1
+console.log(++ingressi);  // 2 — viene incrementato prima, poi usato
+console.log(ingressi);    // 2</code></pre>
+
+                <h3>Esempio</h3>
+                <p>Stampa i numeri da <code>1</code> a <code>10</code> usando un ciclo <code>for</code>.</p>
+                <pre><code class="language-javascript">for (let i = 1; i <= 10; i++) {
+    console.log(i);
+}</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Chiedi all'utente di inserire un numero <code>N</code>. Calcola la somma di tutti i numeri interi da <code>1</code> a <code>N</code> e stampa il risultato.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const num = Number(prompt("Inserisci un numero:"));
+let somma = 0;
+
+for (let i = 1; i <= num; i++) {
+    somma = somma + i;
+}
+
+console.log("Somma da 1 a " + num + ": " + somma);</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============================================================
+                 CAPITOLO 4 — scope
+            ============================================================ -->
+            <section id="scope">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Scope delle variabili</h2>
+                </header>
+
+                <div class="note">
+                    <p>Lo scope è la zona del codice in cui una variabile è visibile e utilizzabile. Con <code>let</code> e <code>const</code> lo scope è di blocco: la variabile esiste solo dentro le parentesi graffe <code>{ }</code> in cui è stata dichiarata.</p>
+                </div>
+
+                <p>Ogni volta che si apre un blocco con <code>{</code>, si entra in uno scope più interno. Le variabili dichiarate in quello scope esistono solo al suo interno e non sono visibili fuori. Le variabili dichiarate fuori, invece, sono visibili anche all'interno dei blocchi annidati. Ogni blocco può leggere ciò che sta nel livello superiore, ma il contrario non vale.</p>
+
+                <p>Lo scope protegge le variabili da interferenze accidentali. Se una variabile serve solo dentro un ciclo, ha senso dichiararla lì, così non entra in conflitto con il resto del programma. Uno degli errori più comuni è dichiarare una variabile dentro un blocco e poi cercare di usarla fuori: in quel punto la variabile non esiste e il programma va in errore.</p>
+
+                <h3>Esempio</h3>
+                <p>Un programma calcola il quadrato di tre numeri inseriti dall'utente. La variabile <code>limite</code> è dichiarata fuori ed è accessibile ovunque. La variabile <code>numero</code> è dichiarata dentro il ciclo e non serve fuori.</p>
+                <pre><code class="language-javascript">const limite = 3;
+
+for (let i = 1; i <= limite; i++) {
+    const numero = Number(prompt("Inserisci il numero " + i + ":"));
+    console.log(numero + " al quadrato è " + numero * numero);
+}
+
+console.log("Numeri richiesti: " + limite);</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Dichiara fuori dal ciclo una variabile <code>soglia</code> con il valore <code>18</code>. Chiedi all'utente di inserire <code>4</code> voti con <code>prompt</code>. Per ogni voto, stampa se è sufficiente o insufficiente confrontandolo con la soglia. Dopo il ciclo, stampa il valore di <code>soglia</code> e verifica che la variabile <code>voto</code> non sia accessibile fuori dal blocco.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const soglia = 18;
+
+for (let i = 1; i <= 4; i++) {
+    const voto = Number(prompt("Inserisci il voto " + i + ":"));
+
+    if (voto >= soglia) {
+        console.log(voto + ": sufficiente");
+    } else {
+        console.log(voto + ": insufficiente");
+    }
+}
+
+console.log("Soglia di sufficienza: " + soglia);</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============================================================
+                 ESERCIZIO FINALE
+            ============================================================ -->
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Il computer sceglie un numero segreto: <code>7</code>. Chiedi all'utente di indovinarlo con <code>prompt</code>. Ogni volta che sbaglia, stampa se il numero inserito è troppo alto o troppo basso. Continua finché l'utente non indovina. Quando indovina, stampa in quanti tentativi ci è riuscito.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">const numeroSegreto = 7;
+let tentativo;
+let contatore = 0;
+
+do {
+    tentativo = Number(prompt("Indovina il numero segreto:"));
+    contatore++;
+
+    if (tentativo < numeroSegreto) {
+        console.log("Troppo basso!");
+    } else if (tentativo > numeroSegreto) {
+        console.log("Troppo alto!");
+    }
+} while (tentativo !== numeroSegreto);
+
+console.log("Hai indovinato in " + contatore + " tentativi!");</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

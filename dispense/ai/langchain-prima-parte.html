@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain: modelli, storico della chat e primo agente - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+    <style>
+        /* Componente diagramma: usa le variabili definite in assets/main.css */
+        figure.diagram {
+            margin: var(--space-6) 0 var(--space-2);
+            padding: var(--space-6) var(--space-4);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-m);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        figure.diagram svg {
+            width: 100%;
+            max-width: 460px;
+            height: auto;
+            overflow: visible;
+        }
+
+        figure.diagram .node-title {
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 15px;
+            fill: var(--text);
+        }
+
+        figure.diagram .node-title.llm {
+            fill: var(--primary-dark);
+        }
+
+        figure.diagram .node-sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            fill: var(--muted);
+        }
+
+        figure.diagram .edge-label {
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 12px;
+            fill: var(--primary);
+        }
+
+        figure.diagram figcaption {
+            margin-top: var(--space-3);
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">LangChain</div>
+            <ul>
+                <li><a href="#progetto">Progetto</a></li>
+                <li><a href="#librerie">Librerie</a></li>
+                <li><a href="#chiave-api">Chiave API</a></li>
+                <li><a href="#hello-world">Hello World</a></li>
+                <li><a href="#stateless">Stateless</a></li>
+                <li><a href="#storico">Storico</a></li>
+                <li><a href="#dati-aggiornati">Dati aggiornati</a></li>
+                <li><a href="#tool-zod">Tool e Zod</a></li>
+                <li><a href="#tool-meteo">Tool meteo</a></li>
+                <li><a href="#agente">Agente</a></li>
+                <li><a href="#esercizi">Esercizi</a></li>
+                <li><a href="#riepilogo">Riepilogo</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 1 · AI</p>
+            <h1>LangChain: modelli, storico della chat e primo agente</h1>
+            <p class="intro">Imparare a usare LangChain con un modello Anthropic, capire perché un LLM è stateless, gestire manualmente lo storico di una chat e creare un primo agente con un tool meteo mock.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="progetto">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Creazione del progetto</h2>
+                </header>
+                <p>Creiamo una cartella dedicata agli esempi della lezione.</p>
+                <pre><code class="language-bash"># Creiamo una nuova cartella per il progetto.
+mkdir langchain-prima-parte
+
+# Entriamo nella cartella del progetto.
+cd langchain-prima-parte
+
+# Creiamo il file package.json iniziale.
+pnpm init</code></pre>
+                <p>Apriamo <code>package.json</code> e modifichiamolo in questo modo.</p>
+                <pre><code class="language-json">{
+    "name": "langchain-prima-parte",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "node --watch index.js",
+        "start": "node index.js"
+    }
+}</code></pre>
+            </section>
+            <section id="librerie">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Installazione delle librerie</h2>
+                </header>
+                <p>Installiamo le librerie che ci serviranno.</p>
+                <pre><code class="language-bash"># Installiamo LangChain: contiene modelli, messaggi, tool e agenti.
+pnpm add langchain
+
+# Installiamo l'adapter che permette a LangChain di comunicare con Anthropic.
+pnpm add @langchain/anthropic
+
+# Installiamo Zod, utile per descrivere e validare gli input dei tool.
+pnpm add zod
+
+# Installiamo dotenv, che carica le variabili del file .env.
+pnpm add dotenv</code></pre>
+                <h3>Ruolo delle librerie</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Libreria</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>langchain</code></td>
+                            <td>Contiene i messaggi, i tool e gli agenti</td>
+                        </tr>
+                        <tr>
+                            <td><code>@langchain/anthropic</code></td>
+                            <td>Permette di usare i modelli Anthropic tramite LangChain</td>
+                        </tr>
+                        <tr>
+                            <td><code>zod</code></td>
+                            <td>Permette di definire e validare la struttura degli input di un tool</td>
+                        </tr>
+                        <tr>
+                            <td><code>dotenv</code></td>
+                            <td>Carica le variabili del file <code>.env</code> in <code>process.env</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="chiave-api">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Configurazione della chiave API</h2>
+                </header>
+                <p>Per comunicare con Anthropic serve una chiave API.</p>
+                <p>Creiamo un file chiamato <code>.env</code> nella cartella principale del progetto.</p>
+                <pre><code class="language-ini"># Chiave API usata per autenticare le richieste verso Anthropic.
+ANTHROPIC_API_KEY=la_tua_chiave_api_qui</code></pre>
+                <div class="note">
+                    <p>Non inserire mai una chiave API direttamente nei file JavaScript.</p>
+                </div>
+                <p>Creiamo anche un file <code>.env.example</code>.</p>
+                <pre><code class="language-ini"># Copiare questo file in .env e sostituire il valore con una chiave API reale.
+ANTHROPIC_API_KEY=la_tua_chiave_api_qui</code></pre>
+                <p>Infine, creiamo o aggiorniamo il file <code>.gitignore</code>.</p>
+                <pre><code class="language-plaintext"># Il file .env contiene segreti e non deve essere caricato su GitHub.
+.env
+
+# Cartella creata automaticamente quando installiamo le dipendenze.
+node_modules</code></pre>
+                <h3>Perché usare <code>process.env</code>?</h3>
+                <p>Le variabili nel file <code>.env</code> vengono caricate dalla libreria <code>dotenv</code>. Basta
+                    importarla come <strong>prima riga</strong> di ogni file che eseguiamo:</p>
+                <pre><code class="language-javascript">// Carica le variabili del file .env in process.env.
+import 'dotenv/config';</code></pre>
+                <p>La chiave sarà disponibile nel programma tramite <code>process.env.ANTHROPIC_API_KEY</code>.</p>
+                <p>In questo caso non dobbiamo leggerla manualmente: l'adapter <code>ChatAnthropic</code> la utilizza automaticamente quando è presente nell'ambiente.</p>
+            </section>
+            <section id="hello-world">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Hello World con LangChain</h2>
+                </header>
+                <p>Un <strong>chat model</strong> riceve messaggi e genera messaggi di risposta.</p>
+                <p>Con LangChain useremo <code>ChatAnthropic</code> per creare un modello collegato ad Anthropic.</p>
+                <p>Crea il file <code>index.js</code>.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// ChatAnthropic è l'adapter LangChain che permette di usare i modelli Anthropic.
+import { ChatAnthropic } from '@langchain/anthropic';
+
+// HumanMessage rappresenta un messaggio scritto dall'utente.
+import { HumanMessage } from 'langchain';
+
+// Creiamo il modello indicando solo il modello Anthropic da utilizzare.
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+try {
+    // Anche se abbiamo un solo messaggio, usiamo sempre un array di HumanMessage.
+    const messages = [
+        new HumanMessage('Ciao! Spiegami in una frase che cos’è LangChain.')
+    ];
+
+    // invoke() invia l'array di messaggi al modello e attende la risposta.
+    const response = await model.invoke(messages);
+
+    // response è un AIMessage. La proprietà content contiene il testo generato.
+    console.log('RISPOSTA DEL MODELLO:');
+    console.log(response.content);
+} catch (error) {
+    // Mostriamo un messaggio utile in caso di errore di configurazione o rete.
+    console.error('Impossibile contattare Anthropic. Controlla la chiave API e la connessione.', error);
+}</code></pre>
+                <p>Avviamo il programma.</p>
+                <pre><code class="language-bash"># Avvia il programma e lo riavvia automaticamente quando salviamo modifiche.
+pnpm run dev</code></pre>
+                <h3>Cosa fa <code>model.invoke()</code>?</h3>
+                <p><code>model.invoke()</code>:</p>
+                <ol>
+                    <li>riceve un array di messaggi;</li>
+                    <li>invia i messaggi al modello;</li>
+                    <li>attende la risposta;</li>
+                    <li>restituisce un oggetto <code>AIMessage</code>.</li>
+                </ol>
+                <p>Nell'esempio precedente il modello riceve un array con un solo elemento:</p>
+                <pre><code class="language-javascript">// L'array rappresenta lo storico della conversazione.
+const messages = [
+    new HumanMessage('Ciao! Spiegami in una frase che cos’è LangChain.')
+];</code></pre>
+            </section>
+            <section id="stateless">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>LLM stateless e storico dei messaggi</h2>
+                </header>
+                <p>Un LLM è <strong>stateless</strong>.</p>
+                <p>Questo significa che una chiamata a <code>model.invoke()</code> non conserva automaticamente ciò che è accaduto nella chiamata precedente.</p>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="Due chiamate a model.invoke() separate, senza memoria condivisa tra loro">
+                        <defs>
+                            <marker id="arrowA" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="105" y1="66" x2="105" y2="110" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowA)" />
+                        <line x1="105" y1="166" x2="105" y2="210" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowA)" />
+                        <line x1="355" y1="66" x2="355" y2="110" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowA)" />
+                        <line x1="355" y1="166" x2="355" y2="210" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowA)" />
+
+                        <line x1="215" y1="138" x2="245" y2="138" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4" />
+                        <text x="230" y="128" text-anchor="middle" class="edge-label" font-size="16">✕</text>
+
+                        <rect x="10" y="10" width="190" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="105" y="34" text-anchor="middle" class="node-title">HumanMessage #1</text>
+                        <text x="105" y="53" text-anchor="middle" class="node-sub">"Mi chiamo Samuel"</text>
+
+                        <rect x="10" y="110" width="190" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="105" y="143" text-anchor="middle" class="node-title llm">model.invoke() #1</text>
+
+                        <rect x="10" y="210" width="190" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="105" y="243" text-anchor="middle" class="node-title">Risposta 1</text>
+
+                        <rect x="260" y="10" width="190" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="355" y="34" text-anchor="middle" class="node-title">HumanMessage #2</text>
+                        <text x="355" y="53" text-anchor="middle" class="node-sub">"Genesi del mio nome?"</text>
+
+                        <rect x="260" y="110" width="190" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="355" y="143" text-anchor="middle" class="node-title llm">model.invoke() #2</text>
+
+                        <rect x="260" y="210" width="190" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="355" y="243" text-anchor="middle" class="node-title">Risposta 2</text>
+
+                        <text x="230" y="288" text-anchor="middle" class="node-sub">nessuna memoria condivisa tra le due chiamate</text>
+                    </svg>
+                    <figcaption>Due chiamate indipendenti: la seconda non sa nulla della prima, a meno che non gliela inviamo esplicitamente.</figcaption>
+                </figure>
+
+                <h3>Esempio concettuale</h3>
+                <p>Immaginiamo queste due chiamate separate:</p>
+                <pre><code class="language-plaintext">Prima chiamata:
+Utente: "Ciao, mi chiamo Samuel."
+
+Seconda chiamata:
+Utente: "Qual è la genesi del mio nome?"</code></pre>
+                <p>Se nella seconda chiamata non inviamo anche il primo messaggio, il modello non riceve l'informazione che il nome dell'utente è Samuel.</p>
+                <h3>Esempio stateless</h3>
+                <p>Crea il file <code>01-stateless.js</code>.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// ChatAnthropic permette di usare Claude tramite LangChain.
+import { ChatAnthropic } from '@langchain/anthropic';
+
+// HumanMessage rappresenta ogni messaggio scritto dall'utente.
+import { HumanMessage } from 'langchain';
+
+// Creiamo il modello indicando il modello Anthropic da usare.
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+try {
+    // Prima chiamata: il modello riceve un array con un solo messaggio.
+    const firstResponse = await model.invoke([
+        new HumanMessage('Ciao, mi chiamo Samuel.')
+    ]);
+
+    console.log('PRIMA RISPOSTA:');
+    console.log(firstResponse.content);
+
+    // Seconda chiamata: creiamo un nuovo array con un nuovo messaggio.
+    // Il modello non riceve il messaggio precedente.
+    const secondResponse = await model.invoke([
+        new HumanMessage('Qual è la genesi del mio nome?')
+    ]);
+
+    console.log('\nSECONDA RISPOSTA:');
+    console.log(secondResponse.content);
+} catch (error) {
+    // Gestiamo eventuali problemi di configurazione, rete o autenticazione.
+    console.error('Errore durante la conversazione:', error);
+}</code></pre>
+                <p>Eseguiamo il file.</p>
+                <pre><code class="language-bash"># dotenv è importato nel file: non servono flag aggiuntivi.
+node 01-stateless.js</code></pre>
+                <h3>Cosa osservare</h3>
+                <p>Le due invocazioni sono indipendenti.</p>
+                <p>Nella seconda chiamata il modello riceve solamente:</p>
+                <pre><code class="language-plaintext">Qual è la genesi del mio nome?</code></pre>
+                <p>Non riceve il messaggio:</p>
+                <pre><code class="language-plaintext">Ciao, mi chiamo Samuel.</code></pre>
+                <p>Il modello potrebbe comunque conoscere il significato del nome Samuel, ma non perché lo ha memorizzato durante la prima chiamata. Lo sa perché il nome è presente nella sua conoscenza generale.</p>
+                <p>Per vedere più chiaramente il problema, possiamo usare una parola inventata.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// Questo esempio usa una parola inventata per rendere evidente
+// che il modello non conserva automaticamente memoria tra due chiamate.
+import { ChatAnthropic } from '@langchain/anthropic';
+import { HumanMessage } from 'langchain';
+
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+try {
+    // Il modello riceve la parola segreta soltanto in questa chiamata.
+    await model.invoke([
+        new HumanMessage('Ricorda che la parola segreta di oggi è marmotta-blu.')
+    ]);
+
+    // Questa è una nuova richiesta indipendente.
+    // La parola marmotta-blu non viene reinviata.
+    const response = await model.invoke([
+        new HumanMessage('Qual è la parola segreta di oggi?')
+    ]);
+
+    console.log(response.content);
+} catch (error) {
+    console.error('Errore durante l’esempio stateless:', error);
+}</code></pre>
+            </section>
+            <section id="storico">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Gestire lo storico della chat</h2>
+                </header>
+                <p>Per permettere al modello di conoscere i messaggi precedenti, dobbiamo conservare manualmente lo storico della conversazione.</p>
+                <p>Lo storico sarà un array chiamato <code>messages</code>.</p>
+                <p>L'array conterrà:</p>
+                <ul>
+                    <li>i messaggi dell'utente, rappresentati da <code>HumanMessage</code>;</li>
+                    <li>le risposte del modello, rappresentate da <code>AIMessage</code>.</li>
+                </ul>
+                <div class="note">
+                    <p>Non dobbiamo creare manualmente l'<code>AIMessage</code>: lo riceviamo come risultato di <code>model.invoke()</code>.</p>
+                </div>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 560" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="L'array messages cresce a ogni turno e viene inviato per intero a ogni invoke">
+                        <defs>
+                            <marker id="arrowB" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="230" y1="76" x2="230" y2="120" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowB)" />
+                        <text x="248" y="103" class="edge-label">messages.push(...)</text>
+
+                        <line x1="230" y1="192" x2="230" y2="236" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowB)" />
+                        <text x="248" y="219" class="edge-label">nuovo turno</text>
+
+                        <line x1="230" y1="308" x2="230" y2="352" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowB)" />
+                        <text x="248" y="335" class="edge-label">invia i 3 messaggi</text>
+
+                        <line x1="230" y1="424" x2="230" y2="468" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowB)" />
+                        <text x="248" y="451" class="edge-label">messages.push(...)</text>
+
+                        <rect x="60" y="20" width="340" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="44" text-anchor="middle" class="node-title">messages[0] — HumanMessage</text>
+                        <text x="230" y="63" text-anchor="middle" class="node-sub">"Ciao, mi chiamo Samuel."</text>
+
+                        <rect x="60" y="136" width="340" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="160" text-anchor="middle" class="node-title llm">messages[1] — AIMessage</text>
+                        <text x="230" y="179" text-anchor="middle" class="node-sub">risposta salvata nello storico</text>
+
+                        <rect x="60" y="252" width="340" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="276" text-anchor="middle" class="node-title">messages[2] — HumanMessage</text>
+                        <text x="230" y="295" text-anchor="middle" class="node-sub">"Qual è la genesi del mio nome?"</text>
+
+                        <rect x="60" y="368" width="340" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="392" text-anchor="middle" class="node-title llm">Il modello risponde</text>
+                        <text x="230" y="411" text-anchor="middle" class="node-sub">ora conosce anche messages[0] e [1]</text>
+
+                        <rect x="60" y="484" width="340" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="508" text-anchor="middle" class="node-title llm">messages[3] — AIMessage</text>
+                        <text x="230" y="527" text-anchor="middle" class="node-sub">nuova risposta salvata nello storico</text>
+                    </svg>
+                    <figcaption>Ogni <code>invoke()</code> riceve l'intero array: per questo il modello del secondo turno può collegare "il mio nome" al nome Samuel.</figcaption>
+                </figure>
+
+                <h3>Esempio con storico</h3>
+                <p>Crea il file <code>02-storico-chat.js</code>.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// ChatAnthropic permette di usare Claude tramite LangChain.
+import { ChatAnthropic } from '@langchain/anthropic';
+
+// HumanMessage rappresenta un messaggio dell'utente.
+import { HumanMessage } from 'langchain';
+
+// Creiamo il modello Anthropic.
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+// Questo array contiene l'intero storico della conversazione.
+const messages = [];
+
+try {
+    // Aggiungiamo il primo messaggio dell'utente allo storico.
+    messages.push(
+        new HumanMessage('Ciao, mi chiamo Samuel.')
+    );
+
+    // Inviamo tutto lo storico al modello.
+    const firstResponse = await model.invoke(messages);
+
+    // Salviamo nello storico anche la risposta del modello.
+    // In questo modo il prossimo turno conoscerà sia domanda sia risposta.
+    messages.push(firstResponse);
+
+    console.log('ASSISTENTE:');
+    console.log(firstResponse.content);
+
+    // Aggiungiamo il secondo messaggio dell'utente allo stesso array.
+    messages.push(
+        new HumanMessage('Qual è la genesi del mio nome?')
+    );
+
+    // Inviamo nuovamente l'intero storico, non solo l'ultima domanda.
+    const secondResponse = await model.invoke(messages);
+
+    // Salviamo anche la seconda risposta nel caso la chat continui.
+    messages.push(secondResponse);
+
+    console.log('\nASSISTENTE:');
+    console.log(secondResponse.content);
+
+    // Mostriamo quanti messaggi sono stati salvati nello storico.
+    console.log(`\nMessaggi nello storico: ${messages.length}`);
+} catch (error) {
+    // Gestiamo eventuali errori durante la chiamata al modello.
+    console.error('Errore durante la gestione dello storico:', error);
+}</code></pre>
+                <p>Eseguiamo il file.</p>
+                <pre><code class="language-bash"># dotenv è importato nel file: non servono flag aggiuntivi.
+node 02-storico-chat.js</code></pre>
+                <h3>Come cambia lo storico?</h3>
+                <p>Dopo il primo messaggio dell'utente:</p>
+                <pre><code class="language-plaintext">1. HumanMessage: "Ciao, mi chiamo Samuel."</code></pre>
+                <p>Dopo la risposta del modello:</p>
+                <pre><code class="language-plaintext">1. HumanMessage: "Ciao, mi chiamo Samuel."
+2. AIMessage: "Ciao Samuel, piacere di conoscerti..."</code></pre>
+                <p>Dopo il secondo messaggio dell'utente:</p>
+                <pre><code class="language-plaintext">1. HumanMessage: "Ciao, mi chiamo Samuel."
+2. AIMessage: "Ciao Samuel, piacere di conoscerti..."
+3. HumanMessage: "Qual è la genesi del mio nome?"</code></pre>
+                <p>A questo punto il modello può collegare l'espressione “il mio nome” al nome Samuel, perché riceve anche il primo messaggio.</p>
+                <h3>Attenzione: lo storico cresce</h3>
+                <p>A ogni nuovo turno aggiungiamo messaggi nell'array.</p>
+                <p>Questo comporta due conseguenze:</p>
+                <ul>
+                    <li>aumentano i token inviati al modello;</li>
+                    <li>una conversazione molto lunga può superare il limite di contesto del modello.</li>
+                </ul>
+                <p>Per ora gestiamo manualmente lo storico, perché è il modo più semplice per capire come funziona. In futuro potremo selezionare solo i messaggi più importanti oppure creare un riassunto della conversazione.</p>
+            </section>
+            <section id="dati-aggiornati">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Il limite dei dati aggiornati</h2>
+                </header>
+                <p>Un LLM è molto bravo a generare testo, spiegare concetti, riformulare contenuti e ragionare sui dati che riceve.</p>
+                <p>Tuttavia non può conoscere automaticamente informazioni aggiornate in tempo reale.</p>
+                <p>Per esempio, proviamo a chiedere:</p>
+                <pre><code class="language-plaintext">Che tempo fa a Pisa?</code></pre>
+                <p>Crea il file <code>03-senza-tool.js</code>.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// ChatAnthropic permette di inviare messaggi a un modello Anthropic.
+import { ChatAnthropic } from '@langchain/anthropic';
+
+// HumanMessage rappresenta il messaggio scritto dall'utente.
+import { HumanMessage } from 'langchain';
+
+// Creiamo il modello Anthropic.
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+try {
+    // Il modello riceve soltanto la domanda dell'utente.
+    // Non riceve dati meteorologici in tempo reale.
+    const response = await model.invoke([
+        new HumanMessage('Che tempo fa a Pisa in questo momento?')
+    ]);
+
+    console.log(response.content);
+} catch (error) {
+    console.error('Errore durante la richiesta meteo:', error);
+}</code></pre>
+                <p>Il modello potrebbe rispondere che non possiede dati in tempo reale oppure potrebbe fornire informazioni generiche sul clima di Pisa.</p>
+                <p>Per ottenere dati aggiornati dobbiamo dare al modello uno strumento che possa recuperare informazioni dall'esterno.</p>
+                <p>Questo strumento viene chiamato <strong>tool</strong>.</p>
+            </section>
+            <section id="tool-zod">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Tool e Zod</h2>
+                </header>
+                <p>Un <strong>tool</strong> è una funzione JavaScript che un agente può decidere di usare.</p>
+                <p>Un tool è composto da quattro parti principali:</p>
+                <ol>
+                    <li>una funzione JavaScript che contiene la logica;</li>
+                    <li>un nome tecnico;</li>
+                    <li>una descrizione per il modello;</li>
+                    <li>uno schema che descrive gli argomenti richiesti.</li>
+                </ol>
+                <h3>Esempio concettuale</h3>
+                <p>Un tool meteo potrebbe ricevere una città:</p>
+                <pre><code class="language-plaintext">get_weather({ city: "Pisa" })</code></pre>
+                <p>Il modello non esegue direttamente il codice JavaScript. Il modello decide di richiamare il tool indicando gli argomenti; LangChain esegue la funzione; infine il risultato viene reinviato al modello.</p>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 676" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="Flusso: utente, agente, il modello decide di usare un tool, LangChain esegue la funzione, il tool restituisce un risultato, il modello risponde">
+                        <defs>
+                            <marker id="arrowC" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="230" y1="76" x2="230" y2="130" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowC)" />
+                        <line x1="230" y1="192" x2="230" y2="246" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowC)" />
+                        <line x1="230" y1="308" x2="230" y2="362" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowC)" />
+                        <line x1="230" y1="424" x2="230" y2="478" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowC)" />
+                        <line x1="230" y1="540" x2="230" y2="594" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowC)" />
+
+                        <rect x="90" y="20" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="53" text-anchor="middle" class="node-title">Utente</text>
+
+                        <rect x="90" y="136" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="169" text-anchor="middle" class="node-title llm">Agente</text>
+
+                        <rect x="90" y="252" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="277" text-anchor="middle" class="node-title llm">Il modello decide di usare un tool</text>
+                        <text x="230" y="296" text-anchor="middle" class="node-sub">get_weather({ city: "Pisa" })</text>
+
+                        <rect x="90" y="368" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="401" text-anchor="middle" class="node-title">LangChain esegue la funzione</text>
+
+                        <rect x="90" y="484" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="517" text-anchor="middle" class="node-title">Il tool restituisce un risultato</text>
+
+                        <rect x="90" y="600" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="633" text-anchor="middle" class="node-title llm">Il modello risponde all'utente</text>
+                    </svg>
+                    <figcaption>Il modello non esegue mai direttamente il codice JavaScript: decide solo quale tool chiamare e con quali argomenti.</figcaption>
+                </figure>
+
+                <h3>Che cos'è Zod?</h3>
+                <p><strong>Zod</strong> è una libreria per descrivere e validare dati JavaScript.</p>
+                <p>Nel nostro caso useremo Zod per dire che il tool meteo richiede un oggetto con una proprietà <code>city</code> di tipo stringa.</p>
+                <pre><code class="language-javascript">// z.object() descrive un oggetto.
+// La proprietà city deve contenere una stringa.
+const getWeatherSchema = z.object({
+    city: z.string()
+});</code></pre>
+                <p>Se il modello costruisse una chiamata non valida, lo schema aiuta LangChain a rilevare il problema.</p>
+            </section>
+            <section id="tool-meteo">
+                <header>
+                    <p class="index">Capitolo 9</p>
+                    <h2>Creare il tool meteo mock</h2>
+                </header>
+                <p>In questa prima lezione non useremo una vera API meteorologica.</p>
+                <p>Creeremo invece un <strong>mock</strong>: una funzione che simula un servizio meteo e restituisce sempre lo stesso risultato.</p>
+                <p>Questo ci permette di concentrarci sul funzionamento di tool e agenti senza introdurre API key aggiuntive, richieste HTTP o gestione di dati esterni.</p>
+                <h3>Struttura delle cartelle</h3>
+                <p>Creiamo una cartella chiamata <code>tools</code>.</p>
+                <pre><code class="language-plaintext">langchain-prima-parte/
+├── tools/
+│   └── getWeather.js
+├── .env
+├── .env.example
+├── .gitignore
+├── index.js
+├── 01-stateless.js
+├── 02-storico-chat.js
+├── 03-senza-tool.js
+├── 04-agente-meteo.js
+└── package.json</code></pre>
+                <h3>Tool <code>get_weather</code></h3>
+                <p>Crea il file <code>tools/getWeather.js</code>.</p>
+                <pre><code class="language-javascript">// tool() trasforma una funzione JavaScript in un tool utilizzabile da LangChain.
+import { tool } from 'langchain';
+
+// Zod permette di descrivere e validare gli argomenti del tool.
+import { z } from 'zod';
+
+/**
+ * Questa funzione contiene la logica del tool meteo.
+ *
+ * Per questa prima lezione è un mock: non chiama servizi esterni
+ * e restituisce sempre lo stesso risultato, indipendentemente dalla città.
+ *
+ * @param {{ city: string }} parameters - Oggetto ricevuto dal tool.
+ * @returns {Promise&lt;string&gt;} Una frase con il meteo simulato.
+ */
+async function getWeatherFunction({ city }) {
+    // Usiamo city solo per evitare un parametro inutilizzato.
+    // Nella versione mock non cambia il risultato restituito.
+    void city;
+
+    // Il tool restituisce sempre una stringa, non un oggetto JSON.
+    return 'Il meteo è sereno con una temperatura di 22 °C. Dati forniti da un mock didattico.';
+}
+
+// Lo schema è separato dalla funzione del tool.
+// Specifica che il tool richiede un oggetto con una proprietà city di tipo stringa.
+const getWeatherSchema = z.object({
+    city: z.string().describe('La città di cui si vuole conoscere il meteo.')
+});
+
+// Creiamo il tool collegando la funzione alla sua configurazione.
+const getWeather = tool(getWeatherFunction, {
+    // Nome tecnico che il modello utilizza per richiamare il tool.
+    name: 'get_weather',
+
+    // Descrizione usata dal modello per capire quando usare il tool.
+    description: 'Restituisce il meteo attuale di una città italiana.',
+
+    // Schema Zod definito separatamente.
+    schema: getWeatherSchema
+});
+
+// Esportiamo il tool per poterlo importare nel file dell'agente.
+export default getWeather;</code></pre>
+                <h3>Parti del tool</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parte</th>
+                            <th>Ruolo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>getWeatherFunction</code></td>
+                            <td>Contiene la logica eseguita quando il tool viene chiamato</td>
+                        </tr>
+                        <tr>
+                            <td><code>getWeatherSchema</code></td>
+                            <td>Definisce gli argomenti che il tool si aspetta</td>
+                        </tr>
+                        <tr>
+                            <td><code>name</code></td>
+                            <td>È il nome tecnico usato dal modello per richiamare il tool</td>
+                        </tr>
+                        <tr>
+                            <td><code>description</code></td>
+                            <td>Spiega al modello quando è opportuno usare il tool</td>
+                        </tr>
+                        <tr>
+                            <td><code>tool(...)</code></td>
+                            <td>Collega funzione, schema e metadati creando il tool LangChain</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Perché il mock restituisce sempre una stringa?</h3>
+                <p>Il nostro obiettivo non è ancora costruire un servizio meteo realistico.</p>
+                <p>Vogliamo solo dimostrare che:</p>
+                <ol>
+                    <li>l'utente fa una domanda;</li>
+                    <li>l'agente riconosce che serve il tool;</li>
+                    <li>LangChain esegue <code>getWeatherFunction()</code>;</li>
+                    <li>la funzione restituisce una stringa;</li>
+                    <li>il modello usa quella stringa per creare una risposta finale.</li>
+                </ol>
+            </section>
+            <section id="agente">
+                <header>
+                    <p class="index">Capitolo 10</p>
+                    <h2>Creare un agente LangChain</h2>
+                </header>
+                <p>Un <strong>agente</strong> collega un modello a uno o più tool.</p>
+                <p>A differenza di una chiamata diretta a <code>model.invoke()</code>, l'agente può decidere se un tool è necessario per rispondere alla richiesta dell'utente.</p>
+                <p>Crea il file <code>04-agente-meteo.js</code>.</p>
+                <pre><code class="language-javascript">// Carica la chiave API dal file .env.
+import 'dotenv/config';
+
+// ChatAnthropic permette di usare Claude tramite LangChain.
+import { ChatAnthropic } from '@langchain/anthropic';
+
+// createAgent crea un agente che può utilizzare uno o più tool.
+// HumanMessage rappresenta il messaggio inviato dall'utente.
+import { createAgent, HumanMessage } from 'langchain';
+
+// Importiamo il tool meteo creato nella cartella tools.
+import getWeather from './tools/getWeather.js';
+
+// Creiamo il modello indicando soltanto il modello Anthropic scelto.
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001'
+});
+
+// Creiamo un agente e gli rendiamo disponibile il tool get_weather.
+const agent = createAgent({
+    model,
+    tools: [getWeather],
+
+    // Il system prompt contiene istruzioni permanenti per l'agente.
+    systemPrompt: `
+Sei un assistente meteorologico didattico.
+Quando l'utente chiede il meteo di una città, usa il tool get_weather.
+Dichiara sempre che i dati restituiti provengono da un mock didattico.
+`
+});
+
+try {
+    // Anche agent.invoke() riceve sempre un array di HumanMessage.
+    // Non usiamo l'oggetto abbreviato con role e content.
+    const result = await agent.invoke({
+        messages: [
+            new HumanMessage('Che tempo fa a Pisa?')
+        ]
+    });
+
+    // L'ultimo messaggio prodotto dall'agente è la risposta finale.
+    const finalMessage = result.messages.at(-1);
+
+    console.log('RISPOSTA FINALE DELL’AGENTE:');
+    console.log(finalMessage.content);
+} catch (error) {
+    // Gestiamo possibili problemi di configurazione, rete o autenticazione.
+    console.error('Errore durante l’esecuzione dell’agente:', error);
+}</code></pre>
+                <p>Eseguiamo il file.</p>
+                <pre><code class="language-bash"># dotenv è importato nel file: non servono flag aggiuntivi.
+node 04-agente-meteo.js</code></pre>
+                <h3>Cosa accade durante l'esecuzione?</h3>
+                <ol>
+                    <li>L'utente invia la domanda: “Che tempo fa a Pisa?”</li>
+                    <li>L'agente riceve un array con un <code>HumanMessage</code>.</li>
+                    <li>Il modello legge la domanda, le istruzioni e la descrizione del tool.</li>
+                    <li>Il modello decide di chiamare <code>get_weather</code>.</li>
+                    <li>LangChain esegue <code>getWeatherFunction()</code>.</li>
+                    <li>La funzione restituisce la stringa del mock.</li>
+                    <li>Il risultato del tool viene passato al modello.</li>
+                    <li>Il modello produce una risposta finale per l'utente.</li>
+                </ol>
+                <h3>Rappresentazione del flusso</h3>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 676" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="Flusso concreto: HumanMessage Che tempo fa a Pisa, Agente LangChain, il modello decide di chiamare get_weather, getWeatherFunction, risultato del mock, risposta finale">
+                        <defs>
+                            <marker id="arrowD" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="230" y1="76" x2="230" y2="130" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowD)" />
+                        <line x1="230" y1="192" x2="230" y2="246" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowD)" />
+                        <line x1="230" y1="308" x2="230" y2="362" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowD)" />
+                        <line x1="230" y1="424" x2="230" y2="478" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowD)" />
+                        <line x1="230" y1="540" x2="230" y2="594" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrowD)" />
+
+                        <rect x="90" y="20" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="45" text-anchor="middle" class="node-title">HumanMessage</text>
+                        <text x="230" y="64" text-anchor="middle" class="node-sub">"Che tempo fa a Pisa?"</text>
+
+                        <rect x="90" y="136" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="169" text-anchor="middle" class="node-title llm">Agente LangChain</text>
+
+                        <rect x="90" y="252" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="285" text-anchor="middle" class="node-title llm">Il modello decide di chiamare</text>
+                        <text x="230" y="303" text-anchor="middle" class="node-sub">get_weather</text>
+
+                        <rect x="90" y="368" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="401" text-anchor="middle" class="node-title">getWeatherFunction</text>
+                        <text x="230" y="416" text-anchor="middle" class="node-sub">{ city: "Pisa" }</text>
+
+                        <rect x="90" y="484" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="509" text-anchor="middle" class="node-title">Risultato del mock</text>
+                        <text x="230" y="527" text-anchor="middle" class="node-sub">"Il meteo è sereno, 22 °C..."</text>
+
+                        <rect x="90" y="600" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="625" text-anchor="middle" class="node-title llm">Il modello formula</text>
+                        <text x="230" y="643" text-anchor="middle" class="node-sub">la risposta finale</text>
+                    </svg>
+                    <figcaption>Lo stesso ciclo del capitolo su tool e Zod, applicato al caso concreto del tool meteo.</figcaption>
+                </figure>
+
+                <h3>Visualizzare tutti i messaggi dell'agente</h3>
+                <p>Per capire meglio cosa avviene, possiamo stampare tutti i messaggi prodotti dall'agente.</p>
+                <pre><code class="language-javascript">// Dopo agent.invoke(), result.messages contiene lo storico completo
+// prodotto durante il lavoro dell'agente.
+console.log(result.messages);</code></pre>
+                <p>Nell'array potremmo trovare:</p>
+                <ul>
+                    <li>il messaggio iniziale dell'utente;</li>
+                    <li>un messaggio del modello che richiede il tool;</li>
+                    <li>un messaggio con il risultato del tool;</li>
+                    <li>il messaggio finale del modello.</li>
+                </ul>
+            </section>
+            <section id="esercizi">
+                <header>
+                    <p class="index">Capitolo 11</p>
+                    <h2>Esercizi sui tool</h2>
+                </header>
+                <p>Gli esercizi seguenti permettono di praticare la creazione di tool senza usare API reali.</p>
+                <p>Per ogni esercizio:</p>
+                <ol>
+                    <li>creare una funzione separata;</li>
+                    <li>creare uno schema Zod separato;</li>
+                    <li>creare il tool con <code>tool()</code>;</li>
+                    <li>collegare il tool a un agente;</li>
+                    <li>fare domande all'agente per verificare che scelga il tool giusto.</li>
+                </ol>
+                <div class="task">
+                    <h3>Esercizio 1 — Informazioni su Pokémon</h3>
+                    <p>Creare un tool chiamato <code>get_pokemon_info</code>.</p>
+                    <p>Lo schema potrebbe essere:</p>
+                    <pre><code class="language-javascript">// Lo schema richiede il nome del Pokémon da cercare.
+const getPokemonInfoSchema = z.object({
+    name: z.string().min(1).describe('Il nome del Pokémon da cercare.')
+});</code></pre>
+                    <p>La funzione mock può restituire sempre questa stringa:</p>
+                    <pre><code class="language-javascript">// La funzione restituisce sempre un testo mock per il primo esercizio.
+async function getPokemonInfoFunction({ name }) {
+    void name;
+
+    return 'Pikachu è un Pokémon di tipo Elettro introdotto nella regione di Kanto.';
+}</code></pre>
+                    <p>Esempi di domande:</p>
+                    <ul>
+                        <li>“Che tipo è Pikachu?”</li>
+                        <li>“Dammi informazioni su Charmander.”</li>
+                        <li>“In quale regione è stato introdotto Pikachu?”</li>
+                    </ul>
+                </div>
+                <div class="task">
+                    <h3>Esercizio 2 — Materiale del corso</h3>
+                    <p>Creare un tool chiamato <code>search_course_material</code>.</p>
+                    <p>Lo schema potrebbe essere:</p>
+                    <pre><code class="language-javascript">// Lo schema richiede una parola chiave da cercare nel materiale del corso.
+const searchCourseMaterialSchema = z.object({
+    query: z.string().min(2).describe('La parola chiave da cercare nel materiale del corso.')
+});</code></pre>
+                    <p>La funzione mock può restituire:</p>
+                    <pre><code class="language-javascript">// La funzione simula una ricerca in una raccolta di dispense.
+async function searchCourseMaterialFunction({ query }) {
+    void query;
+
+    return 'Ho trovato una dispensa su Express che tratta routing, middleware e controller.';
+}</code></pre>
+                    <p>Esempi di domande:</p>
+                    <ul>
+                        <li>“Abbiamo materiale sui middleware?”</li>
+                        <li>“Cerca una lezione su Express.”</li>
+                        <li>“Dove abbiamo parlato di controller?”</li>
+                    </ul>
+                </div>
+                <div class="task">
+                    <h3>Esercizio 3 — Informazioni su giochi da tavolo</h3>
+                    <p>Creare un tool chiamato <code>get_board_game_info</code>.</p>
+                    <p>Lo schema potrebbe essere:</p>
+                    <pre><code class="language-javascript">// Lo schema richiede il titolo del gioco da tavolo.
+const getBoardGameInfoSchema = z.object({
+    title: z.string().min(2).describe('Il titolo del gioco da tavolo.')
+});</code></pre>
+                    <p>La funzione mock può restituire:</p>
+                    <pre><code class="language-javascript">// La funzione restituisce una descrizione fittizia del gioco richiesto.
+async function getBoardGameInfoFunction({ title }) {
+    void title;
+
+    return 'Wingspan è un gioco da tavolo per 1-5 giocatori, con una durata media di circa 70 minuti.';
+}</code></pre>
+                    <p>Esempi di domande:</p>
+                    <ul>
+                        <li>“Quanti giocatori supporta Wingspan?”</li>
+                        <li>“Quanto dura una partita a Wingspan?”</li>
+                    </ul>
+                </div>
+                <div class="task">
+                    <h3>Esercizio 4 — Calcolo preventivo</h3>
+                    <p>Creare un tool chiamato <code>calculate_quote</code>.</p>
+                    <p>In questo esercizio la funzione può usare davvero i dati ricevuti.</p>
+                    <pre><code class="language-javascript">// Lo schema richiede ore di lavoro e tariffa oraria.
+const calculateQuoteSchema = z.object({
+    hours: z.number().positive().describe('Numero di ore di lavoro.'),
+    hourlyRate: z.number().positive().describe('Tariffa oraria in euro.')
+});</code></pre>
+                    <pre><code class="language-javascript">// La funzione calcola un preventivo e restituisce una stringa leggibile.
+async function calculateQuoteFunction({ hours, hourlyRate }) {
+    const total = hours * hourlyRate;
+
+    return `Il preventivo per ${hours} ore a ${hourlyRate} euro l'ora è di ${total} euro.`;
+}</code></pre>
+                    <p>Esempi di domande:</p>
+                    <ul>
+                        <li>“Calcola un preventivo per 8 ore a 35 euro l'ora.”</li>
+                        <li>“Quanto costa un lavoro di 12 ore a 50 euro l'ora?”</li>
+                    </ul>
+                </div>
+                <div class="task">
+                    <h3>Esercizio 5 — Pacchetti fotografici</h3>
+                    <p>Creare un tool chiamato <code>get_photo_session_package</code>.</p>
+                    <p>Lo schema potrebbe essere:</p>
+                    <pre><code class="language-javascript">// Lo schema limita il tipo di servizio a tre valori ammessi.
+const getPhotoSessionPackageSchema = z.object({
+    type: z.enum(['ritratto', 'evento', 'prodotto'])
+        .describe('Il tipo di servizio fotografico richiesto.')
+});</code></pre>
+                    <p>La funzione mock può restituire:</p>
+                    <pre><code class="language-javascript">// La funzione restituisce una proposta di pacchetto fotografico fittizio.
+async function getPhotoSessionPackageFunction({ type }) {
+    void type;
+
+    return 'Il pacchetto ritratto include un’ora di scatti e dieci fotografie post-prodotte.';
+}</code></pre>
+                    <p>Esempi di domande:</p>
+                    <ul>
+                        <li>“Quale pacchetto fotografico proponi per un ritratto?”</li>
+                        <li>“Che servizio offri per un evento?”</li>
+                    </ul>
+                </div>
+            </section>
+            <section id="riepilogo">
+                <header>
+                    <p class="index">Capitolo 12</p>
+                    <h2>Riepilogo</h2>
+                </header>
+                <p>In questa prima parte abbiamo visto che:</p>
+                <ol>
+                    <li>LangChain aiuta a lavorare con LLM, messaggi, tool e agenti.</li>
+                    <li><code>ChatAnthropic</code> è il componente usato per comunicare con Anthropic.</li>
+                    <li>Il modello viene creato indicando la proprietà <code>model</code>.</li>
+                    <li>Ogni chiamata a <code>model.invoke()</code> riceve sempre un array di <code>HumanMessage</code>.</li>
+                    <li>Un LLM è stateless: non conserva automaticamente le chiamate precedenti.</li>
+                    <li>Per creare una conversazione dobbiamo mantenere un array chiamato <code>messages</code>.</li>
+                    <li>Dopo ogni chiamata dobbiamo aggiungere allo storico anche la risposta del modello.</li>
+                    <li>Un LLM non possiede automaticamente dati aggiornati, come il meteo in tempo reale.</li>
+                    <li>Un tool è una funzione che un agente può scegliere di usare.</li>
+                    <li>Zod descrive e valida gli argomenti che il tool riceve.</li>
+                    <li>Un agente collega il modello ai tool disponibili.</li>
+                    <li>Anche <code>agent.invoke()</code> riceve messaggi rappresentati con <code>HumanMessage</code>.</li>
+                    <li>Il nostro tool meteo mock ha funzione e schema separati e restituisce sempre una stringa.</li>
+                </ol>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

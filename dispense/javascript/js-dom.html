@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispensa - DOM: testo, elementi, classi e attributi</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#testo">Testo</a></li>
+                <li><a href="#elementi">Elementi</a></li>
+                <li><a href="#classi">Classi</a></li>
+                <li><a href="#attributi">Attributi</a></li>
+                <li><a href="#template">Template literal</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>DOM: testo, elementi, classi e attributi</h1>
+            <p class="intro">Lettura, modifica e creazione dinamica degli elementi HTML.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+
+            <!-- CAPITOLO 1 -->
+            <section id="testo">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Testo</h2>
+                </header>
+
+                <div class="note">
+                    <p>Le proprietà <code>innerHTML</code>, <code>textContent</code> e <code>innerText</code> permettono di leggere o modificare il contenuto di un elemento. <code>style</code> permette invece di modificarne lo stile direttamente da JavaScript.</p>
+                </div>
+
+                <section>
+                    <h3>innerHTML</h3>
+                    <p><code>innerHTML</code> legge o imposta il contenuto HTML di un elemento, compresi i tag al suo interno. Quando lo imposti con una stringa, il browser la interpreta come HTML e aggiorna il DOM di conseguenza. Va usato con attenzione se il contenuto proviene dall'utente, perché un tag come <code>&lt;script&gt;</code> potrebbe essere eseguito, aprendo a vulnerabilità XSS.</p>
+                </section>
+
+                <section>
+                    <h3>textContent</h3>
+                    <p><code>textContent</code> legge o imposta il testo puro di un elemento, ignorando qualsiasi tag HTML. Se imposti una stringa che contiene tag, questi vengono mostrati come testo normale e non interpretati dal browser. È la scelta più sicura quando devi aggiornare del testo senza bisogno di markup.</p>
+                </section>
+
+                <section>
+                    <h3>innerText</h3>
+                    <p><code>innerText</code> funziona in modo simile a <code>textContent</code>, ma tiene conto dello stile CSS applicato alla pagina. Per esempio, il testo di un elemento nascosto con <code>display: none</code> non viene incluso nel valore restituito. È più lento di <code>textContent</code> perché deve calcolare il rendering visivo prima di rispondere.</p>
+                </section>
+
+                <section>
+                    <h3>style</h3>
+                    <p><code>style</code> permette di leggere e modificare gli stili inline di un elemento direttamente da JavaScript. Ogni proprietà CSS viene scritta in notazione camelCase: <code>background-color</code> diventa <code>backgroundColor</code>, <code>font-size</code> diventa <code>fontSize</code>, <code>margin-top</code> diventa <code>marginTop</code>. Gli stili impostati con <code>style</code> hanno priorità sulle regole del foglio CSS esterno.</p>
+                </section>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const elemento = document.querySelector("#elem");
+
+// innerHTML: interpreta i tag
+elemento.innerHTML = "&lt;strong&gt;Testo in grassetto&lt;/strong&gt;";
+
+// textContent: tratta tutto come testo semplice
+elemento.textContent = "&lt;strong&gt;Questo non è grassetto&lt;/strong&gt;";
+
+// innerText: legge solo il testo visibile
+console.log(elemento.innerText);
+
+// style: modifica lo stile inline
+elemento.style.color = "red";
+elemento.style.backgroundColor = "#f0f0f0";
+elemento.style.fontSize = "18px";</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Seleziona un elemento con id <code>box</code> e assegna il testo <code>Ciao mondo</code> con <code>textContent</code>. Poi sostituisci il contenuto di un secondo elemento con id <code>contenuto</code> con un titolo e un paragrafo usando <code>innerHTML</code>. Infine cambia il colore del testo del primo elemento con <code>style</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const box = document.querySelector("#box");
+const contenuto = document.querySelector("#contenuto");
+
+box.textContent = "Ciao mondo";
+box.style.color = "blue";
+contenuto.innerHTML = "&lt;h2&gt;Titolo&lt;/h2&gt;&lt;p&gt;Testo aggiornato&lt;/p&gt;";</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 2 -->
+            <section id="elementi">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Elementi</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>createElement()</code>, <code>appendChild()</code>, <code>insertBefore()</code> e <code>remove()</code> permettono di costruire e modificare la struttura del DOM aggiungendo o eliminando elementi. <code>parentElement</code> permette invece di risalire al genitore di un nodo.</p>
+                </div>
+
+                <section>
+                    <h3>parentElement</h3>
+                    <p><code>parentElement</code> restituisce l'elemento HTML genitore del nodo su cui viene chiamato. Serve per risalire nella struttura del DOM partendo da un elemento figlio. Se il genitore non è un elemento HTML (per esempio è il documento stesso), restituisce <code>null</code>.</p>
+                </section>
+
+                <section>
+                    <h3>createElement()</h3>
+                    <p><code>createElement()</code> crea un nuovo elemento HTML e lo restituisce come oggetto, ma non lo inserisce ancora nella pagina. Devi passargli il nome del tag come stringa, ad esempio <code>"p"</code>, <code>"div"</code> o <code>"button"</code>. Dopo averlo creato, puoi impostarne il contenuto, le classi e gli attributi prima di aggiungerlo al DOM.</p>
+                </section>
+
+                <section>
+                    <h3>appendChild()</h3>
+                    <p><code>appendChild()</code> aggiunge un elemento come ultimo figlio del nodo su cui viene chiamato. Se l'elemento è già presente nel DOM in un altro punto, viene spostato nella nuova posizione invece di essere duplicato. È il metodo più diretto per inserire un nodo alla fine di un contenitore.</p>
+                </section>
+
+                <section>
+                    <h3>insertBefore()</h3>
+                    <p><code>insertBefore()</code> inserisce un nuovo elemento prima di un elemento figlio già esistente. Viene chiamato sul genitore e riceve due argomenti: il nuovo elemento da inserire e l'elemento di riferimento davanti al quale posizionarlo. Se il secondo argomento è <code>null</code>, l'elemento viene aggiunto in fondo, come con <code>appendChild()</code>.</p>
+                </section>
+
+                <section>
+                    <h3>remove()</h3>
+                    <p><code>remove()</code> elimina l'elemento dal DOM chiamandolo direttamente sull'elemento stesso, senza bisogno di riferirsi al genitore. È il metodo più moderno e semplice per rimuovere un nodo dalla pagina.</p>
+                </section>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const lista = document.querySelector("ul");
+const primo = document.querySelector("ul li:first-child");
+
+// Crea un elemento e aggiungilo in fondo
+const nuovo = document.createElement("li");
+nuovo.textContent = "Ultima voce";
+lista.appendChild(nuovo);
+
+// Inserisce prima del primo elemento
+const altro = document.createElement("li");
+altro.textContent = "Prima voce";
+lista.insertBefore(altro, primo);
+
+// Legge il genitore
+console.log(nuovo.parentElement);
+
+// Rimuove un elemento
+altro.remove();</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un elemento <code>p</code> con <code>createElement()</code>, assegnagli un testo e aggiungilo in fondo a un elemento con classe <code>contenitore</code> usando <code>appendChild()</code>. Poi crea un secondo paragrafo e inseriscilo prima del primo con <code>insertBefore()</code>. Infine rimuovi il primo paragrafo con <code>remove()</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const contenitore = document.querySelector(".contenitore");
+
+const p1 = document.createElement("p");
+p1.textContent = "Primo paragrafo";
+contenitore.appendChild(p1);
+
+const p2 = document.createElement("p");
+p2.textContent = "Paragrafo inserito prima";
+contenitore.insertBefore(p2, p1);
+
+p1.remove();</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 3 -->
+            <section id="classi">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Classi</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>classList</code> è l'oggetto che gestisce le classi CSS di un elemento. Permette di aggiungere, rimuovere e alternare classi senza dover riscrivere l'intero attributo <code>class</code>.</p>
+                </div>
+
+                <section>
+                    <h3>classList.add()</h3>
+                    <p><code>classList.add()</code> aggiunge una o più classi all'elemento. Se una delle classi è già presente, non viene duplicata. Puoi passare più classi come argomenti separati: <code>classList.add("prima", "seconda")</code>.</p>
+                </section>
+
+                <section>
+                    <h3>classList.remove()</h3>
+                    <p><code>classList.remove()</code> rimuove una o più classi dall'elemento. Se la classe non è presente, non genera errori e non modifica nulla. Come per <code>add()</code>, puoi passare più classi contemporaneamente.</p>
+                </section>
+
+                <section>
+                    <h3>classList.toggle()</h3>
+                    <p><code>classList.toggle()</code> aggiunge la classe se non è presente, la rimuove se c'è già. È particolarmente utile per gestire stati alternati come aperto/chiuso, attivo/inattivo, visibile/nascosto. Ogni chiamata inverte lo stato corrente della classe.</p>
+                </section>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const card = document.querySelector(".card");
+
+// Aggiunge una classe
+card.classList.add("attiva");
+
+// Aggiunge più classi insieme
+card.classList.add("evidenza", "grande");
+
+// Rimuove una classe
+card.classList.remove("evidenza");
+
+// Toggle: aggiunge se assente, rimuove se presente
+card.classList.toggle("aperta");</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Seleziona un elemento con classe <code>box</code> e aggiungi le classi <code>attivo</code> e <code>evidenziato</code> con un'unica chiamata a <code>classList.add()</code>. Poi rimuovi solo <code>evidenziato</code> con <code>classList.remove()</code>. Infine usa <code>classList.toggle()</code> su <code>attivo</code> due volte e verifica che alla fine la classe sia ancora presente.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const box = document.querySelector(".box");
+
+box.classList.add("attivo", "evidenziato");
+box.classList.remove("evidenziato");
+
+box.classList.toggle("attivo");
+box.classList.toggle("attivo");
+
+console.log(box.classList.contains("attivo"));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 4 -->
+            <section id="attributi">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Attributi</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>setAttribute()</code>, <code>getAttribute()</code>, <code>removeAttribute()</code> e <code>hasAttribute()</code> permettono di leggere e modificare gli attributi HTML di un elemento, come <code>href</code>, <code>src</code>, <code>alt</code>, <code>title</code> o <code>disabled</code>.</p>
+                </div>
+
+                <section>
+                    <h3>setAttribute()</h3>
+                    <p><code>setAttribute()</code> imposta un attributo sull'elemento con il nome e il valore indicati. Se l'attributo esiste già, ne aggiorna il valore. Se non esiste, lo crea. Riceve due argomenti: il nome dell'attributo e il valore da assegnargli.</p>
+                </section>
+
+                <section>
+                    <h3>getAttribute()</h3>
+                    <p><code>getAttribute()</code> restituisce il valore dell'attributo indicato come stringa. Se l'attributo non è presente sull'elemento, restituisce <code>null</code>. È utile per leggere attributi come <code>href</code>, <code>src</code> o attributi personalizzati come <code>data-id</code>.</p>
+                </section>
+
+                <section>
+                    <h3>removeAttribute()</h3>
+                    <p><code>removeAttribute()</code> rimuove completamente l'attributo dall'elemento. Se l'attributo non è presente, non genera errori. È diverso da impostare un attributo a stringa vuota: in quel caso l'attributo rimane, con <code>removeAttribute()</code> scompare del tutto.</p>
+                </section>
+
+                <section>
+                    <h3>hasAttribute()</h3>
+                    <p><code>hasAttribute()</code> restituisce <code>true</code> se l'attributo è presente sull'elemento, <code>false</code> altrimenti. È utile da usare come controllo prima di leggere o rimuovere un attributo, per essere sicuri che esista davvero.</p>
+                </section>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const immagine = document.querySelector("img");
+const link = document.querySelector("a");
+
+// Imposta e legge un attributo
+immagine.setAttribute("alt", "Descrizione immagine");
+console.log(immagine.getAttribute("alt"));
+
+// Imposta target su un link
+link.setAttribute("target", "_blank");
+console.log(link.getAttribute("href"));
+
+// Verifica e rimuove
+if (link.hasAttribute("title")) {
+    link.removeAttribute("title");
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Seleziona un'immagine con <code>querySelector()</code> e imposta l'attributo <code>alt</code> con <code>setAttribute()</code>. Poi leggi il valore dell'attributo <code>src</code> con <code>getAttribute()</code> e mostralo in console. Infine controlla con <code>hasAttribute()</code> se l'immagine ha l'attributo <code>title</code> e, se presente, rimuovilo.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const immagine = document.querySelector("img");
+
+immagine.setAttribute("alt", "Logo del corso");
+
+const src = immagine.getAttribute("src");
+console.log(src);
+
+if (immagine.hasAttribute("title")) {
+    immagine.removeAttribute("title");
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CAPITOLO 5 -->
+            <section id="template">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Template literal</h2>
+                </header>
+
+                <div class="note">
+                    <p>I template literal possono essere combinati con <code>innerHTML</code> per costruire blocchi di HTML in modo leggibile, usando variabili e valori dinamici direttamente dentro la stringa.</p>
+                </div>
+
+                <section>
+                    <h3>Come funziona</h3>
+                    <p>Un template literal è una stringa delimitata da backtick che permette di inserire espressioni JavaScript con la sintassi <code>${...}</code>. Quando lo usi con <code>innerHTML</code>, puoi costruire strutture HTML complete includendo valori dinamici, senza dover concatenare pezzi di stringa. Il risultato è codice più leggibile e facile da scrivere, soprattutto quando la struttura HTML da generare è complessa o contiene più elementi.</p>
+                </section>
+
+                <section>
+                    <h3>Vantaggi rispetto a createElement</h3>
+                    <p>Con <code>innerHTML</code> e template literal puoi scrivere l'intera struttura HTML in poche righe, come se stessi scrivendo direttamente nel file HTML. Questo è molto comodo quando devi generare blocchi con più tag annidati: con <code>createElement()</code> avresti bisogno di creare ogni elemento separatamente, impostarne il contenuto, e poi collegarlo al genitore passo dopo passo. Il codice risultante sarebbe molto più lungo.</p>
+                </section>
+
+                <section>
+                    <h3>Svantaggi e attenzioni</h3>
+                    <p>Il limite principale di <code>innerHTML</code> è la sicurezza: se il contenuto inserito proviene da una fonte esterna o dall'utente, potrebbero essere iniettati tag pericolosi come <code>&lt;script&gt;</code>, causando vulnerabilità XSS. Inoltre, ogni volta che imposti <code>innerHTML</code> l'intero contenuto del nodo viene distrutto e ricreato, il che può essere inefficiente se hai solo bisogno di aggiornare un singolo elemento figlio. In quei casi, <code>createElement()</code> e <code>appendChild()</code> sono più precisi e controllati.</p>
+                </section>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const contenitore = document.querySelector(".contenitore");
+
+const titolo = "JavaScript Base";
+const descrizione = "Manipolazione del DOM";
+const anno = 2026;
+
+// Con innerHTML e template literal
+contenitore.innerHTML = `
+    &lt;div class="card"&gt;
+        &lt;h2&gt;${titolo}&lt;/h2&gt;
+        &lt;p&gt;${descrizione}&lt;/p&gt;
+        &lt;small&gt;Anno: ${anno}&lt;/small&gt;
+    &lt;/div&gt;
+`;
+
+// Lo stesso risultato con createElement richiederebbe:
+const card = document.createElement("div");
+card.classList.add("card");
+
+const h2 = document.createElement("h2");
+h2.textContent = titolo;
+
+const p = document.createElement("p");
+p.textContent = descrizione;
+
+const small = document.createElement("small");
+small.textContent = "Anno: " + anno;
+
+card.appendChild(h2);
+card.appendChild(p);
+card.appendChild(small);
+contenitore.appendChild(card);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dichiara tre variabili: <code>nome</code> (una stringa), <code>ruolo</code> (una stringa) e <code>attivo</code> (un booleano). Poi seleziona un elemento con classe <code>scheda</code> e usa <code>innerHTML</code> con un template literal per inserire al suo interno un titolo con il nome, un paragrafo con il ruolo e un secondo paragrafo che mostri <code>"Attivo"</code> oppure <code>"Non attivo"</code> in base al valore di <code>attivo</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const nome = "Anna";
+const ruolo = "Sviluppatrice";
+const attivo = true;
+
+const scheda = document.querySelector(".scheda");
+
+scheda.innerHTML = `
+    &lt;h2&gt;${nome}&lt;/h2&gt;
+    &lt;p&gt;${ruolo}&lt;/p&gt;
+    &lt;p&gt;${attivo ? "Attivo" : "Non attivo"}&lt;/p&gt;
+`;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ESERCIZIO FINALE -->
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Seleziona un contenitore con <code>querySelector()</code>. Dichiara tre variabili per nome, ruolo e anno. Usa <code>innerHTML</code> con un template literal per inserire un blocco HTML con queste informazioni. Poi seleziona l'elemento appena creato, aggiungici una classe con <code>classList.add()</code>, imposta un attributo <code>data-anno</code> con <code>setAttribute()</code> e verifica che sia presente con <code>hasAttribute()</code>.</p>
+
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">const contenitore = document.querySelector(".contenitore");
+
+const nome = "Marco";
+const ruolo = "Studente";
+const anno = 2026;
+
+contenitore.innerHTML = `
+    &lt;div class="card"&gt;
+        &lt;h2&gt;${nome}&lt;/h2&gt;
+        &lt;p&gt;${ruolo}&lt;/p&gt;
+        &lt;small&gt;Anno: ${anno}&lt;/small&gt;
+    &lt;/div&gt;
+`;
+
+const card = document.querySelector(".card");
+card.classList.add("attiva");
+card.setAttribute("data-anno", anno);
+
+if (card.hasAttribute("data-anno")) {
+    console.log(card.getAttribute("data-anno"));
+}</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

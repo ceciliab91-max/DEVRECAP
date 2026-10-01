@@ -5,7 +5,7 @@ import { z } from "zod";
  */
 export const CodeSnippetSchema = z.object({
   title: z.string().min(1, "Il titolo dello snippet è obbligatorio"),
-  language: z.enum(["css", "javascript", "jsx", "sql"]),
+  language: z.enum(["css", "javascript", "jsx", "sql", "json", "bash", "html", "prisma", "text"]),
   code: z.string().min(1, "Il codice non può essere vuoto"),
   explanation: z.string().min(1, "La spiegazione dello snippet è obbligatoria")
 });
@@ -25,10 +25,10 @@ export const DispensaLessonSchema = z.object({
 });
 
 /**
- * Schema per l'intero modulo didattico (es. JavaScript, React, CSS, SQL).
+ * Schema per l'intero modulo didattico (es. JavaScript, React, CSS, SQL, Node, AI).
  */
 export const DispensaModuleSchema = z.object({
-  moduleId: z.enum(["css", "javascript", "react", "sql"]),
+  moduleId: z.enum(["css", "javascript", "react", "sql", "node", "ai"]),
   moduleName: z.string(),
   description: z.string(),
   totalLessons: z.number().int().positive(),
@@ -39,6 +39,7 @@ export const DispensaModuleSchema = z.object({
  * Schema della Knowledge Base complessiva.
  */
 export const DispenseKnowledgeBaseSchema = z.record(
-  z.enum(["css", "javascript", "react", "sql"]),
+  z.enum(["css", "javascript", "react", "sql", "node", "ai"]),
   DispensaModuleSchema
 );
+

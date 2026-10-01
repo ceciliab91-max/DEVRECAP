@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript - LocalStorage</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript</div>
+            <ul>
+                <li><a href="#cos-e">Cos'è</a></li>
+                <li><a href="#setitem">setItem</a></li>
+                <li><a href="#getitem">getItem</a></li>
+                <li><a href="#removeitem">removeItem</a></li>
+                <li><a href="#clear">clear</a></li>
+                <li><a href="#json-stringify">JSON.stringify</a></li>
+                <li><a href="#json-parse">JSON.parse</a></li>
+                <li><a href="#oggetti-array">Oggetti e array</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>LocalStorage in JavaScript</h1>
+            <p class="intro">Salvare, leggere e cancellare dati nel browser.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="cos-e">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Cos'è il localStorage</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il localStorage è uno spazio di memorizzazione del browser che salva dati anche dopo la chiusura della pagina. I dati restano disponibili finché non vengono cancellati manualmente.</p>
+                </div>
+
+                <p>Lavora con coppie chiave-valore: ogni dato ha una chiave che lo identifica e un valore che lo contiene. Nel localStorage si salvano solo stringhe. Se vuoi memorizzare numeri, booleani, oggetti o array, devi prima trasformarli in testo e poi riconvertirli quando li leggi.</p>
+
+                <p>È importante sapere che i dati nel localStorage sono visibili e modificabili direttamente dall'utente tramite il pannello DevTools del browser, nella scheda <strong>Application</strong>. Chiunque può aprire gli strumenti di sviluppo e leggere, cambiare o cancellare i valori salvati. Per questo motivo il localStorage è adatto a conservare solo informazioni non sensibili: preferenze dell'utente (tema grafico, lingua, dimensione del testo), lo stato di un carrello in un e-commerce, l'ultima pagina visitata o impostazioni di configurazione dell'interfaccia. Non deve mai contenere password, token di autenticazione o dati personali riservati.</p>
+            </section>
+
+            <section id="setitem">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>setItem</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>setItem()</code> aggiunge un dato oppure aggiorna un dato già esistente. Vuole sempre due argomenti: la chiave e il valore.</p>
+                </div>
+
+                <p><code>setItem()</code> è il metodo con cui inserisci un dato nel localStorage. Se la chiave esiste già, il valore precedente viene sostituito con quello nuovo.</p>
+                <p>Questo metodo è utile quando vuoi salvare una scelta dell'utente, come una preferenza grafica o la lingua selezionata.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">localStorage.setItem("tema", "scuro");
+localStorage.setItem("lingua", "it");</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Salva nel localStorage due preferenze: il volume dell'audio impostato a <code>80</code> e le notifiche impostate su <code>attive</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">localStorage.setItem("volume", "80");
+localStorage.setItem("notifiche", "attive");</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="getitem">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>getItem</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>getItem()</code> legge il valore associato a una chiave. Se la chiave non esiste, restituisce <code>null</code>.</p>
+                </div>
+
+                <p><code>getItem()</code> serve per recuperare un dato salvato in precedenza. Si usa quando vuoi riutilizzare un'informazione già memorizzata, per esempio per mostrarla a schermo o per fare un controllo.</p>
+                <p>Il valore restituito è sempre una stringa o <code>null</code>. Se ti serve un numero, devi convertirlo con <code>Number()</code> prima di usarlo in un calcolo.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">localStorage.setItem("lingua", "it");
+const lingua = localStorage.getItem("lingua");
+console.log(lingua);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Salva nel localStorage il tema preferito come <code>chiaro</code>, poi recuperalo in una variabile chiamata <code>temaAttivo</code> e stampala in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">localStorage.setItem("tema", "chiaro");
+const temaAttivo = localStorage.getItem("tema");
+console.log(temaAttivo);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="removeitem">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>removeItem</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>removeItem()</code> elimina solo una chiave specifica dal localStorage.</p>
+                </div>
+
+                <p><code>removeItem()</code> è il metodo da usare quando vuoi cancellare un solo dato salvato. Si indica la chiave da eliminare e il browser rimuove solo quella coppia chiave-valore, lasciando intatto tutto il resto.</p>
+                <p>È utile quando un utente vuole annullare una scelta, resettare una preferenza o eliminare un'informazione non più necessaria.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">localStorage.setItem("tema", "scuro");
+localStorage.removeItem("tema");</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Salva nel localStorage tre chiavi: <code>lingua</code>, <code>volume</code> e <code>notifiche</code>. Poi elimina solo la chiave <code>volume</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">localStorage.setItem("lingua", "it");
+localStorage.setItem("volume", "80");
+localStorage.setItem("notifiche", "attive");
+localStorage.removeItem("volume");</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clear">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>clear</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>clear()</code> svuota completamente il localStorage del sito.</p>
+                </div>
+
+                <p><code>clear()</code> cancella tutti i dati salvati nel localStorage. Va usato con attenzione, perché rimuove ogni chiave presente, non solo una singola informazione.</p>
+                <p>Questo metodo è utile quando vuoi ripartire da zero, per esempio in una schermata di logout o in un pulsante che elimina tutte le preferenze memorizzate.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">localStorage.setItem("tema", "scuro");
+localStorage.setItem("lingua", "it");
+localStorage.clear();</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Salva nel localStorage la preferenza di colore e il nome utente, poi simula un reset completo dell'applicazione svuotando tutta la memoria.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">localStorage.setItem("colore", "blu");
+localStorage.setItem("utente", "Anna");
+localStorage.clear();</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="json-stringify">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>JSON.stringify</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>JSON.stringify()</code> trasforma un oggetto o un array in una stringa testuale in formato JSON.</p>
+                </div>
+
+                <p>JSON è un formato standard per rappresentare dati strutturati come testo. Poiché il localStorage accetta solo stringhe, <code>JSON.stringify()</code> è il passaggio necessario per poter salvare oggetti e array. Il risultato è una stringa che contiene tutti i dati in un formato leggibile e riconvertibile.</p>
+                <p>Il metodo si usa passando il dato da trasformare come argomento. Il valore originale non viene modificato: viene creata una nuova stringa.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studente = {
+    nome: "Luca",
+    eta: 16
+};
+
+const studenteJSON = JSON.stringify(studente);
+console.log(studenteJSON);
+// risultato: '{"nome":"Luca","eta":16}'
+
+const corsi = ["HTML", "CSS", "JavaScript"];
+const corsiJSON = JSON.stringify(corsi);
+console.log(corsiJSON);
+// risultato: '["HTML","CSS","JavaScript"]'</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un oggetto <code>prodotto</code> con le proprietà <code>nome</code> e <code>prezzo</code>, trasformalo in una stringa JSON e stampala in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodotto = {
+    nome: "Tastiera",
+    prezzo: 49
+};
+
+const prodottoJSON = JSON.stringify(prodotto);
+console.log(prodottoJSON);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="json-parse">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>JSON.parse</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>JSON.parse()</code> trasforma una stringa JSON in un oggetto o in un array.</p>
+                </div>
+
+                <p>Quando leggi dal localStorage un valore salvato con <code>JSON.stringify()</code>, ottieni una stringa. Con <code>JSON.parse()</code> puoi riconvertire quella stringa nel tipo di dato originale, così da poter accedere di nuovo alle proprietà di un oggetto o agli elementi di un array.</p>
+                <p>I due metodi lavorano sempre in coppia: <code>JSON.stringify()</code> si usa prima di salvare, <code>JSON.parse()</code> si usa dopo aver letto.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studenteJSON = '{"nome":"Luca","eta":16}';
+const studente = JSON.parse(studenteJSON);
+console.log(studente.nome);
+// risultato: Luca
+
+const corsiJSON = '["HTML","CSS","JavaScript"]';
+const corsi = JSON.parse(corsiJSON);
+console.log(corsi[0]);
+// risultato: HTML</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Data la stringa <code>'{"nome":"Tastiera","prezzo":49}'</code>, riconvertila in un oggetto e stampa in console il valore della proprietà <code>prezzo</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodottoJSON = '{"nome":"Tastiera","prezzo":49}';
+const prodotto = JSON.parse(prodottoJSON);
+console.log(prodotto.prezzo);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="oggetti-array">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Oggetti e array nel localStorage</h2>
+                </header>
+
+                <div class="note">
+                    <p>Oggetti e array si salvano nel localStorage con <code>JSON.stringify()</code> e si recuperano con <code>JSON.parse()</code>.</p>
+                </div>
+
+                <p>Un oggetto o un array non può essere salvato direttamente nel localStorage, perché il localStorage accetta solo stringhe. Il flusso corretto è: trasformare con <code>JSON.stringify()</code>, salvare con <code>setItem()</code>, leggere con <code>getItem()</code> e infine riconvertire con <code>JSON.parse()</code>.</p>
+                <p>Questo approccio è utile quando devi memorizzare strutture più ricche, come i prodotti nel carrello di un e-commerce, le preferenze di configurazione di un'interfaccia o un elenco di voci selezionate dall'utente.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const studente = {
+    nome: "Luca",
+    eta: 16
+};
+
+const listaCorsi = ["HTML", "CSS", "JavaScript"];
+
+localStorage.setItem("studente", JSON.stringify(studente));
+localStorage.setItem("corsi", JSON.stringify(listaCorsi));
+
+const studenteSalvato = JSON.parse(localStorage.getItem("studente"));
+const corsiSalvati = JSON.parse(localStorage.getItem("corsi"));
+
+console.log(studenteSalvato);
+console.log(corsiSalvati);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Salva nel localStorage un oggetto che rappresenta un prodotto nel carrello (nome e quantità) e un array con tre categorie della tienda. Poi recuperali entrambi e stampali in console.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodotto = {
+    nome: "Monitor",
+    quantita: 1
+};
+
+const categorie = ["Elettronica", "Accessori", "Software"];
+
+localStorage.setItem("prodotto", JSON.stringify(prodotto));
+localStorage.setItem("categorie", JSON.stringify(categorie));
+
+const prodottoSalvato = JSON.parse(localStorage.getItem("prodotto"));
+const categorieSalvate = JSON.parse(localStorage.getItem("categorie"));
+
+console.log(prodottoSalvato);
+console.log(categorieSalvate);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Simula il salvataggio delle preferenze di un utente e del suo carrello. Salva una preferenza semplice (lingua), un oggetto con i dati di un prodotto nel carrello e un array con le categorie visitate. Poi recupera tutti i dati, riconvertili nei tipi originali e infine elimina solo la chiave della lingua.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">localStorage.setItem("lingua", "it");
+
+const prodotto = {
+    nome: "Cuffie",
+    quantita: 2
+};
+
+const categorieVisitate = ["Elettronica", "Accessori", "Audio"];
+
+localStorage.setItem("prodotto", JSON.stringify(prodotto));
+localStorage.setItem("categorie", JSON.stringify(categorieVisitate));
+
+const lingua = localStorage.getItem("lingua");
+const prodottoSalvato = JSON.parse(localStorage.getItem("prodotto"));
+const categorieSalvate = JSON.parse(localStorage.getItem("categorie"));
+
+console.log(lingua);
+console.log(prodottoSalvato);
+console.log(categorieSalvate);
+
+localStorage.removeItem("lingua");</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

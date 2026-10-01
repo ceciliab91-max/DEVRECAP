@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timing Functions - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#timing">Timing</a></li>
+                <li><a href="#settimeout">setTimeout</a></li>
+                <li><a href="#setinterval">setInterval</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Timing Functions</h1>
+            <p class="intro">Eseguire codice in modo differito o ripetuto nel tempo con <code>setTimeout</code> e <code>setInterval</code>.</p>
+        </div>
+    </header>
+
+    <main id="content">
+        <article>
+
+            <section id="timing">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Cosa sono le timing functions</h2>
+                </header>
+
+                <div class="note">
+                    <p>Le timing functions permettono di eseguire una funzione in un momento preciso nel futuro, senza interrompere il flusso normale del programma.</p>
+                </div>
+
+                <p>In JavaScript è possibile programmare l'esecuzione di una funzione in un momento futuro. Le <strong>timing functions</strong> sono strumenti che permettono di dire al browser: "esegui questo codice dopo un certo numero di millisecondi". Questo è utile ogni volta che vuoi introdurre un ritardo, creare un'animazione, aggiornare un dato periodicamente o mostrare un messaggio dopo qualche secondo.</p>
+                <p>Il tempo si misura in <strong>millisecondi</strong>: 1000 millisecondi corrispondono a 1 secondo. Le due funzioni principali sono <code>setTimeout</code>, che esegue il codice una volta sola dopo un ritardo, e <code>setInterval</code>, che lo esegue ripetutamente a intervalli regolari.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// 1000 millisecondi = 1 secondo
+// 500 millisecondi = mezzo secondo
+// 2000 millisecondi = 2 secondi
+</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Quanti millisecondi corrispondono a 3 secondi? E a mezzo minuto? Scrivi i due valori come costanti.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const treSecondi = 3000 // oppure (3 * 1000);
+const mezzoMinuto = 30000 // oppure (30 * 1000);
+const quindiciMinuti = 900000 // oppure (15 * 60 * 1000);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="settimeout">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>setTimeout</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>setTimeout</code> esegue una funzione <strong>una volta sola</strong> dopo il ritardo indicato.</p>
+                </div>
+
+                <p><code>setTimeout</code> accetta due argomenti: la funzione da eseguire e il numero di millisecondi da aspettare prima di eseguirla. Dopo che il tempo è trascorso, la funzione viene chiamata una sola volta. Il codice che segue <code>setTimeout</code> non si ferma ad aspettare: continua a girare normalmente mentre il timer conta in background.</p>
+                <p><code>setTimeout</code> restituisce un identificatore numerico, chiamato <strong>timer ID</strong>. Se vuoi annullare il timer prima che scatti, puoi passare quell'ID a <code>clearTimeout</code>. In questo modo la funzione non verrà mai eseguita.</p>
+
+                <section>
+                    <h3>Sintassi</h3>
+                    <pre><code class="language-javascript">setTimeout(funzione, millisecondi);</code></pre>
+                </section>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// Stampa un messaggio dopo 2 secondi
+setTimeout(() => {
+    console.log('Sono passati 2 secondi!');
+}, 2000);
+
+// Il codice qui sotto viene eseguito subito, senza aspettare
+console.log('Questo appare prima, anche se è scritto dopo.');</code></pre>
+                </section>
+
+                <section>
+                    <h3>Esempio con clearTimeout</h3>
+                    <pre><code class="language-javascript">// Avvia un timer
+const timerID = setTimeout(() => {
+    console.log('Questo non verrà mai stampato.');
+}, 5000);
+
+// Annulla il timer prima che scatti
+clearTimeout(timerID);</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un <code>setTimeout</code> che stampa in console il messaggio <code>'Benvenuto!'</code> dopo 3 secondi. Poi scrivi una seconda versione in cui il timer viene annullato prima di scattare.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">// Versione 1: il messaggio viene stampato
+setTimeout(() => {
+    console.log('Benvenuto!');
+}, 3000);
+
+// Versione 2: il timer viene annullato
+const id = setTimeout(() => {
+    console.log('Benvenuto!');
+}, 3000);
+
+clearTimeout(id);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="setinterval">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>setInterval</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>setInterval</code> esegue una funzione <strong>ripetutamente</strong> ogni tot millisecondi, finché non viene fermato con <code>clearInterval</code>.</p>
+                </div>
+
+                <p><code>setInterval</code> funziona in modo simile a <code>setTimeout</code>, ma invece di eseguire la funzione una volta sola, la richiama automaticamente ogni volta che il tempo indicato è trascorso. Questo lo rende utile per operazioni che devono ripetersi nel tempo: aggiornare un contatore, mostrare l'ora corrente, fare lampeggiare un elemento o controllare una condizione a intervalli regolari.</p>
+                <p>Come <code>setTimeout</code>, anche <code>setInterval</code> restituisce un timer ID. Per fermare il ciclo si usa <code>clearInterval</code> passando quell'ID come argomento. Senza <code>clearInterval</code>, la funzione continua a girare all'infinito finché la pagina è aperta.</p>
+
+                <section>
+                    <h3>Sintassi</h3>
+                    <pre><code class="language-javascript">setInterval(funzione, millisecondi);</code></pre>
+                </section>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// Stampa un messaggio ogni secondo
+const intervallo = setInterval(() => {
+    console.log('Tick!');
+}, 1000);</code></pre>
+                </section>
+
+                <section>
+                    <h3>Esempio con clearInterval</h3>
+                    <pre><code class="language-javascript">// Conta da 1 a 5, poi si ferma
+let contatore = 0;
+
+const intervallo = setInterval(() => {
+    contatore = contatore + 1;
+    console.log('Contatore: ' + contatore);
+
+    if (contatore === 5) {
+        clearInterval(intervallo);
+        console.log('Contatore fermato.');
+    }
+}, 1000);</code></pre>
+                </section>
+
+                <div class="task">
+                    <h3>Esercizio</h3>
+                    <p>Crea un <code>setInterval</code> che stampa in console il messaggio <code>'Aggiornamento!'</code> ogni 2 secondi. Poi aggiungi una condizione per fermarlo dopo 4 ripetizioni.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">let ripetizioni = 0;
+
+const id = setInterval(() => {
+    console.log('Aggiornamento!');
+    ripetizioni = ripetizioni + 1;
+
+    if (ripetizioni === 4) {
+        clearInterval(id);
+    }
+}, 2000);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Crea un conto alla rovescia da 5 a 0. Usa <code>setInterval</code> per decrementare un contatore ogni secondo e stampa il valore corrente in console. Quando il contatore arriva a 0, ferma l'intervallo e stampa <code>'Via!'</code>. Usa <code>let</code> per il contatore e <code>const</code> per l'ID dell'intervallo.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">let secondi = 5;
+
+const conto = setInterval(() => {
+    console.log(secondi);
+    secondi = secondi - 1;
+
+    if (secondi < 0) {
+        clearInterval(conto);
+        console.log('Via!');
+    }
+}, 1000);</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

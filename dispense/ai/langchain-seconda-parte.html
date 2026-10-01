@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain: output strutturato, agenti multipli ed Express - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+    <style>
+        /* Componente diagramma: usa le variabili definite in assets/main.css */
+        figure.diagram {
+            margin: var(--space-6) 0 var(--space-2);
+            padding: var(--space-6) var(--space-4);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-m);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        figure.diagram svg {
+            width: 100%;
+            max-width: 440px;
+            height: auto;
+            overflow: visible;
+        }
+
+        figure.diagram .node-title {
+            font-family: var(--body);
+            font-weight: 700;
+            font-size: 15px;
+            fill: var(--text);
+        }
+
+        figure.diagram .node-title.llm {
+            fill: var(--primary-dark);
+        }
+
+        figure.diagram .node-sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            fill: var(--muted);
+        }
+
+        figure.diagram .edge-label {
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: 12px;
+            fill: var(--primary);
+        }
+
+        figure.diagram figcaption {
+            margin-top: var(--space-3);
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">LangChain</div>
+            <ul>
+                <li><a href="#ripasso-tool">Tool</a></li>
+                <li><a href="#ripasso-zod">Zod</a></li>
+                <li><a href="#ripasso-agente">Agenti</a></li>
+                <li><a href="#output-strutturato">Output strutturato</a></li>
+                <li><a href="#pattern-agenti">Psy, Psyco &amp; Mediator</a></li>
+                <li><a href="#struttura-cartelle">Cartelle</a></li>
+                <li><a href="#rotta-get">GET /ai</a></li>
+                <li><a href="#rotta-post">POST /ai/chat</a></li>
+                <li><a href="#database-mock">DB mock</a></li>
+                <li><a href="#tool-get-products">getProducts</a></li>
+                <li><a href="#tool-get-product-info">getProductInfo</a></li>
+                <li><a href="#tool-search-product">searchProduct</a></li>
+                <li><a href="#agente-generico-completo">Agente completo</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 2 · AI</p>
+            <h1>LangChain: output strutturato, agenti multipli ed Express</h1>
+            <p class="intro">Ripasso di tool, schema Zod e agenti, poi risposte strutturate con Zod, agenti con personalità diverse che dialogano tra loro, organizzazione del progetto in cartelle e la prima API Express che espone l'agente, fino ai tool che leggono un piccolo store di prodotti mock.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+
+            <section id="ripasso-tool">
+                <header>
+                    <p class="index">Ripasso 1</p>
+                    <h2>Le chiamate a tool: come funziona il ciclo</h2>
+                </header>
+                <div class="note">
+                    <p>Un agente non chiama un tool a caso: quando gli serve un'informazione che non ha, si ferma, chiama il tool giusto e riprende a ragionare con il risultato in mano.</p>
+                </div>
+                <p>Nella prima parte abbiamo creato il tool <code>get_weather</code> e lo abbiamo collegato a un agente con <code>createAgent()</code>. Il modello legge la <code>description</code> del tool per capire quando usarlo, poi genera i parametri richiesti dallo schema e li passa alla funzione. Il ciclo si ripete ogni volta che serve: l'agente può chiamare più tool, uno dopo l'altro, prima di rispondere.</p>
+                <p><strong>Regola da ricordare:</strong> un tool deve restituire sempre una <strong>stringa</strong>. Se il dato è un oggetto o un array, va convertito con <code>JSON.stringify()</code> prima del <code>return</code>.</p>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 676" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="Flusso: domanda utente, agente LLM, chiamata al tool, risultato, agente LLM, risposta finale">
+                        <defs>
+                            <marker id="arrow1" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="230" y1="76" x2="230" y2="130" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow1)" />
+                        <line x1="230" y1="192" x2="230" y2="246" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow1)" />
+                        <text x="248" y="219" class="edge-label">Ho bisogno di dati</text>
+
+                        <line x1="230" y1="308" x2="230" y2="362" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow1)" />
+                        <line x1="230" y1="424" x2="230" y2="478" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow1)" />
+                        <line x1="230" y1="540" x2="230" y2="594" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow1)" />
+                        <text x="248" y="573" class="edge-label">Elabora e risponde</text>
+
+                        <rect x="90" y="20" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="53" text-anchor="middle" class="node-title">Domanda dell'utente</text>
+
+                        <rect x="90" y="136" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="169" text-anchor="middle" class="node-title llm">Agente (LLM)</text>
+
+                        <rect x="90" y="252" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="277" text-anchor="middle" class="node-title">Chiama il tool</text>
+                        <text x="230" y="296" text-anchor="middle" class="node-sub">get_weather(city, unit)</text>
+
+                        <rect x="90" y="368" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="393" text-anchor="middle" class="node-title">Riceve il risultato</text>
+                        <text x="230" y="412" text-anchor="middle" class="node-sub">return sempre una stringa</text>
+
+                        <rect x="90" y="484" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="517" text-anchor="middle" class="node-title llm">Agente (LLM)</text>
+
+                        <rect x="90" y="600" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="633" text-anchor="middle" class="node-title">Risposta finale</text>
+                    </svg>
+                    <figcaption>L'agente torna sempre dal modello dopo aver ricevuto il risultato del tool: non decide da solo la risposta finale finché l'LLM non la conferma.</figcaption>
+                </figure>
+
+                <h3>Il tool <code>get_weather</code></h3>
+                <pre><code class="language-javascript">import { tool } from "langchain";
+import { z } from 'zod';
+
+const schema = z.object({
+    city: z.string().describe('La città di cui vuoi le informazioni'),
+    unit: z.string().describe("L'unità di misura con cui vuoi che sia espresso il risultato")
+});
+
+const toolFunction = async ({ city, unit }) => {
+    // Il valore restituito dal tool DEVE essere sempre una stringa
+    return `Il tempo a ${city} è costantemente a 28 ${unit}`;
+}
+
+const getWeather = tool(toolFunction, {
+    name: "get_weather",
+    description: "Questo tool serve quando hai bisogno di informazioni sul meteo",
+    schema
+});
+
+export { getWeather };</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi al tool <code>getWeather</code> un secondo campo nella stringa restituita: una previsione inventata per il giorno successivo (es. "domani pioggia").</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const toolFunction = async ({ city, unit }) => {
+    return `Il tempo a ${city} è costantemente a 28 ${unit}. Domani: pioggia debole.`;
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="ripasso-zod">
+                <header>
+                    <p class="index">Ripasso 2</p>
+                    <h2>Lo schema Zod: cosa descrive e dove si usa</h2>
+                </header>
+                <div class="note">
+                    <p>Zod descrive la <strong>forma</strong> dei dati. In LangChain si usa in due punti diversi: nello <code>schema</code> di un tool (i parametri in input) e nel <code>responseFormat</code> di un agente (la forma della risposta finale).</p>
+                </div>
+                <p>Nel tool, lo schema dice al modello quali parametri deve generare per chiamare la funzione: <code>z.string()</code>, <code>z.number()</code>, <code>z.enum([...])</code> e così via, ognuno con un <code>.describe()</code> che spiega al modello a cosa serve quel campo.</p>
+                <p>Nel <code>responseFormat</code> lo stesso linguaggio serve per un altro scopo: vincolare la risposta finale dell'agente a una forma precisa, invece di lasciarla libera. Vedremo un esempio completo nel prossimo capitolo.</p>
+                <p><strong>Regola da ricordare:</strong> Anthropic richiede che lo schema abbia sempre <code>type: object</code> alla radice. Uno <code>z.array()</code> come radice non è supportato: va sempre incapsulato in un <code>z.object()</code>.</p>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="Lo schema Zod si usa sia nel tool per i parametri di input, sia nel responseFormat per la forma della risposta">
+                        <defs>
+                            <marker id="arrow2" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="230" y1="76" x2="110" y2="154" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow2)" />
+                        <line x1="230" y1="76" x2="350" y2="154" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow2)" />
+
+                        <rect x="90" y="20" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="46" text-anchor="middle" class="node-title llm">Schema Zod</text>
+                        <text x="230" y="65" text-anchor="middle" class="node-sub">z.object({ ... })</text>
+
+                        <rect x="15" y="160" width="190" height="80" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="110" y="186" text-anchor="middle" class="node-title">Nel tool</text>
+                        <text x="110" y="205" text-anchor="middle" class="node-sub">parametri in input</text>
+                        <text x="110" y="222" text-anchor="middle" class="node-sub">id: z.number()</text>
+
+                        <rect x="255" y="160" width="190" height="80" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="350" y="186" text-anchor="middle" class="node-title">Nel responseFormat</text>
+                        <text x="350" y="205" text-anchor="middle" class="node-sub">forma della risposta</text>
+                        <text x="350" y="222" text-anchor="middle" class="node-sub">sentiment: z.enum([...])</text>
+                    </svg>
+                    <figcaption>Stesso linguaggio (Zod), due scopi diversi: parametri in ingresso al tool, oppure forma della risposta finale dell'agente.</figcaption>
+                </figure>
+
+                <h3>Esempio: schema per un tool con parametro numerico</h3>
+                <pre><code class="language-javascript">const schema = z.object({
+    id: z.number().describe("l'ID del prodotto di cui vuoi informazioni")
+});</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Scrivi lo schema Zod per un tool che cerca un prodotto per nome, con un unico parametro <code>nameSearch</code> di tipo stringa.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const schema = z.object({
+    nameSearch: z.string().describe("il nome del prodotto da cercare")
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="ripasso-agente">
+                <header>
+                    <p class="index">Ripasso 3</p>
+                    <h2>Costruire un agente con <code>createAgent</code></h2>
+                </header>
+                <div class="note">
+                    <p><code>createAgent</code> mette insieme tre ingredienti: un <strong>modello</strong>, uno o più <strong>tool</strong> e, facoltativamente, un <strong>systemPrompt</strong> che definisce il comportamento dell'agente.</p>
+                </div>
+                <p>Il modello è l'istanza del chat model (es. <code>ChatAnthropic</code>), i tool sono un array (anche vuoto, se l'agente non ne usa nessuno) e il <code>systemPrompt</code> è un testo che orienta il tono e il ruolo dell'agente prima ancora che arrivi la prima domanda. Una volta creato, l'agente si usa con <code>agent.invoke({ messages: [...] })</code>.</p>
+
+                <figure class="diagram">
+                    <svg viewBox="0 0 470 322" xmlns="http://www.w3.org/2000/svg" role="img"
+                        aria-label="model, tools e systemPrompt confluiscono in createAgent, che produce un agente pronto per invoke">
+                        <defs>
+                            <marker id="arrow3" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)" />
+                            </marker>
+                        </defs>
+
+                        <line x1="85" y1="70" x2="230" y2="124" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow3)" />
+                        <line x1="230" y1="70" x2="230" y2="124" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow3)" />
+                        <line x1="375" y1="70" x2="230" y2="124" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow3)" />
+                        <line x1="230" y1="186" x2="230" y2="240" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow3)" />
+
+                        <rect x="15" y="20" width="140" height="50" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="85" y="42" text-anchor="middle" class="node-title">model</text>
+                        <text x="85" y="59" text-anchor="middle" class="node-sub">models/anthropic.js</text>
+
+                        <rect x="165" y="20" width="130" height="50" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="42" text-anchor="middle" class="node-title">tools</text>
+                        <text x="230" y="59" text-anchor="middle" class="node-sub">[] oppure [tool1, ...]</text>
+
+                        <rect x="305" y="20" width="140" height="50" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="375" y="42" text-anchor="middle" class="node-title">systemPrompt</text>
+                        <text x="375" y="59" text-anchor="middle" class="node-sub">opzionale</text>
+
+                        <rect x="90" y="130" width="280" height="56" rx="10" fill="var(--soft)" stroke="var(--primary)" stroke-width="1.5" />
+                        <text x="230" y="163" text-anchor="middle" class="node-title llm">createAgent({ ... })</text>
+
+                        <rect x="90" y="246" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+                        <text x="230" y="271" text-anchor="middle" class="node-title">Agente pronto</text>
+                        <text x="230" y="290" text-anchor="middle" class="node-sub">agent.invoke({ messages })</text>
+                    </svg>
+                    <figcaption>I tre ingredienti di createAgent: modello, tool e system prompt. Il risultato è un agente pronto a ricevere messaggi con invoke().</figcaption>
+                </figure>
+
+                <h3>Un agente minimo, senza tool</h3>
+                <pre><code class="language-javascript">import { createAgent, HumanMessage } from "langchain";
+import model from "./models/anthropic.js";
+
+const agent = createAgent({
+    model,
+    tools: [],
+    systemPrompt: "Sei un assistente disponibile e sintetico."
+});
+
+const response = await agent.invoke({
+    messages: [new HumanMessage("Ciao, come stai?")]
+});
+
+console.log(response.messages.at(-1).content);</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Cambia il <code>systemPrompt</code> dell'agente qui sopra per dargli una personalità diversa (es. "rispondi sempre in rima") e osserva come cambia la risposta.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const agent = createAgent({
+    model,
+    tools: [],
+    systemPrompt: "Sei un assistente che risponde sempre in rima, in italiano."
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="output-strutturato">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Output strutturato con <code>responseFormat</code></h2>
+                </header>
+                <div class="note">
+                    <p>Quando imposti <code>responseFormat</code> su un agente, la sua risposta finale <strong>deve</strong> avere quella forma. Il modello farà di tutto per soddisfare lo schema, incluso chiamare i tool necessari.</p>
+                </div>
+                <p>Con <code>responseFormat</code> impostato, la risposta non va più letta da <code>response.messages.at(-1).content</code> (che conterrebbe JSON grezzo), ma dal campo <code>response.structuredResponse</code>, già validato secondo lo schema Zod.</p>
+                <p>Vediamo un caso concreto: un agente che analizza una recensione di una pizzeria e restituisce sentiment, voto e un breve feedback, sempre nella stessa forma.</p>
+
+                <h3>Analizzatore di recensioni</h3>
+                <pre><code class="language-javascript">import "dotenv/config";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { createAgent, HumanMessage } from "langchain";
+import { getWeather } from "./tools/getWeather.js";
+import { z } from 'zod';
+
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5',
+    apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+const agent = createAgent({
+    model,
+    tools: [getWeather],
+    systemPrompt: "Ciao sei un analizzatore di recensioni online della pizzeria da Antonio",
+    responseFormat: z.object({
+        sentiment: z.enum(['positiva', 'negativa']),
+        score: z.number().min(1).max(5),
+        feedback: z.string()
+    })
+});
+
+const recensione = "La cottura della pizza era ottima, come pure il servizio, do il massimo dei voti";
+
+const response = await agent.invoke({
+    messages: [new HumanMessage(`
+Analizza la seguente recensione:
+- dimmi se è (negativa/positiva)
+- un eventuale valore in gradimento da 1 a 5
+
+${recensione}
+    `)]
+});
+
+// Con responseFormat leggiamo structuredResponse, non messages.at(-1).content
+console.log(response.structuredResponse);
+// { sentiment: 'positiva', score: 5, feedback: '...' }</code></pre>
+                <p>Nota che l'agente ha comunque un tool (<code>getWeather</code>) tra le mani: <code>responseFormat</code> vincola solo la <strong>forma finale</strong> della risposta, non impedisce all'agente di usare i tool durante il ragionamento.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi allo schema un campo <code>categoria</code> con <code>z.enum(['cibo', 'servizio', 'ambiente'])</code> e stampa solo quel campo dalla risposta.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">responseFormat: z.object({
+    sentiment: z.enum(['positiva', 'negativa']),
+    score: z.number().min(1).max(5),
+    feedback: z.string(),
+    categoria: z.enum(['cibo', 'servizio', 'ambiente'])
+})
+
+// ...
+
+console.log(response.structuredResponse.categoria);</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="pattern-agenti">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Più agenti con personalità diverse: Psy, Psyco e Mediator</h2>
+                </header>
+                <div class="note">
+                    <p>Stesso modello, <code>systemPrompt</code> diversi: bastano per ottenere punti di vista opposti sulla stessa domanda. Un terzo agente può poi leggere entrambe le risposte e sintetizzarle.</p>
+                </div>
+                <p>È una versione semplificata del pattern <strong>Debate</strong>: più "esperti" rispondono alla stessa domanda con prospettive diverse, poi un agente (il "giudice" o, come lo chiamiamo qui, il <strong>Mediator</strong>) confronta le risposte e propone una sintesi.</p>
+                <p>Creiamo due agenti con personalità agli antipodi:</p>
+
+                <h3>L'agente <code>psy</code></h3>
+                <pre><code class="language-javascript">import { createAgent } from "langchain";
+import anthropicModel from '../models/anthropic.js';
+
+const agentPsy = createAgent({
+    model: anthropicModel,
+    systemPrompt: `
+Sei uno pscichiatra che interpreta alla lettera la filosofia di Jung.
+Sai interpretare i sogni come Freud e suggerisce sempre problemi affettivi
+con la figura genitoriale
+`
+});
+
+export default agentPsy;</code></pre>
+
+                <h3>L'agente <code>psyco</code></h3>
+                <pre><code class="language-javascript">import { createAgent } from "langchain";
+import anthropicModel from '../models/anthropic.js';
+
+const agentPsyco = createAgent({
+    model: anthropicModel,
+    systemPrompt: `
+Sei uno psicopatico fuori di testa, che ha sempre idee fuori dal comune.
+Rispondi sempre in tono crucciato e suggeriscimi sempre modi nuovi per creare
+bug nel mio codice
+    `
+});
+
+export default agentPsyco;</code></pre>
+
+                <h3>L'agente <code>mediator</code></h3>
+                <pre><code class="language-javascript">import { createAgent } from "langchain";
+import anthropicModel from '../models/anthropic.js';
+
+const agentMediator = createAgent({
+    model: anthropicModel,
+    systemPrompt: `
+Sei un agente che deve analizzare le opinioni di due agenti molto diversi,
+capirne i pro e contro e suggerire una soluzione che metta d'accordo entrambi.
+    `
+});
+
+export default agentMediator;</code></pre>
+
+                <p>La domanda viene inviata a entrambi gli agenti in modo indipendente. Ogni risposta è solo testo (nessun <code>responseFormat</code> qui), quindi la leggiamo da <code>response.messages.at(-1).content</code>. Il Mediator riceve infine la domanda originale <strong>e</strong> entrambe le risposte, per poterle confrontare.</p>
+
+                <h3>Orchestrazione</h3>
+                <pre><code class="language-javascript">import "dotenv/config";
+import { HumanMessage } from "langchain";
+import psyAgent from './agents/psy.js';
+import psycoAgent from './agents/psyco.js';
+import mediatorAgent from './agents/mediator.js';
+
+const question = `Mi dici una possibile alternativa al petrolio`;
+
+const responsePsyco = await psycoAgent.invoke({
+    messages: [new HumanMessage(question)]
+});
+const responsePsycoText = responsePsyco.messages.at(-1).content;
+
+const responsePsy = await psyAgent.invoke({
+    messages: [new HumanMessage(question)]
+});
+const responsePsyText = responsePsy.messages.at(-1).content;
+
+const responseMediator = await mediatorAgent.invoke({
+    messages: [new HumanMessage(`
+Domanda dell'utente:
+${question}
+
+Risposta PSYCO:
+${responsePsycoText}
+
+Risposta PSY:
+${responsePsyText}
+
+Fai un recap della discussione e dimmi il risultato finale della domanda
+`)]
+});
+
+console.log(responseMediator.messages.at(-1).content);</code></pre>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi un terzo agente esperto (es. un ingegnere pragmatico, senza fronzoli) e passa anche la sua risposta al Mediator insieme alle altre due.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">// agents/engineer.js
+import { createAgent } from "langchain";
+import anthropicModel from '../models/anthropic.js';
+
+const agentEngineer = createAgent({
+    model: anthropicModel,
+    systemPrompt: `
+Sei un ingegnere pragmatico: rispondi in modo tecnico, concreto,
+senza fronzoli e citando sempre un limite pratico della soluzione.
+    `
+});
+
+export default agentEngineer;
+
+// main2.js (estratto)
+const responseEngineer = await engineerAgent.invoke({
+    messages: [new HumanMessage(question)]
+});
+const responseEngineerText = responseEngineer.messages.at(-1).content;
+
+const responseMediator = await mediatorAgent.invoke({
+    messages: [new HumanMessage(`
+Domanda dell'utente:
+${question}
+
+Risposta PSYCO:
+${responsePsycoText}
+
+Risposta PSY:
+${responsePsyText}
+
+Risposta ENGINEER:
+${responseEngineerText}
+
+Fai un recap della discussione e dimmi il risultato finale della domanda
+`)]
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="struttura-cartelle">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Organizzare il progetto: <code>models/</code>, <code>agents/</code>, <code>tools/</code></h2>
+                </header>
+                <div class="note">
+                    <p>Separare modelli, agenti e tool in cartelle dedicate rende il codice più facile da estendere man mano che il progetto cresce.</p>
+                </div>
+                <p>Con più agenti e più tool, tenere tutto in un unico file diventa presto scomodo. Convenzione semplice ed efficace:</p>
+                <ul>
+                    <li><code>models/</code> — un file per provider, ognuno esporta un'istanza già configurata (<code>anthropic.js</code>, <code>mistral.js</code>, <code>openai.js</code>). Cambiare provider vuol dire importare un file diverso, non toccare la logica dell'agente.</li>
+                    <li><code>agents/</code> — un file per agente, ognuno esporta l'agente già pronto con <code>createAgent()</code>, i suoi tool e il suo <code>systemPrompt</code>.</li>
+                    <li><code>tools/</code> — un file per tool, ognuno esporta la funzione creata con <code>tool()</code> e il suo schema Zod.</li>
+                </ul>
+
+                <h3>Struttura delle cartelle</h3>
+                <pre><code class="language-text">progetto/
+├── models/
+│   ├── anthropic.js
+│   ├── mistral.js
+│   └── openai.js
+├── agents/
+│   └── generic.js
+├── tools/
+│   ├── getWeather.js
+│   ├── getProducts.js
+│   ├── getProductInfo.js
+│   └── searchProduct.js
+├── data/
+│   └── db.js
+└── server.js</code></pre>
+
+                <h3>Un modello per provider</h3>
+                <pre><code class="language-javascript">// models/anthropic.js
+import { ChatAnthropic } from "@langchain/anthropic";
+
+const model = new ChatAnthropic({
+    model: 'claude-haiku-4-5',
+    apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+export default model;</code></pre>
+                <pre><code class="language-javascript">// models/mistral.js
+import { ChatMistralAI } from "@langchain/mistralai";
+
+const model = new ChatMistralAI({
+    apiKey: process.env.MISTRAL_API_KEY
+});
+
+export default model;</code></pre>
+
+                <h3>Un agente che importa modello e tool</h3>
+                <pre><code class="language-javascript">// agents/generic.js
+import { createAgent } from "langchain";
+import mistralModel from '../models/mistral.js';
+import { getWeather } from '../tools/getWeather.js';
+import { getProductInfo } from '../tools/getProductInfo.js';
+import { searchProduct } from '../tools/searchProduct.js';
+
+const genericAgent = createAgent({
+    model: mistralModel,
+    tools: [
+        getWeather,
+        getProductInfo,
+        searchProduct,
+    ],
+});
+
+export default genericAgent;</code></pre>
+                <p>Cambiare provider all'agente generico è ora un'unica riga: basta importare <code>anthropicModel</code> o <code>openAiModel</code> al posto di <code>mistralModel</code>.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Crea <code>models/openai.js</code> seguendo lo stesso schema di <code>anthropic.js</code>, poi cambia l'import in <code>agents/generic.js</code> per usare OpenAI al posto di Mistral.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">// models/openai.js
+import { ChatOpenAI } from "@langchain/openai";
+
+const model = new ChatOpenAI({
+    model: 'gpt-3.5-turbo',
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+export default model;
+
+// agents/generic.js
+import openAiModel from '../models/openai.js';
+
+const genericAgent = createAgent({
+    model: openAiModel,
+    tools: [getWeather, getProductInfo, searchProduct],
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="rotta-get">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Express: la rotta GET <code>/ai</code></h2>
+                </header>
+                <div class="note">
+                    <p>Una rotta Express può inoltrare la domanda dell'utente direttamente all'agente e restituirne la risposta: è il modo più semplice per esporre un agente come API.</p>
+                </div>
+                <p>Installiamo Express e creiamo un piccolo server con una rotta che legge la domanda dalla <strong>query string</strong> e la inoltra all'agente Generico (quello di <code>agents/generic.js</code>, senza vincoli di <code>responseFormat</code>).</p>
+                <pre><code class="language-bash">pnpm add express dotenv</code></pre>
+
+                <h3><code>server.js</code></h3>
+                <pre><code class="language-javascript">import 'dotenv/config';
+import express from 'express';
+import aiRouter from './routers/aiRouter.js';
+
+const app = express();
+const PORT = process.env.PORT;
+
+app.use(express.json());
+app.use('/ai', aiRouter);
+
+app.listen(PORT, (error) => {
+    if (error) {
+        console.error(error);
+    } else {
+        console.log(`Server in ascolto sulla porta ${PORT}`);
+    }
+});</code></pre>
+
+                <h3><code>routers/aiRouter.js</code> — GET <code>/ai</code></h3>
+                <pre><code class="language-javascript">import { Router } from "express";
+import genericAgent from '../agents/generic.js';
+import { HumanMessage } from "langchain";
+
+const router = Router();
+
+// http://localhost:3000/ai?richiesta=Che tempo fa a Pisa
+router.get('/', async (req, res) => {
+    const richiesta = req.query.richiesta;
+
+    const response = await genericAgent.invoke({
+        messages: [new HumanMessage(richiesta)]
+    });
+
+    const responseText = response.messages.at(-1).content;
+
+    res.send(responseText);
+});
+
+export default router;</code></pre>
+                <p>Il dato arriva in <code>req.query.richiesta</code>, viene incapsulato in uno <code>HumanMessage</code> e passato all'agente Generico senza altre modifiche: la rotta fa solo da ponte tra HTTP e l'agente.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Avvia il server e prova la rotta dal browser con una domanda diversa nella query string, ad esempio una che faccia scattare il tool <code>get_weather</code> dell'agente Generico.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-text">http://localhost:3000/ai?richiesta=Che tempo fa a Milano in gradi Fahrenheit</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="rotta-post">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Express: la rotta POST <code>/ai/chat</code></h2>
+                </header>
+                <div class="note">
+                    <p>Con <code>express.json()</code> attivo, una rotta POST può leggere i dati dal corpo (<code>body</code>) della richiesta invece che dalla query string: è il formato più comodo per un client che invia un messaggio di chat.</p>
+                </div>
+                <p>Aggiungiamo alla stessa router una seconda rotta, questa volta POST, che riceve un JSON con il messaggio dell'utente e restituisce la risposta come JSON.</p>
+
+                <h3><code>routers/aiRouter.js</code> — POST <code>/ai/chat</code></h3>
+                <pre><code class="language-javascript">// http://localhost:3000/ai/chat
+// Corpo della richiesta:
+// { "message": "Ciao come stai" }
+router.post('/chat', async (req, res) => {
+    const datiIngresso = req.body;
+    const messaggioInIngresso = datiIngresso.message;
+
+    const messageFull = `
+Questa la richiesta che ti è stata fatta:
+${messaggioInIngresso}
+
+Rispondi in maniera testuale, evita Markdown.
+    `
+
+    const response = await genericAgent.invoke({
+        messages: [new HumanMessage(messageFull)]
+    });
+
+    const responseText = response.messages.at(-1).content;
+
+    res.json({
+        risposta: responseText
+    });
+});</code></pre>
+                <p>Le due rotte inoltrano entrambe la domanda allo stesso agente Generico: cambia solo da dove arriva il dato (query string per GET, corpo JSON per POST) e come viene restituita la risposta (testo semplice per GET, oggetto JSON per POST).</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Fai una chiamata POST a <code>http://localhost:3000/ai/chat</code> e prova a inviare nel corpo un dato, poi leggi la risposta JSON restituita.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-json">{
+    "message": "Consigliami un prodotto per lo smart working"
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="database-mock">
+                <header>
+                    <p class="index">Capitolo 9</p>
+                    <h2>Simulare un database con dati mock</h2>
+                </header>
+                <div class="note">
+                    <p>Prima di collegare un vero database, un semplice array esportato da un file JS basta per far ragionare l'agente su dati reali: i tool lo interrogano esattamente come farebbero con una query.</p>
+                </div>
+                <p>Creiamo <code>data/db.js</code>: un array di prodotti con identificativo, nome, descrizione e prezzo. È lo stesso ruolo che, più avanti, avrà una vera tabella su database: i tool non sanno (e non devono sapere) se i dati vengono da un array in memoria o da una query SQL.</p>
+
+                <h3><code>data/db.js</code></h3>
+                <pre><code class="language-javascript">const db = [
+    {
+        id: 1,
+        name: "Mouse Opale Air 5",
+        descrizione: "Mouse wireless leggero, precisione elevata, ideale per smart working e studio.",
+        price: 30.99
+    },
+    {
+        id: 2,
+        name: "Tastiera Pulsar Core Titanio",
+        descrizione: "Tastiera meccanica con switch hot-swap e telaio in alluminio spazzolato.",
+        price: 88.99
+    },
+    {
+        id: 3,
+        name: "Monitor Vortex One Lavanda",
+        descrizione: "Monitor con tempo di risposta di 1 ms e supporto ergonomico regolabile.",
+        price: 271.49
+    },
+    {
+        id: 4,
+        name: "Cuffie Vortex Core 9",
+        descrizione: "Cuffie Bluetooth 5.3 multipoint con modalità trasparenza.",
+        price: 144.99
+    },
+    {
+        id: 5,
+        name: "Webcam Polaris Core Verde Salvia",
+        descrizione: "Webcam con copriobiettivo integrato e doppio microfono con riduzione del rumore.",
+        price: 110.99
+    },
+    {
+        id: 6,
+        name: "Stampante Prisma Max Rosso Corsa",
+        descrizione: "Stampante con display touch a colori e stampa fronte/retro automatica.",
+        price: 422.99
+    },
+    {
+        id: 7,
+        name: "Router Ossidiana Plus Blu Oceano",
+        descrizione: "Router Wi-Fi con copertura estesa e gestione da app.",
+        price: 134.99
+    },
+    {
+        id: 8,
+        name: "Supporto Laptop Vortex Core 7",
+        descrizione: "Supporto regolabile in alluminio per migliorare postura e dissipazione del calore.",
+        price: 46.90
+    }
+    // ... altri prodotti
+];
+
+export default db;</code></pre>
+                <p>
+                    Per esercitarti con un catalogo più realistico (e con tutti i dati usati nel capitolo finale sui microfoni),
+                    scarica il file <a href="assets/downloads/db-store-completo.js" download>db-store-completo.js</a>: 1000
+                    prodotti generati proceduralmente, con lo stesso formato <code>{ id, name, descrizione, price }</code>.
+                    Basta sostituirlo al posto del tuo <code>data/db.js</code>.
+                </p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi un nuovo prodotto all'array mock, con un <code>id</code> univoco e tutti i campi richiesti.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">{
+    id: 9,
+    name: "Microfono Aquila Ultra Bianco Artico",
+    descrizione: "Microfono USB-C con registrazione a 24 bit/96 kHz e controllo del guadagno integrato.",
+    price: 242.99
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="tool-get-products">
+                <header>
+                    <p class="index">Capitolo 10</p>
+                    <h2>Tool <code>getProducts()</code>: dalla lista completa ai dati alleggeriti</h2>
+                </header>
+                <div class="note">
+                    <p>Il modello non ha bisogno di ricevere tutti i campi di ogni prodotto per rispondere: meno dati nel contesto significano risposte più veloci ed economiche.</p>
+                </div>
+                <p>Una prima versione, la più semplice, restituisce l'intero array così com'è:</p>
+                <pre><code class="language-javascript">async function getProductsFunction({}) {
+    // Versione naive: passiamo TUTTI i campi di TUTTI i prodotti
+    return JSON.stringify(products);
+}</code></pre>
+                <p>Funziona, ma è sprecato: se lo store ha centinaia di prodotti, ognuno con una lunga descrizione, il modello riceve nel contesto molti più dati di quanti gliene servano solo per capire quali prodotti esistono. Alleggeriamo la risposta con una <code>map</code> che tiene solo <code>id</code> e <code>name</code>:</p>
+
+                <h3><code>tools/getProducts.js</code></h3>
+                <pre><code class="language-javascript">import { tool } from 'langchain';
+import products from '../data/db.js';
+import { z } from 'zod';
+
+const schema = z.object({});
+
+async function getProductsFunction({}) {
+    const productsLight = products.map(product => {
+        return {
+            id: product.id,
+            name: product.name
+        };
+    });
+
+    return JSON.stringify(productsLight);
+}
+
+const getProducts = tool(getProductsFunction, {
+    name: "get_products",
+    description: "Tool da utilizzare per ottenere informazioni sui prodotti dello store",
+    schema
+});
+
+export { getProducts };</code></pre>
+                <p>Lo schema è un <code>z.object({})</code> vuoto: questo tool non ha bisogno di nessun parametro in input, restituisce sempre l'intera lista alleggerita.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Modifica <code>getProducts</code> per includere anche il campo <code>price</code> nella versione alleggerita, insieme a <code>id</code> e <code>name</code>.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">const productsLight = products.map(product => {
+    return {
+        id: product.id,
+        name: product.name,
+        price: product.price
+    };
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="tool-get-product-info">
+                <header>
+                    <p class="index">Capitolo 11</p>
+                    <h2>Tool <code>getProductInfo(id)</code>: il dettaglio del prodotto</h2>
+                </header>
+                <div class="note">
+                    <p>Quando l'agente ha già scelto <em>quale</em> prodotto interessa (tramite il suo <code>id</code>), può chiedere il dettaglio completo: qui i dati alleggeriti non bastano più.</p>
+                </div>
+                <p>A differenza di <code>getProducts</code>, questo tool richiede un parametro (<code>id</code>) e restituisce <strong>tutti</strong> i campi del singolo prodotto trovato, descrizione compresa.</p>
+
+                <h3><code>tools/getProductInfo.js</code></h3>
+                <pre><code class="language-javascript">import { tool } from 'langchain';
+import products from '../data/db.js';
+import { z } from 'zod';
+
+const schema = z.object({
+    id: z.number().describe("l'ID del prodotto di cui vuoi informazioni")
+});
+
+async function getProductinfoFunction({ id }) {
+    const productFind = products.find((product) => {
+        return product.id === id;
+    });
+
+    if (productFind) {
+        return JSON.stringify(productFind);
+    } else {
+        return 'Nessun prodotto trovato';
+    }
+}
+
+const getProductInfo = tool(getProductinfoFunction, {
+    name: "get_product_info",
+    description: "Tool da utilizzare per ottenere informazioni sul singolo prodotto dello store",
+    schema
+});
+
+export { getProductInfo };</code></pre>
+                <p>Il flusso tipico è quindi in due passi: prima l'agente chiama <code>get_products</code> per vedere la lista leggera, poi chiama <code>get_product_info</code> con l'<code>id</code> del prodotto scelto per averne i dettagli completi.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Gestisci il caso in cui l'agente passa un <code>id</code> che non esiste nell'array, restituendo un messaggio d'errore chiaro che indichi anche l'id cercato.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">if (productFind) {
+    return JSON.stringify(productFind);
+} else {
+    return `Nessun prodotto trovato con id ${id}`;
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="tool-search-product">
+                <header>
+                    <p class="index">Capitolo 12</p>
+                    <h2>Tool <code>searchProduct()</code>: la ricerca per nome</h2>
+                </header>
+                <div class="note">
+                    <p>Quando l'utente non conosce l'<code>id</code> ma solo (parte del) nome del prodotto, serve un tool di ricerca: filtra per corrispondenza parziale, senza distinguere maiuscole e minuscole.</p>
+                </div>
+                <p>Come <code>getProducts</code>, anche questo tool restituisce solo <code>id</code> e <code>name</code> dei prodotti trovati: l'agente userà poi <code>get_product_info</code> se avrà bisogno del dettaglio completo di uno di questi risultati.</p>
+
+                <h3><code>tools/searchProduct.js</code></h3>
+                <pre><code class="language-javascript">import { tool } from 'langchain';
+import products from '../data/db.js';
+import { z } from 'zod';
+
+const schema = z.object({
+    nameSearch: z.string().describe("il nome del prodotto da cercare")
+});
+
+async function searchProductFunction({ nameSearch }) {
+    const productsFound = products
+        .filter(product => {
+            return product.name.toLocaleLowerCase().includes(nameSearch.toLocaleLowerCase());
+        })
+        .map(product => {
+            return {
+                id: product.id,
+                name: product.name
+            };
+        });
+
+    if (productsFound.length === 0) {
+        return 'Nessun prodotto trovato';
+    } else {
+        return JSON.stringify(productsFound);
+    }
+}
+
+const searchProduct = tool(searchProductFunction, {
+    name: "search_product",
+    description: "Tool da utilizzare per cercare un prodotto nello store in base al nome",
+    schema
+});
+
+export { searchProduct };</code></pre>
+                <p><code>toLocaleLowerCase()</code> viene applicato su entrambi i lati del confronto, così la ricerca funziona indipendentemente da come l'utente scrive il nome (maiuscolo, minuscolo o misto).</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Modifica <code>searchProduct</code> per restituire anche il campo <code>price</code> insieme a <code>id</code> e <code>name</code> nei risultati trovati.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-javascript">.map(product => {
+    return {
+        id: product.id,
+        name: product.name,
+        price: product.price
+    };
+});</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="agente-generico-completo">
+                <header>
+                    <p class="index">Capitolo 13</p>
+                    <h2>Collegare tutti i tool all'agente Generico</h2>
+                </header>
+                <div class="note">
+                    <p>Con i quattro tool pronti, colleghiamoli tutti insieme all'agente Generico: sarà lui a decidere, di volta in volta, quale usare (o quanti, in sequenza) per rispondere.</p>
+                </div>
+                <p>Nell'agente Generico visto nel capitolo sulla struttura delle cartelle mancava ancora <code>getProducts</code>. Aggiungiamolo: l'agente Generico avrà così tutti e quattro i tool a disposizione.</p>
+
+                <h3><code>agents/generic.js</code> — versione completa</h3>
+                <pre><code class="language-javascript">import { createAgent } from "langchain";
+import anthropicModel from '../models/anthropic.js';
+import { getWeather } from '../tools/getWeather.js';
+import { getProducts } from '../tools/getProducts.js';
+import { getProductInfo } from '../tools/getProductInfo.js';
+import { searchProduct } from '../tools/searchProduct.js';
+
+const genericAgent = createAgent({
+    model: anthropicModel,
+    tools: [
+        getWeather,
+        getProducts,
+        getProductInfo,
+        searchProduct,
+    ],
+});
+
+export default genericAgent;</code></pre>
+
+                <h3>Proviamo la rotta</h3>
+                <p>Fai una chiamata POST a <code>http://localhost:3000/ai/chat</code> e prova a inviare nel corpo il seguente dato:</p>
+                <pre><code class="language-json">{
+    "message": "Dimmi il prezzo di tutti i tuoi microfoni del tuo negozio"
+}</code></pre>
+
+                <h3>Cosa succede dietro le quinte</h3>
+                <p>Nessuno dei quattro tool restituisce direttamente "tutti i microfoni con il prezzo": l'agente deve combinarli. Il ragionamento più probabile, passo dopo passo:</p>
+                <ol>
+                    <li><code>get_products</code> non basta: restituisce <code>id</code> e <code>name</code> di tutti i prodotti, ma non il prezzo.</li>
+                    <li>L'agente riconosce "microfoni" nella domanda e chiama <code>search_product</code> con <code>nameSearch: "microfono"</code>.</li>
+                    <li>Per rispondere con il prezzo di <strong>ciascun</strong> microfono, deve chiamare <code>get_product_info(id)</code> una volta per ogni risultato trovato.</li>
+                </ol>
+                <p>Eseguendo davvero questi tool sul database mock del negozio (1000 prodotti), il quadro è questo:</p>
+                <pre><code class="language-javascript">// 1. search_product({ nameSearch: "microfono" })
+// → 62 prodotti trovati, solo id e name:
+[
+    { id: 9, name: 'Microfono Aquila Ultra Bianco Artico' },
+    { id: 22, name: 'Microfono Onice Evo Sabbia' },
+    { id: 37, name: 'Microfono Luna Lite Titanio' },
+    { id: 38, name: 'Microfono Zenith Max 6' },
+    { id: 60, name: 'Microfono Phantom Studio Lavanda' }
+    // ... altri 57 risultati
+]
+
+// 2. get_product_info(id) chiamato una volta per ciascuno dei 62 id
+// → solo per i primi 5:
+[
+    { id: 9, name: 'Microfono Aquila Ultra Bianco Artico', price: 242.99 },
+    { id: 22, name: 'Microfono Onice Evo Sabbia', price: 107.99 },
+    { id: 37, name: 'Microfono Luna Lite Titanio', price: 49.99 },
+    { id: 38, name: 'Microfono Zenith Max 6', price: 205.49 },
+    { id: 60, name: 'Microfono Phantom Studio Lavanda', price: 172.99 }
+    // ... altri 57 prezzi
+]</code></pre>
+                <p><strong>62 chiamate a <code>get_product_info</code></strong> per una sola domanda dell'utente: la risposta richiederà diversi secondi (ogni tool call è un giro completo col modello) e un buon numero di token, prima che l'agente possa scrivere l'elenco finale con tutti i prezzi. A seconda del modello e dei limiti configurati, l'agente potrebbe anche fermarsi prima di arrivare al 62° prodotto e riassumere quello che ha raccolto.</p>
+                <p>È il rovescio della medaglia delle scelte fatte nei capitoli precedenti: alleggerire <code>search_product</code> a solo <code>id</code> e <code>name</code> è ottimo quando poi serve il dettaglio di <strong>un</strong> prodotto, ma diventa costoso quando serve un singolo dato (qui il prezzo) per <strong>molti</strong> prodotti insieme.</p>
+                <p><strong>Suggerimento per osservare il fenomeno dal vivo:</strong> aggiungi temporaneamente un <code>console.log</code> dentro <code>searchProductFunction</code> e <code>getProductinfoFunction</code>: nel terminale del server vedrai comparire una riga per ogni chiamata, ed è un modo immediato per "contare" quante volte l'agente ha usato ciascun tool.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Applica all'esercizio del capitolo precedente (<code>searchProduct</code> che restituisce anche <code>price</code>) e rifai la stessa domanda sui microfoni. Quante chiamate a <code>get_product_info</code> dovrebbero servire adesso?</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <p>Nessuna. Se <code>search_product</code> restituisce già <code>id</code>, <code>name</code> e <code>price</code>, una sola chiamata a <code>search_product({ nameSearch: "microfono" })</code> basta per rispondere: l'agente non ha più bisogno di <code>get_product_info</code> per questa domanda.</p>
+                            <pre><code class="language-javascript">async function searchProductFunction({ nameSearch }) {
+    const productsFound = products
+        .filter(product => {
+            return product.name.toLocaleLowerCase().includes(nameSearch.toLocaleLowerCase());
+        })
+        .map(product => {
+            return {
+                id: product.id,
+                name: product.name,
+                price: product.price
+            };
+        });
+
+    if (productsFound.length === 0) {
+        return 'Nessun prodotto trovato';
+    } else {
+        return JSON.stringify(productsFound);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

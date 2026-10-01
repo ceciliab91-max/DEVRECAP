@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript - Arrow Function e Metodi Array</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#arrow">Arrow function</a></li>
+                <li><a href="#foreach">forEach</a></li>
+                <li><a href="#map">map</a></li>
+                <li><a href="#find">find</a></li>
+                <li><a href="#filter">filter</a></li>
+                <li><a href="#some">some</a></li>
+                <li><a href="#every">every</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Arrow function e metodi degli array</h1>
+            <p class="intro">Concetto di base delle funzioni compatte, visibilita delle variabili e uso dei principali metodi sugli array.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="arrow">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Arrow function</h2>
+                </header>
+
+                <div class="note">
+                    <p>Una arrow function e una funzione scritta in forma compatta con <code>=&gt;</code>. Ha gli stessi elementi logici di una funzione classica: parametri, corpo della funzione e, quando serve, un valore restituito.</p>
+                </div>
+
+                <p>I <strong>parametri</strong> sono i valori in ingresso che la funzione riceve. Nella funzione classica si scrivono tra parentesi tonde dopo <code>function</code>; nella arrow function si scrivono nello stesso modo, ma senza la parola <code>function</code>. Se il parametro e uno solo, le parentesi tonde non sono obbligatorie e si possono omettere. Se i parametri sono piu di uno, le parentesi tonde restano necessarie. Se non ci sono parametri, le tonde sono comunque obbligatorie.</p>
+                <p>Il <strong>corpo della funzione</strong> e la parte che contiene le istruzioni da eseguire. Nella funzione classica il corpo sta dentro le graffe dopo le tonde. Anche nella arrow function si possono usare le graffe quando ci sono piu istruzioni. Se l'istruzione è una sola, il <code>return</code> diventa implicito: il valore dell'espressione viene restituito automaticamente e non serve scrivere <code>return</code>. Se invece il corpo contiene piu istruzioni e usi le graffe, allora <code>return</code> torna necessario per restituire un risultato.</p>
+                <p><code>return</code> serve a restituire un valore dalla funzione. Nella funzione classica si scrive dentro il corpo quando vuoi dare un risultato all'esterno. Nella arrow function, se il corpo è una sola espressione, il ritorno è implicito e <code>return</code> non serve. Se invece usi le graffe, <code>return</code> torna necessario.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">function calcolaSconto(prezzo) {
+    return prezzo * 0.9;
+}
+
+const calcolaScontoArrow = prezzo =&gt; prezzo * 0.9;
+
+console.log(calcolaSconto(50));
+console.log(calcolaScontoArrow(50));</code></pre>
+
+                <p>In questo esempio il parametro è <code>prezzo</code>. La funzione classica usa le tonde per il parametro, le graffe per il corpo e <code>return</code> per restituire il risultato. La arrow function scrive lo stesso parametro con sintassi piu breve e, siccome c'è una sola espressione, il <code>return</code> è implicito.</p>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi la stessa funzione in due modi: prima in forma classica e poi come arrow function. La funzione deve ricevere il prezzo di un prodotto e restituire il prezzo finale con il 22% di IVA.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">function prezzoFinale(prezzo) {
+    return prezzo * 1.22;
+}
+
+const prezzoFinaleArrow = prezzo =&gt; prezzo * 1.22;
+
+console.log(prezzoFinale(100));
+console.log(prezzoFinaleArrow(100));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="foreach">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>forEach</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>forEach</code> esegue una funzione su ogni elemento dell'array, senza creare un nuovo array. Si usa quando vuoi fare un'azione per ogni valore, per esempio stampare tutti i prodotti di una lista.</p>
+                </div>
+
+                <p><code>forEach</code> serve per percorrere un array e compiere un'azione su ogni elemento. Non restituisce un nuovo array, quindi è adatto quando vuoi solo leggere i valori, stamparli o aggiornare una variabile esterna. In un contesto reale puo essere usato per mostrare una lista di articoli, studenti o ordini.</p>
+                <p>La callback riceve ogni elemento uno alla volta e il metodo la esegue fino alla fine dell'array. Questo lo rende utile per operazioni di controllo o visualizzazione, quando non serve trasformare i dati.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const prodotti = ["penna", "quaderno", "zaino"];
+
+prodotti.forEach(prodotto =&gt; {
+    console.log(`Prodotto disponibile: ${prodotto}`);
+});</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dato l'array <code>["latte", "pane", "uova"]</code>, stampa ogni prodotto con il testo <code>Articolo presente:</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodotti = ["latte", "pane", "uova"];
+
+prodotti.forEach(prodotto =&gt; {
+    console.log(`Articolo presente: ${prodotto}`);
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="map">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>map</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>map</code> crea un nuovo array con lo stesso numero di elementi dell'originale. Ogni valore viene trasformato dalla callback e salvato nel nuovo array.</p>
+                </div>
+
+                <p><code>map</code> si usa quando vuoi trasformare ogni elemento di un array in un nuovo valore. Il risultato è sempre un nuovo array, utile quando devi modificare prezzi, formati o dati da mostrare in una pagina. L'array iniziale non viene cambiato.</p>
+                <p>Questo metodo è molto comune nei progetti reali, per esempio quando bisogna applicare un'imposta a una lista di prezzi o creare una versione piu leggibile di un elenco di oggetti.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const prezzi = [10, 20, 30];
+const prezziConIVA = prezzi.map(prezzo =&gt; prezzo * 1.22);
+
+console.log(prezziConIVA);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dato l'array dei prezzi <code>[15, 25, 35]</code>, crea un nuovo array con il prezzo scontato del 10%.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prezzi = [15, 25, 35];
+const scontati = prezzi.map(prezzo =&gt; prezzo * 0.9);
+
+console.log(scontati);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="find">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>find</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>find</code> restituisce il primo elemento che soddisfa una condizione. Se non trova nessun elemento valido, restituisce <code>undefined</code>.</p>
+                </div>
+
+                <p><code>find</code> serve quando devi cercare un solo elemento in un array. Controlla i valori uno alla volta e si ferma appena trova il primo che rispetta la condizione. È utile quando vuoi recuperare un prodotto specifico, un utente o un elemento con una certa caratteristica.</p>
+                <p>Dal punto di vista pratico, <code>find</code> è la scelta giusta quando non ti serve tutta la lista filtrata, ma solo il primo risultato utile.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const prodotti = ["penna", "quaderno", "zaino"];
+const trovato = prodotti.find(prodotto =&gt; prodotto === "quaderno");
+
+console.log(trovato);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dato l'array <code>["latte", "pane", "uova"]</code>, trova il primo prodotto che contiene la lettera <code>e</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const prodotti = ["latte", "pane", "uova"];
+const trovato = prodotti.find(prodotto =&gt; prodotto.includes("e"));
+
+console.log(trovato);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="filter">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>filter</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>filter</code> crea un nuovo array con solo gli elementi che rispettano la condizione. Controlla tutti i valori e conserva quelli validi.</p>
+                </div>
+
+                <p><code>filter</code> si usa quando vuoi selezionare solo alcuni elementi di un array. Il risultato è un nuovo array che contiene esclusivamente i valori che superano il controllo. Questo metodo è perfetto per separare elementi validi, importanti o sopra una certa soglia.</p>
+                <p>In un caso reale puoi usarlo per tenere solo i prodotti disponibili, gli studenti promossi o gli ordini sopra un certo importo.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const ordini = [12, 18, 7, 30];
+const ordiniValidi = ordini.filter(importo =&gt; importo &gt;= 10);
+
+console.log(ordiniValidi);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Dato l'array <code>[4, 9, 12, 3]</code>, crea un nuovo array con solo i numeri maggiori o uguali a 5.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const numeri = [4, 9, 12, 3];
+const filtrati = numeri.filter(numero =&gt; numero &gt;= 5);
+
+console.log(filtrati);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="some">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>some</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>some</code> restituisce <code>true</code> se almeno un elemento rispetta la condizione. Appena trova un valore valido, si ferma.</p>
+                </div>
+
+                <p><code>some</code> serve per controllare se in un array esiste almeno un elemento che soddisfa una condizione. Il risultato è sempre un valore booleano: <code>true</code> o <code>false</code>. È utile quando ti basta sapere se qualcosa esiste, per esempio se c'è almeno un prodotto economico o un numero dispari.</p>
+                <p>Questo metodo è molto comodo nei controlli rapidi, perché evita di analizzare tutto l'array quando il primo elemento valido è gia sufficiente.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const prodotti = ["pasta", "sugo", "formaggio"];
+const esisteProdottoSenzaGlutine = prodotti.some(prodotto =&gt; prodotto === "pasta");
+
+console.log(esisteProdottoSenzaGlutine);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Verifica se nell'array <code>[2, 4, 7]</code> esiste almeno un numero dispari.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const numeri = [2, 4, 7];
+const esisteDispari = numeri.some(numero =&gt; numero % 2 !== 0);
+
+console.log(esisteDispari);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="every">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>every</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>every</code> restituisce <code>true</code> solo se tutti gli elementi rispettano la condizione. Se anche un solo elemento non la rispetta, il risultato diventa <code>false</code>.</p>
+                </div>
+
+                <p><code>every</code> si usa quando vuoi controllare che tutta la lista rispetti una regola. Restituisce un valore booleano e permette di capire subito se l'array è completamente valido. È utile, per esempio, per verificare che tutti i prodotti abbiano un prezzo positivo o che tutti gli studenti siano presenti.</p>
+                <p>A differenza di <code>some</code>, che si ferma al primo elemento valido, <code>every</code> richiede che la condizione sia vera per tutti gli elementi.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">const etàClienti = [18, 22, 31];
+const tuttiMaggiorenni = etàClienti.every(età =&gt; età &gt;= 18);
+
+console.log(tuttiMaggiorenni);</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Controlla se tutti gli importi di <code>[20, 15, 18]</code> sono almeno 10 euro.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const importi = [20, 15, 18];
+const tuttiValidi = importi.every(importo =&gt; importo &gt;= 10);
+
+console.log(tuttiValidi);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio final</h3>
+                <p>Immagina un negozio online con una lista di prodotti: usa <code>forEach</code> per stampare i nomi, <code>map</code> per applicare uno sconto, <code>find</code> per cercare un prodotto specifico, <code>filter</code> per tenere solo quelli sopra una certa soglia, <code>some</code> per controllare se esiste almeno un prodotto economico e <code>every</code> per verificare che tutti i prezzi siano validi. Usa anche una arrow function per calcolare il totale di un prezzo scontato.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">const prodotti = [
+    { nome: "T-shirt", prezzo: 12 },
+    { nome: "Felpa", prezzo: 25 },
+    { nome: "Cappello", prezzo: 8 },
+    { nome: "Giacca", prezzo: 40 }
+];
+
+const applicaSconto = prezzo =&gt; prezzo * 0.9;
+
+prodotti.forEach(prodotto =&gt; {
+    console.log(`Prodotto disponibile: ${prodotto.nome}`);
+});
+
+const prodottiScontati = prodotti.map(prodotto =&gt; ({
+    nome: prodotto.nome,
+    prezzo: applicaSconto(prodotto.prezzo)
+}));
+
+const trovato = prodottiScontati.find(prodotto =&gt; prodotto.nome === "Felpa");
+const sopraDieci = prodottiScontati.filter(prodotto =&gt; prodotto.prezzo &gt; 10);
+const esisteEconomico = prodottiScontati.some(prodotto =&gt; prodotto.prezzo &lt; 10);
+const tuttiValidi = prodottiScontati.every(prodotto =&gt; prodotto.prezzo &gt; 0);
+const totale = prodottiScontati.reduce((accumulatore, prodotto) =&gt; accumulatore + prodotto.prezzo, 0);
+
+console.log(prodottiScontati);
+console.log(trovato);
+console.log(sopraDieci);
+console.log(esisteEconomico);
+console.log(tuttiValidi);
+console.log(totale);</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

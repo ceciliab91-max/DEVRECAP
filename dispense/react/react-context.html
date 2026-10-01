@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>React Context - Dispensa Didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">React Base</div>
+                <ul>
+                    <li><a href="#problema">Problema</a></li>
+                    <li><a href="#context">Context</a></li>
+                    <li><a href="#provider">Provider</a></li>
+                    <li><a href="#hook">Hook personalizzato</a></li>
+                    <li><a href="#componenti">Componenti</a></li>
+                    <li><a href="#quando">Quando usarlo</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>React Context</h1>
+                <p class="intro">Condividere un contatore tra componenti senza passare props inutili.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="problema">
+                    <header><p class="index">Capitolo 1</p><h2>Il problema: il prop drilling</h2></header>
+                    <div class="note"><p>Il <strong>prop drilling</strong> avviene quando una prop attraversa componenti che non la usano, solo per raggiungere quello che ne ha bisogno.</p></div>
+                    <p>In React i dati viaggiano normalmente dall'alto verso il basso: un componente padre passa una prop a un componente figlio. È un meccanismo semplice e preferibile quando i componenti sono vicini nell'albero.</p>
+                    <p>Immagina però un contatore: <code>Total</code> deve leggere il valore, mentre <code>Click</code> deve aggiornarlo. Senza Context, lo stato dovrebbe vivere in <code>App</code> ed essere passato come prop ai componenti interessati.</p>
+                    <pre><code class="language-jsx">function App() {
+    const [counter, setCounter] = useState(0);
+
+    return (
+        &lt;&gt;
+            &lt;Total counter={counter} /&gt;
+            &lt;Click setCounter={setCounter} /&gt;
+        &lt;/&gt;
+    );
+}</code></pre>
+                    <p>Con due componenti questa soluzione è assolutamente valida. Il problema emerge quando, tra <code>App</code> e il componente che usa il dato, ci sono altri componenti. Questi ricevono prop che non gli servono e le inoltrano soltanto: il codice diventa più rumoroso e ogni modifica alla struttura dell'app richiede di aggiornare più file.</p>
+                    <div class="exercise"><h3>Esercizio</h3><p>Quale valore serve a <code>Total</code> e quale a <code>Click</code>?</p><button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button><div class="panel"><p><code>Total</code> legge <code>counter</code>; <code>Click</code> usa <code>setCounter</code> per modificarlo.</p></div></div>
+                </section>
+
+                <section id="context">
+                    <header><p class="index">Capitolo 2</p><h2>Creare il Context</h2></header>
+                    <div class="note"><p>Un Context è un canale condiviso: il Provider inserisce un valore e i componenti al suo interno possono consumarlo.</p></div>
+                    <p>Context non è uno stato alternativo a <code>useState</code>: è un modo per rendere disponibile uno stato a più componenti. Nel nostro esempio lo stato continua a essere creato con <code>useState</code>; Context distribuisce il valore e la funzione che lo modifica.</p>
+                    <p>Creiamo il file <code>src/contexts/CounterContext.jsx</code>. <code>createContext()</code> crea il contesto che conterrà il contatore.</p>
+                    <pre><code class="language-jsx">import { createContext, useContext, useState } from "react";
+
+const CounterContext = createContext();</code></pre>
+                    <p>Il valore passato a <code>createContext()</code> è il valore di riserva, usato solo se un componente legge il Context senza trovarsi dentro il Provider. Qui non ne specifichiamo uno perché i nostri componenti devono essere usati esclusivamente dentro <code>CounterProvider</code>.</p>
+                    <p>Il contesto non viene esportato direttamente: esporteremo invece il Provider e un hook dedicato, così i componenti avranno un modo semplice e coerente per usarlo.</p>
+                </section>
+
+                <section id="provider">
+                    <header><p class="index">Capitolo 3</p><h2>CounterProvider: stato e condivisione</h2></header>
+                    <div class="note"><p>Il Provider deve avvolgere i componenti che devono leggere o aggiornare il valore condiviso.</p></div>
+                    <p>Un Provider è un normale componente React. Riceve automaticamente la prop speciale <code>children</code>, cioè tutto ciò che scriviamo tra il tag di apertura e quello di chiusura. In questo caso, <code>children</code> saranno <code>Total</code> e <code>Click</code>.</p>
+                    <p><code>CounterProvider</code> conserva lo stato con <code>useState(0)</code> e passa sia <code>counter</code> sia <code>setCounter</code> nel valore del Provider. Mettiamo i due valori in un oggetto perché i componenti possano estrarre solo ciò che serve loro.</p>
+                    <pre><code class="language-jsx">const CounterProvider = ({ children }) =&gt; {
+    const [counter, setCounter] = useState(0);
+
+    return (
+        &lt;CounterContext.Provider value={{ counter, setCounter }}&gt;
+            {children}
+        &lt;/CounterContext.Provider&gt;
+    );
+};</code></pre>
+                    <p>Ogni volta che <code>setCounter</code> cambia lo stato, il Provider riceve un nuovo valore. React aggiorna quindi tutti i componenti che stanno consumando quel Context: non occorre inviare manualmente nuove props.</p>
+                    <div class="exercise"><h3>Esercizio</h3><p>Perché nel <code>value</code> inseriamo sia <code>counter</code> sia <code>setCounter</code>?</p><button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button><div class="panel"><p>Per permettere ai componenti di leggere il valore attuale e di aggiornarlo.</p></div></div>
+                </section>
+
+                <section id="hook">
+                    <header><p class="index">Capitolo 4</p><h2>Un hook per consumare il Context</h2></header>
+                    <div class="note"><p>Un hook personalizzato nasconde il dettaglio di <code>useContext(CounterContext)</code> dietro un nome più chiaro: <code>useCount</code>.</p></div>
+                    <p><code>useContext</code> riceve il Context e restituisce il valore del Provider più vicino nell'albero. Per convenzione, gli hook personalizzati iniziano con <code>use</code>; questo comunica a React e a chi legge il codice che la funzione usa un hook.</p>
+                    <p>Raccogliere <code>useContext(CounterContext)</code> dentro <code>useCount</code> ha un vantaggio pratico: se in futuro cambiamo il modo di gestire il contatore, i componenti <code>Total</code> e <code>Click</code> continuano a usare la stessa interfaccia.</p>
+                    <p>Completiamo ed esportiamo il file <code>src/contexts/CounterContext.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { createContext, useContext, useState } from "react";
+
+const CounterContext = createContext();
+
+const CounterProvider = ({ children }) =&gt; {
+    const [counter, setCounter] = useState(0);
+
+    return (
+        &lt;CounterContext.Provider value={{ counter, setCounter }}&gt;
+            {children}
+        &lt;/CounterContext.Provider&gt;
+    );
+};
+
+function useCount() {
+    return useContext(CounterContext);
+}
+
+export { CounterProvider, useCount };</code></pre>
+                </section>
+
+                <section id="componenti">
+                    <header><p class="index">Capitolo 5</p><h2>Usare il contatore nei componenti</h2></header>
+                    <p>In <code>App</code>, <code>CounterProvider</code> avvolge <code>Total</code> e <code>Click</code>. La posizione è importante: solo i discendenti del Provider possono usare <code>useCount</code>. I due componenti non ricevono props.</p>
+                    <p>File <code>src/App.jsx</code>:</p>
+                    <pre><code class="language-jsx">import Click from "./components/Click"
+import Total from "./components/Total"
+import { CounterProvider } from "./contexts/CounterContext"
+
+export default function App() {
+    return (
+        &lt;CounterProvider&gt;
+            &lt;Total /&gt;
+            &lt;Click /&gt;
+        &lt;/CounterProvider&gt;
+    );
+}</code></pre>
+                    <p><code>Total</code> legge soltanto <code>counter</code>. Destrutturare solo il valore necessario rende evidente la responsabilità del componente: visualizzare il totale, senza modificarlo.</p>
+                    <p>File <code>src/components/Total.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { useCount } from "../contexts/CounterContext";
+
+export default function Total() {
+    const { counter } = useCount();
+
+    return &lt;h1&gt;{counter}&lt;/h1&gt;;
+}</code></pre>
+                    <p><code>Click</code>, al contrario, usa soltanto <code>setCounter</code>. Nella funzione di aggiornamento scriviamo <code>current =&gt; current + 1</code>: React fornisce sempre il valore più recente dello stato. Questa forma è preferibile quando il nuovo valore dipende da quello precedente.</p>
+                    <p>File <code>src/components/Click.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { useCount } from "../contexts/CounterContext";
+
+export default function Click() {
+    const { setCounter } = useCount();
+
+    return (
+        &lt;button onClick={() =&gt; setCounter(current =&gt; current + 1)}&gt;
+            Cliccami
+        &lt;/button&gt;
+    );
+}</code></pre>
+                    <div class="exercise"><h3>Esercizio</h3><p>Che cosa succede premendo il pulsante <em>Cliccami</em>?</p><button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button><div class="panel"><p><code>setCounter</code> riceve il valore corrente e restituisce il valore aumentato di uno. <code>Total</code> viene aggiornato e visualizza il nuovo numero.</p></div></div>
+                </section>
+
+                <section id="quando">
+                    <header><p class="index">Capitolo 6</p><h2>Quando usare Context</h2></header>
+                    <div class="note"><p>Usa Context per dati condivisi tra più componenti; usa props e stato locale quando il dato ha pochi destinatari.</p></div>
+                    <p>Context è utile per dati come utente autenticato, lingua, tema o stato condiviso in vari punti dell'app. In questo esempio evita di passare il contatore e la sua funzione di aggiornamento come props.</p>
+                    <p>Non è necessario creare un Context per ogni dato. Se uno stato è usato da un solo componente, <code>useState</code> locale resta la soluzione più semplice. Anche una prop passata a un figlio diretto è spesso più leggibile di un Context.</p>
+                    <p>È inoltre una buona pratica creare Context piccoli e con una responsabilità chiara: un <code>CounterContext</code> per il contatore, un eventuale <code>ThemeContext</code> per il tema e così via. Un unico Context enorme con dati non collegati rende più difficile capire da dove arrivano le informazioni.</p>
+                    <p>Ricorda infine che quando cambia il valore di un Provider, React rivaluta i componenti che consumano quel Context. Per valori che cambiano molto spesso o per applicazioni molto grandi possono servire altre tecniche di ottimizzazione; nella maggior parte delle interfacce, però, Context è una soluzione chiara e sufficiente.</p>
+                </section>
+
+                <section class="task">
+                    <h3>Esercizio finale</h3>
+                    <p>Aggiungi un secondo pulsante <code>Sottrai</code> che diminuisca il contatore di uno. Deve usare <code>useCount</code> e non deve ricevere props.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel"><pre><code class="language-jsx">import { useCount } from "../contexts/CounterContext";
+
+export default function Subtract() {
+    const { setCounter } = useCount();
+
+    return (
+        &lt;button onClick={() =&gt; setCounter(current =&gt; current - 1)}&gt;
+            Sottrai
+        &lt;/button&gt;
+    );
+}</code></pre></div>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

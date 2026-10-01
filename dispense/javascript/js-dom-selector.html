@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selezione del DOM ed eventi - Dispensa didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#metodi-classici">Metodi classici</a></li>
+                <li><a href="#query-metodi">Query methods</a></li>
+                <li><a href="#eventi">Eventi</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Selezione elementi e gestione eventi</h1>
+            <p class="intro">Metodi per selezionare elementi del DOM e per gestire gli eventi.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="metodi-classici">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Metodi classici per selezionare elementi</h2>
+                </header>
+
+                <div class="note">
+                    <p>Questi metodi sono stati molto usati per lavorare con il DOM: <code>getElementById</code>, <code>getElementsByClassName</code>, <code>getElementsByTagName</code> e <code>getElementsByName</code>.</p>
+                </div>
+
+                <p><code>getElementById</code> recupera un solo elemento usando il suo <code>id</code>. <code>getElementsByClassName</code> restituisce tutti gli elementi che hanno una certa classe, <code>getElementsByTagName</code> raccoglie tutti i tag con lo stesso nome e <code>getElementsByName</code> cerca gli elementi che condividono lo stesso attributo <code>name</code>.</p>
+                <p>Questi metodi sono ancora validi, ma oggi molti casi si risolvono in modo più comodo con <code>querySelector</code> e <code>querySelectorAll</code>, che sono diventati i metodi più pratici da usare perché seguono la logica dei selettori CSS. Nel capitolo successivo questi due metodi vengono mostrati come alternativa moderna ai metodi classici.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-html">&lt;h1 id="titolo"&gt;Titolo della pagina&lt;/h1&gt;
+&lt;div class="box"&gt;Primo box&lt;/div&gt;
+&lt;div class="box"&gt;Secondo box&lt;/div&gt;
+&lt;p&gt;Un paragrafo di testo.&lt;/p&gt;
+&lt;input type="text" name="nome"&gt;</code></pre>
+
+                <pre><code class="language-javascript">const titolo = document.getElementById('titolo'); // restituisce un elemento
+const elementiBox = document.getElementsByClassName('box'); // restituisce un array di elementi
+const paragrafi = document.getElementsByTagName('p'); // restituisce un array di elementi
+const campiNome = document.getElementsByName('nome'); // restituisce un array di elementi
+</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un codice che recuperi un elemento con <code>id</code>, tutti gli elementi con una classe, tutti i paragrafi e tutti i campi con lo stesso <code>name</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;h1 id="titolo"&gt;Titolo&lt;/h1&gt;
+&lt;div class="box"&gt;Box&lt;/div&gt;
+&lt;p&gt;Paragrafo&lt;/p&gt;
+&lt;input name="nome"&gt;</code></pre>
+                        <pre><code class="language-javascript">const titolo = document.getElementById('titolo');
+const box = document.getElementsByClassName('box');
+const paragrafi = document.getElementsByTagName('p');
+const campi = document.getElementsByName('nome');</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="query-metodi">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>I metodi moderni di selezione</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>querySelector</code> e <code>querySelectorAll</code> sono due metodi introdotti per selezionare gli elementi in modo più flessibile, usando la stessa sintassi dei selettori CSS.</p>
+                </div>
+
+                <p><code>querySelector</code> restituisce il primo elemento che corrisponde al selettore scelto. <code>querySelectorAll</code> restituisce invece tutti gli elementi che corrispondono al selettore e permette di lavorare con una lista di risultati da attraversare con un ciclo.</p>
+                <p>Con questi due metodi si può cercare quasi tutto: un tag, una classe, un id, un figlio dentro un contenitore o un insieme di elementi con la stessa caratteristica. Per questo, nella pratica, sostituiscono spesso i metodi classici mostrati nel capitolo precedente.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-html">&lt;h1&gt;Titolo principale&lt;/h1&gt;
+&lt;button id="salva"&gt;Salva modifiche&lt;/button&gt;
+&lt;div class="scheda"&gt;Scheda 1&lt;/div&gt;
+&lt;div class="scheda"&gt;Scheda 2&lt;/div&gt;</code></pre>
+
+                <pre><code class="language-javascript">const titolo = document.querySelector('h1'); // restituisce un elemento
+const pulsante = document.querySelector('#salva'); // restituisce un elemento
+const schede = document.querySelectorAll('.scheda'); // restituisce un array di elementi
+
+if (pulsante) {
+    pulsante.addEventListener('click', () => {
+        console.log('Click sul pulsante');
+    });
+}
+
+for (let i = 0; i < schede.length; i++) {
+    console.log(schede[i]);
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Seleziona il primo titolo della pagina con <code>querySelector</code> e tutti gli elementi con classe <code>scheda</code> con <code>querySelectorAll</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;h1&gt;Titolo&lt;/h1&gt;
+&lt;div class="scheda"&gt;Elemento&lt;/div&gt;</code></pre>
+                        <pre><code class="language-javascript">const titolo = document.querySelector('h1');
+const schede = document.querySelectorAll('.scheda');</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="eventi">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Ascoltare gli eventi principali</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un evento è un'azione che accade nella pagina, per esempio un click, la pressione di un tasto o la modifica di un campo.</p>
+                </div>
+
+                <p>Con <code>addEventListener</code> si collega una funzione a un evento in modo ordinato e riutilizzabile. Di seguito la tabella degli eventi più comuni:</p>
+
+                                <table>
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Descrizione</th>
+                            <th>Elementi comuni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>click</code></td>
+                            <td>L'utente preme e rilascia il mouse su un elemento.</td>
+                            <td>Tutti (button, a, div, etc.)</td>
+                        </tr>
+                        <tr>
+                            <td><code>submit</code></td>
+                            <td>Viene inviato un modulo (form).</td>
+                            <td>form</td>
+                        </tr>
+                        <tr>
+                            <td><code>change</code></td>
+                            <td>Il valore di un elemento di input è cambiato.</td>
+                            <td>input, select, textarea</td>
+                        </tr>
+                        <tr>
+                            <td><code>input</code></td>
+                            <td>Il valore viene modificato (anche durante la digitazione).</td>
+                            <td>input, textarea</td>
+                        </tr>
+                        <tr>
+                            <td><code>focus</code></td>
+                            <td>Un elemento riceve il focus (es. cliccandoci dentro).</td>
+                            <td>input, a, button</td>
+                        </tr>
+                        <tr>
+                            <td><code>blur</code></td>
+                            <td>Un elemento perde il focus.</td>
+                            <td>input, a, button</td>
+                        </tr>
+                        <tr>
+                            <td><code>keydown</code></td>
+                            <td>L'utente preme un tasto sulla tastiera.</td>
+                            <td>document, input</td>
+                        </tr>
+                        <tr>
+                            <td><code>keyup</code></td>
+                            <td>L'utente rilascia un tasto sulla tastiera.</td>
+                            <td>document, input</td>
+                        </tr>
+                        <tr>
+                            <td><code>mouseover</code></td>
+                            <td>Il puntatore del mouse entra in un elemento.</td>
+                            <td>Tutti</td>
+                        </tr>
+                        <tr>
+                            <td><code>mouseout</code></td>
+                            <td>Il puntatore del mouse esce da un elemento.</td>
+                            <td>Tutti</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-html">&lt;button&gt;Clicca qui&lt;/button&gt;
+&lt;input type="text" id="nome" placeholder="Inserisci nome"&gt;</code></pre>
+
+                <pre><code class="language-javascript">const pulsante = document.querySelector('button');
+const campoNome = document.querySelector('#nome');
+
+pulsante.addEventListener('click', () => {
+    console.log('Pulsante premuto');
+});
+
+campoNome.addEventListener('keydown', () => {
+    console.log('Tasto premuto');
+});
+
+campoNome.addEventListener('change', () => {
+    console.log('Valore cambiato');
+});</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Collega un evento <code>click</code> a un pulsante e un evento <code>change</code> a un campo di input.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;button&gt;Pulsante&lt;/button&gt;
+&lt;input id="nome"&gt;</code></pre>
+                        <pre><code class="language-javascript">const pulsante = document.querySelector('button');
+const input = document.querySelector('#nome');
+
+pulsante.addEventListener('click', () => {
+    console.log('Hai cliccato il pulsante');
+});
+
+input.addEventListener('change', () => {
+    console.log('Valore modificato');
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task" id="esercizio-final">
+                <h3>Esercizio finale</h3>
+                <p>Crea una pagina con un titolo, un campo di input e un pulsante. Seleziona il titolo e l'input e collega l'evento <code>click</code> al pulsante e <code>change</code> all'input.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-html">&lt;h1 id="titolo"&gt;Titolo Pagina&lt;/h1&gt;
+&lt;div class="scheda"&gt;Scheda A&lt;/div&gt;
+&lt;div class="scheda"&gt;Scheda B&lt;/div&gt;
+&lt;input type="text" id="nome"&gt;
+&lt;button&gt;Invia&lt;/button&gt;</code></pre>
+                    <pre><code class="language-javascript">const titolo = document.querySelector('#titolo');
+const schede = document.querySelectorAll('.scheda');
+const pulsante = document.querySelector('button');
+const input = document.querySelector('#nome');
+
+for (let i = 0; i < schede.length; i++) {
+    console.log(schede[i]);
+}
+
+pulsante.addEventListener('click', () => {
+    console.log(titolo);
+});
+
+input.addEventListener('change', () => {
+    console.log('Input modificato');
+});</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

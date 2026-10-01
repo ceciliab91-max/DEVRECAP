@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express e React: usare API in locale - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body><a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + React</div>
+            <ul>
+                <li><a href="#workspace">Workspace</a></li>
+                <li><a href="#script">Script</a></li>
+                <li><a href="#idea">Flusso</a></li>
+                <li><a href="#backend">API</a></li>
+                <li><a href="#fetch">Fetch</a></li>
+                <li><a href="#render">Interfaccia</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Express e React: API in locale</h1>
+            <p class="intro">Usare in un progetto React le API create con Express, mentre entrambi i server funzionano
+                sul proprio computer, organizzati in un unico workspace pnpm: il progetto <code>catalogo</code>.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="workspace">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Preparare il progetto: un workspace pnpm</h2>
+                </header>
+                <p>Backend e frontend sono due progetti diversi, ciascuno con il proprio <code>package.json</code> e le
+                    proprie dipendenze. Invece di tenerli in due cartelle sparse, li mettiamo dentro un'unica cartella
+                    principale: un <strong>workspace</strong> (spesso chiamato anche <strong>monorepo</strong>).</p>
+                <div class="note">
+                    <p>Un <strong>workspace</strong> è una cartella che contiene più progetti gestiti insieme da pnpm.
+                        Ogni progetto resta indipendente, ma possiamo installare le dipendenze e avviare tutto dalla
+                        cartella principale.</p>
+                </div>
+                <pre><code class="language-text">catalogo/
+├── package.json              ← script che avviano backend e frontend
+├── pnpm-workspace.yaml       ← elenca i progetti del workspace
+├── pnpm-lock.yaml            ← un solo lockfile per tutto il workspace
+├── backend/                  ← API Express (porta 3000)
+│   ├── package.json
+│   ├── server.js
+│   ├── routers/
+│   │   └── productsRouter.js
+│   └── data/
+│       └── db-store-completo.js
+└── frontend/                 ← React + Vite (porta 5173)
+    ├── package.json
+    └── src/
+        ├── main.jsx
+        └── App.jsx</code></pre>
+                <h3>Creare la struttura</h3>
+                <p>Creiamo la cartella principale e il progetto Express nella sottocartella <code>backend</code>.</p>
+                <pre><code class="language-bash">mkdir catalogo
+cd catalogo
+pnpm init
+
+mkdir backend
+cd backend
+pnpm init
+cd ..</code></pre>
+                <p>Sempre dalla cartella <code>catalogo</code> creiamo il progetto React con Vite nella sottocartella
+                    <code>frontend</code>.</p>
+                <pre><code class="language-bash">pnpm create vite frontend --template react</code></pre>
+                <h3>Dire a pnpm quali progetti fanno parte del workspace</h3>
+                <p>Nella cartella principale crea il file <code>pnpm-workspace.yaml</code>. Ogni voce di
+                    <code>packages</code> è una cartella che contiene un progetto.</p>
+                <pre><code class="language-yaml"># catalogo/pnpm-workspace.yaml
+packages:
+  - backend
+  - frontend</code></pre>
+                <p>Poi, sempre dalla cartella principale, installa le dipendenze di tutti i progetti con un solo
+                    comando.</p>
+                <pre><code class="language-bash">pnpm install</code></pre>
+                <p>pnpm crea un solo <code>pnpm-lock.yaml</code> nella cartella principale, ma ogni progetto vede solo
+                    le proprie dipendenze: in <code>frontend/node_modules</code> ci sono React e Vite, in
+                    <code>backend/node_modules</code> ci saranno Express e cors.</p>
+                <h3>Aggiungere una dipendenza</h3>
+                <p>Per installare un package entra nella cartella del progetto che lo usa e usa
+                    <code>pnpm add</code>, come hai sempre fatto. Installiamo così le dipendenze del backend.</p>
+                <pre><code class="language-bash">cd backend
+pnpm add express cors
+cd ..</code></pre>
+                <div class="note">
+                    <p>Se lanci <code>pnpm add</code> dalla cartella principale, pnpm si ferma con l'errore
+                        <code>ERR_PNPM_ADDING_TO_ROOT</code>: ti protegge dall'installare il package nel posto
+                        sbagliato. In alternativa puoi restare nella cartella principale e scrivere
+                        <code>pnpm --filter backend add nome-package</code>.</p>
+                </div>
+            </section>
+            <section id="script">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Gli script: avviare backend e frontend</h2>
+                </header>
+                <p>Nel <code>package.json</code> del backend controlla che ci sia <code>"type": "module"</code>, che
+                    permette di usare <code>import</code>, e aggiungi gli script <code>start</code> e <code>dev</code>.
+                    Il frontend creato con Vite ha già il suo script <code>dev</code>.</p>
+                <pre><code class="language-json">// catalogo/backend/package.json
+{
+  "name": "backend",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}</code></pre>
+                <p><code>start</code> avvia il server una volta; <code>dev</code> lo riavvia da solo ogni volta che
+                    salviamo un file.</p>
+                <h3>Avviare un solo progetto: <code>--filter</code></h3>
+                <p>Dalla cartella principale possiamo lanciare lo script di un progetto preciso con
+                    <code>--filter</code>, seguito dal <code>name</code> scritto nel suo <code>package.json</code>.
+                    Salviamo questi comandi come script della root.</p>
+                <pre><code class="language-json">// catalogo/package.json
+{
+  "name": "catalogo",
+  "type": "module",
+  "scripts": {
+    "back:dev": "pnpm --filter backend dev",
+    "front:dev": "pnpm --filter frontend dev"
+  }
+}</code></pre>
+                <pre><code class="language-bash">pnpm back:dev    # solo Express
+pnpm front:dev   # solo React</code></pre>
+                <p>Così servono due terminali, uno per server. Proviamo ad avviarli insieme.</p>
+                <h3>Avviare tutto: prima versione con <code>&amp;</code></h3>
+                <p>Nel terminale <code>&amp;</code> avvia un comando <strong>in background</strong> e passa subito al
+                    successivo: i due server partono insieme.</p>
+                <pre><code class="language-json">"all:dev_alt": "pnpm back:dev &amp; pnpm front:dev"</code></pre>
+                <div class="note">
+                    <p>Funziona, ma è una soluzione fragile: <code>&amp;</code> non esiste allo stesso modo su tutti i
+                        sistemi (su Windows con cmd non funziona) e, quando premi <code>Ctrl + C</code>, il processo in
+                        background può rimanere acceso e tenere occupata la porta 3000.</p>
+                </div>
+                <h3>Avviare tutto: la versione di pnpm</h3>
+                <p>pnpm sa già avviare lo stesso script in tutti i progetti del workspace.</p>
+                <pre><code class="language-json">"all:dev": "pnpm --parallel -r dev"</code></pre>
+                <p><code>-r</code> (recursive) esegue lo script <code>dev</code> in <strong>ogni</strong> progetto
+                    del workspace; <code>--parallel</code> li avvia <strong>contemporaneamente</strong>. Basta un solo
+                    terminale nella cartella principale:</p>
+                <pre><code class="language-bash">pnpm all:dev</code></pre>
+                <pre><code class="language-text">backend dev: Server running on port 3000
+frontend dev:   VITE ready
+frontend dev:   ➜  Local:   http://localhost:5173/</code></pre>
+                <p>Ogni riga del terminale è preceduta dal nome del progetto che l'ha scritta. Con
+                    <code>Ctrl + C</code> fermi entrambi i server.</p>
+                <div class="note">
+                    <p>Il <code>package.json</code> è JSON e non ammette commenti: per spiegare a cosa serve ogni
+                        script, scriviamo una tabella nel <code>README.md</code> della cartella principale.</p>
+                </div>
+            </section>
+            <section id="idea">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Due progetti, una comunicazione</h2>
+                </header>
+                <div class="note">
+                    <p>Express è il <strong>backend</strong>: espone API e restituisce dati. React è il
+                        <strong>frontend</strong>: chiede quei dati e costruisce l'interfaccia che l'utente vede.</p>
+                </div>
+                <p>Anche se stanno nello stesso workspace, i due progetti funzionano come due server separati. Vite avvia
+                    React su <code>http://localhost:5173</code>; Express avvia l'API su
+                    <code>http://localhost:3000</code>.</p>
+                <pre><code class="language-text">Browser
+  │
+  │ apre React: http://localhost:5173
+  ▼
+Frontend React
+  │
+  │ fetch('http://localhost:3000/products')
+  ▼
+API Express
+  │
+  ▼
+Risposta JSON</code></pre>
+                <p>Il frontend non legge direttamente i dati e non importa file del backend. Chiede i dati all'API
+                    Express con <code>fetch()</code>. Express può poi leggere MySQL, usare Prisma oppure, come oggi,
+                    restituire dati salvati in un file del server.</p>
+            </section>
+            <section id="backend">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>L'API dei prodotti</h2>
+                </header>
+                <h3>I dati</h3>
+                <p>Al posto del database usiamo un file JavaScript con 1000 prodotti: scarica
+                    <a href="assets/downloads/db-store-completo.js" download>db-store-completo.js</a> e salvalo in
+                    <code>backend/data/</code>. Ogni prodotto ha questa forma:</p>
+                <pre><code class="language-js">// backend/data/db-store-completo.js
+const db = [
+  {
+    id: 1,
+    name: "Mouse Opale Air 5",
+    descrizione: "Il Mouse Opale Air 5 nasce per chi vuole precisione assoluta...",
+    price: 30.99
+  },
+  // ...altri 999 prodotti
+];
+
+export default db;</code></pre>
+                <h3>Il router dei prodotti</h3>
+                <p>Come nelle lezioni su Express, le rotte di una risorsa stanno in un router dedicato. Il nome
+                    dell'import (<code>products</code>) lo scegliamo noi: l'<code>export default</code> si può importare
+                    con qualsiasi nome.</p>
+                <pre><code class="language-js">// backend/routers/productsRouter.js
+import { Router } from 'express';
+import products from '../data/db-store-completo.js';
+
+const router = Router();
+
+router.get('/', (req, res) =&gt; {
+  res.json({
+    success: true,
+    message: '',
+    data: products
+  });
+});
+
+export default router;</code></pre>
+                <p>La risposta non è l'array da solo, ma un oggetto con sempre la stessa forma:</p>
+                <ul>
+                    <li><code>success</code>: dice subito al frontend se l'operazione è andata a buon fine;</li>
+                    <li><code>message</code>: un testo da mostrare all'utente, utile soprattutto in caso di errore;</li>
+                    <li><code>data</code>: i dati veri e propri, qui l'array dei prodotti.</li>
+                </ul>
+                <p>Se tutte le rotte rispondono così, il frontend sa sempre dove trovare dati ed errori.</p>
+                <h3>Il server e CORS</h3>
+                <p>Le porte <code>5173</code> e <code>3000</code> sono <strong>origini diverse</strong>. Per sicurezza,
+                    il browser non permette a una pagina di leggere la risposta di un'altra origine, a meno che il
+                    server non dia il permesso. <strong>CORS</strong> è la configurazione con cui Express autorizza il
+                    frontend a leggere le sue risposte. Il package <code>cors</code> l'abbiamo già installato:
+                    registriamolo prima delle rotte.</p>
+                <pre><code class="language-js">// backend/server.js
+import express from 'express';
+import cors from 'cors';
+import productsRouter from './routers/productsRouter.js';
+
+const app = express();
+const port = 3000;
+
+app.use(cors());
+
+app.use('/products', productsRouter);
+
+app.listen(port, (error) =&gt; {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log(`Server running on port ${port}`);
+  }
+});</code></pre>
+                <p><code>app.use('/products', productsRouter)</code> monta il router su <code>/products</code>: la
+                    rotta <code>'/'</code> del router risponde quindi a <code>GET /products</code>.</p>
+                <p>In Express 5 la funzione passata a <code>app.listen()</code> riceve un eventuale
+                    <code>error</code>: per esempio, se la porta 3000 è già occupata lo stampiamo invece di scrivere
+                    "Server running".</p>
+                <div class="note">
+                    <p>Per la lezione <code>cors()</code> permette le richieste da tutte le origini. In un progetto
+                        pubblicato specificheremo l'indirizzo del frontend autorizzato.</p>
+                </div>
+                <div class="note">
+                    <p>Prima di scrivere codice React, controlla nel browser o in Postman che
+                        <code>GET http://localhost:3000/products</code> restituisca JSON. Postman non è un browser e non
+                        applica le regole CORS: se una richiesta funziona in Postman ma non in React, il problema è
+                        quasi sempre CORS.</p>
+                </div>
+            </section>
+            <section id="fetch">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Chiedere i dati da React</h2>
+                </header>
+                <p>Nel componente React usiamo <code>useState</code> per salvare i prodotti e <code>useEffect</code> per
+                    eseguire la richiesta quando il componente appare per la prima volta. L'indirizzo del server lo
+                    salviamo in una costante <code>API_URL</code>, così lo scriviamo una volta sola e aggiungiamo il
+                    percorso della risorsa quando serve.</p>
+                <pre><code class="language-jsx">// frontend/src/App.jsx
+import { useState, useEffect } from 'react';
+
+const API_URL = 'http://localhost:3000';
+
+function App() {
+  console.log('Render App');
+  const [products, setProducts] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch(`${API_URL}/products`)
+      .then((response) =&gt; response.json())
+      .then((jsonData) =&gt; setProducts(jsonData.data));
+  }, []);
+
+  return &lt;h1&gt;My Store&lt;/h1&gt;;
+}
+
+export default App;</code></pre>
+                <p><code>fetch()</code> invia la richiesta. La prima funzione <code>then()</code> trasforma la risposta
+                    in JSON; la seconda riceve l'oggetto <code>{ success, message, data }</code> e salva nello stato
+                    solo <code>jsonData.data</code>, cioè l'array. Quando chiamiamo <code>setProducts()</code>, React
+                    aggiorna il componente.</p>
+                <div class="note">
+                    <p>L'array vuoto <code>[]</code> in <code>useEffect</code> indica che la richiesta deve partire una
+                        sola volta, dopo il primo render. Senza <code>[]</code> si creerebbe un ciclo infinito:
+                        <code>fetch</code> → <code>setProducts()</code> → nuovo render → nuova <code>fetch</code>…</p>
+                </div>
+                <h3>Quante volte si esegue il componente?</h3>
+                <p>Il <code>console.log('Render App')</code> ci mostra ogni esecuzione del componente. Nella Console ne
+                    vediamo due: la prima con l'array vuoto, la seconda dopo <code>setProducts()</code>, quando
+                    arrivano i dati.</p>
+                <p>Con il <code>main.jsx</code> creato da Vite, invece, le stampe sono il doppio e nella scheda Network
+                    compaiono <strong>due</strong> richieste <code>GET /products</code>. Il motivo è
+                    <code>&lt;StrictMode&gt;</code>: in sviluppo esegue componenti ed effetti due volte per aiutarti a
+                    trovare bug. Per osservare il comportamento reale, nel progetto lo abbiamo tolto dal
+                    <code>render()</code>.</p>
+                <pre><code class="language-jsx">// frontend/src/main.jsx
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.jsx';
+
+createRoot(document.getElementById('root')).render(
+  &lt;App /&gt;,
+);</code></pre>
+                <div class="note">
+                    <p>Per rimetterlo basta avvolgere il componente:
+                        <code>render(&lt;StrictMode&gt;&lt;App /&gt;&lt;/StrictMode&gt;)</code>, con
+                        <code>import { StrictMode } from 'react'</code>. Togliere <code>StrictMode</code> non cambia nulla nella versione pubblicata, dove comunque non
+                        è attivo: nei progetti reali di solito si lascia, sapendo che in sviluppo la richiesta parte due
+                        volte.</p>
+                </div>
+                <p>Se l'URL è sbagliato, il server Express è spento o CORS non è configurato, apri gli strumenti per
+                    sviluppatori del browser: nella Console e nella scheda Network trovi l'errore della richiesta.</p>
+            </section>
+            <section id="render">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Mostrare i dati nell'interfaccia</h2>
+                </header>
+                <p>Abbiamo già i dati nello stato. Usiamo <code>map()</code> per creare, per ogni prodotto, un titolo e
+                    un paragrafo con la descrizione.</p>
+                <pre><code class="language-jsx">// frontend/src/App.jsx
+return (
+  &lt;&gt;
+    &lt;h1&gt;My Store&lt;/h1&gt;
+    {products.map((product) =&gt; {
+      return (
+        &lt;&gt;
+          &lt;h3&gt;{product.name}&lt;/h3&gt;
+          &lt;p&gt;{product.descrizione}&lt;/p&gt;
+        &lt;/&gt;
+      );
+    })}
+  &lt;/&gt;
+);</code></pre>
+                <p>La pagina inizialmente mostra solo il titolo; appena arriva la risposta dell'API, React mostra i 1000
+                    prodotti. Per restituire due elementi senza aggiungere un <code>&lt;div&gt;</code> usiamo un
+                    <strong>fragment</strong> <code>&lt;&gt;...&lt;/&gt;</code>.</p>
+                <h3>Il warning sulla <code>key</code></h3>
+                <p>Nella Console compare un avviso: <em>Each child in a list should have a unique "key" prop</em>. Ogni
+                    elemento creato da <code>map()</code> ha bisogno di una <code>key</code> unica, ma alla forma breve
+                    <code>&lt;&gt;</code> non si possono passare attributi. Usiamo la forma estesa
+                    <code>&lt;Fragment&gt;</code>, importata da React, e diamo come <code>key</code> l'<code>id</code>
+                    del prodotto.</p>
+                <pre><code class="language-jsx">import { useState, useEffect, Fragment } from 'react';
+
+// ...
+
+{products.map((product) =&gt; (
+  &lt;Fragment key={product.id}&gt;
+    &lt;h3&gt;{product.name}&lt;/h3&gt;
+    &lt;p&gt;{product.descrizione}&lt;/p&gt;
+  &lt;/Fragment&gt;
+))}</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Sotto la descrizione mostra il prezzo di ogni prodotto, sempre con due decimali (per esempio
+                        <code>€ 30.99</code>, <code>€ 12.50</code>).</p>
+                    <p>Suggerimento: il metodo dei numeri <code>toFixed(2)</code> restituisce una stringa con due
+                        decimali.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">{products.map((product) =&gt; (
+  &lt;Fragment key={product.id}&gt;
+    &lt;h3&gt;{product.name}&lt;/h3&gt;
+    &lt;p&gt;{product.descrizione}&lt;/p&gt;
+    &lt;p&gt;€ {product.price.toFixed(2)}&lt;/p&gt;
+  &lt;/Fragment&gt;
+))}</code></pre>
+                    </div>
+                </div>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: catalogo locale</h3>
+                <p>Crea il workspace <code>catalogo</code> con le cartelle <code>backend</code> e
+                    <code>frontend</code> e gli script <code>back:dev</code>, <code>front:dev</code> e
+                    <code>all:dev</code>. Sul backend attiva CORS e crea in <code>routers/productsRouter.js</code> la
+                    rotta <code>GET /products</code> che risponde con <code>{ success, message, data }</code> usando i
+                    prodotti di <code>data/db-store-completo.js</code>.</p>
+                <p>Sul frontend visualizza nome, descrizione e prezzo di ogni prodotto, senza warning nella Console.
+                    Verifica il flusso completo: avvia il workspace con <code>pnpm all:dev</code> dalla cartella
+                    principale, visita <code>http://localhost:5173</code> e controlla nella scheda Network la
+                    <code>GET</code> verso <code>http://localhost:3000/products</code>.</p>
+                <p>Bonus: aggiungi al router la rotta <code>GET /products/:id</code> che restituisce un solo prodotto,
+                    con <code>success: false</code> e status <code>404</code> se l'id non esiste.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

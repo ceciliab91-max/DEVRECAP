@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>React Router - Dispensa Didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">React Base</div>
+                <ul>
+                    <li><a href="#spa">SPA</a></li>
+                    <li><a href="#router">Router</a></li>
+                    <li><a href="#routes">Route</a></li>
+                    <li><a href="#links">Link</a></li>
+                    <li><a href="#layout">Layout</a></li>
+                    <li><a href="#not-found">404</a></li>
+                    <li><a href="#navigate">useNavigate</a></li>
+                    <li><a href="#params">useParams</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>React Router</h1>
+                <p class="intro">Come creare pagine, menu, layout, pagina non trovata, navigazione da codice e parametri dinamici in React.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="spa">
+                    <header>
+                        <p class="index">Capitolo 1</p>
+                        <h2>Che cos'è una SPA</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>SPA significa Single Page Application: l'app carica una sola pagina HTML e aggiorna il contenuto nel browser.</p>
+                    </div>
+
+                    <p>In un sito tradizionale, visitare una nuova pagina richiede al browser di chiedere un nuovo documento al server. In una SPA il browser carica l'applicazione una volta sola; quando l'utente passa dalla Home ai Servizi, React sostituisce soltanto il contenuto necessario.</p>
+                </section>
+
+                <section id="router">
+                    <header>
+                        <p class="index">Capitolo 2</p>
+                        <h2>Cos'è React Router e come si installa</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>React Router collega un percorso dell'URL, come <code>/contatti</code>, al componente React da mostrare.</p>
+                    </div>
+
+                    <p>React da solo aggiorna l'interfaccia, ma non decide quale pagina mostrare quando cambia l'indirizzo del browser. React Router aggiunge questa capacità: legge l'URL, trova la route corrispondente e mostra il componente previsto.</p>
+                    <p>Nel progetto creato con Vite installiamo il pacchetto con pnpm. Poi avvolgiamo l'applicazione con <code>BrowserRouter</code> nel file di ingresso.</p>
+
+                    <h3>Esempio</h3>
+                    <pre><code class="language-bash">pnpm add react-router</code></pre>
+
+                    <p>File <code>src/main.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(
+    &lt;StrictMode&gt;
+        &lt;BrowserRouter&gt;
+            &lt;App /&gt;
+        &lt;/BrowserRouter&gt;
+    &lt;/StrictMode&gt;
+);</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Installa il pacchetto con pnpm e inserisci <code>BrowserRouter</code> attorno ad <code>App</code> nel file <code>main.jsx</code>.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-bash">pnpm add react-router</code></pre>
+                            <pre><code class="language-jsx">import { BrowserRouter } from "react-router";
+
+&lt;BrowserRouter&gt;
+    &lt;App /&gt;
+&lt;/BrowserRouter&gt;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="routes">
+                    <header>
+                        <p class="index">Capitolo 3</p>
+                        <h2>Routes e Route</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>Routes</code> raccoglie le route dell'app.</p>
+                        <p><code>Route</code> associa una prop <code>path</code> a un componente tramite la prop <code>Component</code>.</p>
+                    </div>
+
+                    <p>Per il sito vetrina creiamo pagine minime: ognuna ha soltanto un titolo e un testo. La prop <code>path</code> indica l'URL da riconoscere; la prop <code>Component</code> riceve il nome del componente, senza parentesi graffe con JSX.</p>
+
+                    <h3>Esempio</h3>
+                    <p>File <code>src/App.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { Route, Routes } from "react-router";
+
+function Home() {
+    return &lt;main&gt;&lt;h1&gt;Studio Aurora&lt;/h1&gt;&lt;p&gt;Idee digitali per piccole attività.&lt;/p&gt;&lt;/main&gt;;
+}
+
+function ChiSiamo() {
+    return &lt;main&gt;&lt;h1&gt;Chi siamo&lt;/h1&gt;&lt;p&gt;Siamo un piccolo studio creativo.&lt;/p&gt;&lt;/main&gt;;
+}
+
+function Contatti() {
+    return &lt;main&gt;&lt;h1&gt;Contatti&lt;/h1&gt;&lt;p&gt;Scrivici per conoscere il progetto.&lt;/p&gt;&lt;/main&gt;;
+}
+
+function App() {
+    return (
+        &lt;Routes&gt;
+            &lt;Route path="/" Component={Home} /&gt;
+            &lt;Route path="/chi-siamo" Component={ChiSiamo} /&gt;
+            &lt;Route path="/contatti" Component={Contatti} /&gt;
+        &lt;/Routes&gt;
+    );
+}
+
+export default App;</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Crea il componente <code>Servizi</code> con titolo e testo. Aggiungi una route per l'URL <code>/servizi</code> usando <code>Component</code>.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">function Servizi() {
+    return &lt;main&gt;&lt;h1&gt;Servizi&lt;/h1&gt;&lt;p&gt;Creiamo siti chiari e veloci.&lt;/p&gt;&lt;/main&gt;;
+}
+
+&lt;Route path="/servizi" Component={Servizi} /&gt;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="links">
+                    <header>
+                        <p class="index">Capitolo 4</p>
+                        <h2>Link e NavLink</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>Link</code> cambia route senza ricaricare tutta la pagina.</p>
+                        <p><code>NavLink</code> è pensato per i menu e permette di riconoscere la route attiva.</p>
+                    </div>
+
+                    <p>Per navigare all'interno di una SPA non usiamo un tag <code>&lt;a&gt;</code> normale. Usiamo <code>Link</code> e la prop <code>to</code>. In questo modo React Router intercetta il click e aggiorna soltanto la parte necessaria dell'app.</p>
+                    <p><code>NavLink</code> funziona come <code>Link</code>, ma passa l'informazione <code>isActive</code> alla funzione di <code>className</code>. È utile per evidenziare la voce del menu della pagina aperta.</p>
+
+                    <h3>Esempio</h3>
+                    <pre><code class="language-jsx">import { Link, NavLink } from "react-router";
+
+function Menu() {
+    return (
+        &lt;nav&gt;
+            &lt;NavLink to="/" end&gt;Home&lt;/NavLink&gt;
+            &lt;NavLink to="/chi-siamo"&gt;Chi siamo&lt;/NavLink&gt;
+            &lt;NavLink
+                to="/servizi"
+                className={({ isActive }) =&gt; isActive ? "attivo" : ""}
+            &gt;
+                Servizi
+            &lt;/NavLink&gt;
+            &lt;NavLink to="/contatti"&gt;Contatti&lt;/NavLink&gt;
+
+            &lt;Link to="/servizi/web-design"&gt;Scopri il web design&lt;/Link&gt;
+        &lt;/nav&gt;
+    );
+}</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi un <code>NavLink</code> verso <code>/contatti</code> che riceve la classe <code>attivo</code> quando la pagina Contatti è aperta.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">&lt;NavLink
+    to="/contatti"
+    className={({ isActive }) =&gt; isActive ? "attivo" : ""}
+&gt;
+    Contatti
+&lt;/NavLink&gt;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="layout">
+                    <header>
+                        <p class="index">Capitolo 5</p>
+                        <h2>Layout e Outlet</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Un layout raccoglie le parti condivise, come il menu.</p>
+                        <p><code>Outlet</code> indica il punto in cui viene mostrata la route figlia.</p>
+                    </div>
+
+                    <p>Il menu del sito vetrina compare in ogni pagina. Per evitare di copiarlo nelle pagine Home, Chi siamo, Servizi e Contatti, lo spostiamo in un file separato chiamato <code>layouts/MainLayout.jsx</code>.</p>
+                    <p>Le pagine diventano route figlie di <code>MainLayout</code>. La route con <code>index</code> è la pagina predefinita del layout e viene mostrata all'URL <code>/</code>.</p>
+
+                    <h3>Esempio</h3>
+                    <p>File <code>src/layouts/MainLayout.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { NavLink, Outlet } from "react-router";
+
+function MainLayout() {
+    return (
+        &lt;&gt;
+            &lt;nav&gt;
+                &lt;NavLink to="/" end&gt;Home&lt;/NavLink&gt;
+                &lt;NavLink to="/chi-siamo"&gt;Chi siamo&lt;/NavLink&gt;
+                &lt;NavLink to="/servizi"&gt;Servizi&lt;/NavLink&gt;
+                &lt;NavLink to="/contatti"&gt;Contatti&lt;/NavLink&gt;
+            &lt;/nav&gt;
+            &lt;Outlet /&gt;
+        &lt;/&gt;
+    );
+}
+
+export default MainLayout;</code></pre>
+
+                    <p>File <code>src/App.jsx</code>:</p>
+                    <pre><code class="language-jsx">import { Route, Routes } from "react-router";
+import MainLayout from "./layouts/MainLayout";
+
+function App() {
+    return (
+        &lt;Routes&gt;
+            &lt;Route path="/" Component={MainLayout}&gt;
+                &lt;Route index Component={Home} /&gt;
+                &lt;Route path="chi-siamo" Component={ChiSiamo} /&gt;
+                &lt;Route path="servizi" Component={Servizi} /&gt;
+                &lt;Route path="contatti" Component={Contatti} /&gt;
+            &lt;/Route&gt;
+        &lt;/Routes&gt;
+    );
+}</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Crea <code>layouts/MainLayout.jsx</code> con un titolo per il sito, il componente <code>Menu</code> e <code>Outlet</code>. Usa poi <code>MainLayout</code> come route principale.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">import { Outlet } from "react-router";
+import Menu from "../components/Menu";
+
+function MainLayout() {
+    return (
+        &lt;&gt;
+            &lt;header&gt;&lt;h1&gt;Studio Aurora&lt;/h1&gt;&lt;/header&gt;
+            &lt;Menu /&gt;
+            &lt;Outlet /&gt;
+        &lt;/&gt;
+    );
+}
+
+export default MainLayout;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="not-found">
+                    <header>
+                        <p class="index">Capitolo 6</p>
+                        <h2>Pagina 404</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>La route con <code>path="*"</code> viene usata quando nessun altro percorso corrisponde all'URL.</p>
+                    </div>
+
+                    <p>Un utente può digitare un indirizzo inesistente o aprire un vecchio collegamento. Senza una route di recupero, l'app non avrebbe un messaggio utile da mostrare. Una pagina 404 spiega il problema e offre un link per tornare alla Home.</p>
+
+                    <h3>Esempio</h3>
+                    <pre><code class="language-jsx">import { Link, Route } from "react-router";
+
+function PaginaNonTrovata() {
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Pagina non trovata&lt;/h1&gt;
+            &lt;p&gt;L'indirizzo visitato non esiste.&lt;/p&gt;
+            &lt;Link to="/"&gt;Torna alla Home&lt;/Link&gt;
+        &lt;/main&gt;
+    );
+}
+
+&lt;Route path="*" Component={PaginaNonTrovata} /&gt;</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Crea una pagina 404 con titolo, testo e link alla Home. Aggiungila dopo le route del layout.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">function PaginaNonTrovata() {
+    return &lt;main&gt;&lt;h1&gt;404&lt;/h1&gt;&lt;p&gt;Pagina non trovata.&lt;/p&gt;&lt;Link to="/"&gt;Home&lt;/Link&gt;&lt;/main&gt;;
+}
+
+&lt;Route path="*" Component={PaginaNonTrovata} /&gt;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="navigate">
+                    <header>
+                        <p class="index">Capitolo 7</p>
+                        <h2>Navigare con useNavigate</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>useNavigate</code> restituisce una funzione per cambiare route da JavaScript.</p>
+                    </div>
+
+                    <p><code>Link</code> viene usato quando la navigazione è già visibile nel JSX. <code>useNavigate</code> è utile quando la navigazione dipende da un'azione: per esempio, dopo l'invio di un form o dopo il click di un bottone.</p>
+
+                    <h3>Esempio</h3>
+                    <pre><code class="language-jsx">import { useNavigate } from "react-router";
+
+function Home() {
+    const navigate = useNavigate();
+
+    function mostraServizi() {
+        navigate("/servizi");
+    }
+
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Studio Aurora&lt;/h1&gt;
+            &lt;p&gt;Idee digitali per piccole attività.&lt;/p&gt;
+            &lt;button onClick={mostraServizi}&gt;Scopri i servizi&lt;/button&gt;
+        &lt;/main&gt;
+    );
+}</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Nella pagina Contatti aggiungi un bottone che porta l'utente alla Home tramite <code>useNavigate</code>.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">import { useNavigate } from "react-router";
+
+function Contatti() {
+    const navigate = useNavigate();
+
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Contatti&lt;/h1&gt;
+            &lt;p&gt;Scrivici per conoscere il progetto.&lt;/p&gt;
+            &lt;button onClick={() =&gt; navigate("/")}&gt;Torna alla Home&lt;/button&gt;
+        &lt;/main&gt;
+    );
+}</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="params">
+                    <header>
+                        <p class="index">Capitolo 8</p>
+                        <h2>Parametri dinamici e useParams</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Un segmento che inizia con <code>:</code> è un parametro dinamico.</p>
+                        <p><code>useParams</code> legge il valore presente nell'URL.</p>
+                    </div>
+
+                    <p>Non serve una route separata per ogni servizio. Il percorso <code>servizi/:serviceId</code> riconosce sia <code>/servizi/web-design</code> sia <code>/servizi/consulenza</code>. La parte variabile viene letta nel componente tramite <code>useParams</code>.</p>
+                    <p>Nel sito vetrina i dati possono stare in un piccolo oggetto locale. La chiave dell'oggetto corrisponde al valore scritto nell'URL.</p>
+
+                    <h3>Esempio</h3>
+                    <pre><code class="language-jsx">import { Link, Route, useParams } from "react-router";
+
+const servizi = {
+    "web-design": {
+        titolo: "Web design",
+        testo: "Progettiamo siti semplici e piacevoli da usare."
+    },
+    consulenza: {
+        titolo: "Consulenza",
+        testo: "Ti aiutiamo a scegliere gli strumenti giusti."
+    }
+};
+
+function Servizi() {
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Servizi&lt;/h1&gt;
+            &lt;p&gt;Scegli un servizio per vedere i dettagli.&lt;/p&gt;
+            &lt;Link to="/servizi/web-design"&gt;Web design&lt;/Link&gt;
+            &lt;Link to="/servizi/consulenza"&gt;Consulenza&lt;/Link&gt;
+        &lt;/main&gt;
+    );
+}
+
+function DettaglioServizio() {
+    const { serviceId } = useParams();
+    const servizio = servizi[serviceId];
+
+    if (!servizio) {
+        return &lt;main&gt;&lt;h1&gt;Servizio non trovato&lt;/h1&gt;&lt;Link to="/servizi"&gt;Torna ai servizi&lt;/Link&gt;&lt;/main&gt;;
+    }
+
+    return &lt;main&gt;&lt;h1&gt;{servizio.titolo}&lt;/h1&gt;&lt;p&gt;{servizio.testo}&lt;/p&gt;&lt;/main&gt;;
+}
+
+&lt;Route path="servizi/:serviceId" Component={DettaglioServizio} /&gt;</code></pre>
+
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Aggiungi il servizio <code>social</code> all'oggetto locale e crea un link verso <code>/servizi/social</code>.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-jsx">const servizi = {
+    social: {
+        titolo: "Social media",
+        testo: "Prepariamo contenuti chiari per i tuoi canali."
+    }
+};
+
+&lt;Link to="/servizi/social"&gt;Social media&lt;/Link&gt;</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="task">
+                    <h3>Esercizio finale</h3>
+                    <p>Crea un sito vetrina per uno studio creativo. Installa React Router con pnpm, configura <code>BrowserRouter</code>, usa <code>MainLayout</code> nel file <code>layouts/MainLayout.jsx</code> e crea le pagine Home, Chi siamo, Servizi e Contatti. Aggiungi un menu con <code>NavLink</code>, una pagina 404, il bottone <code>Scopri i servizi</code> con <code>useNavigate</code> e una route dinamica per i dettagli dei servizi con <code>useParams</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <p>File <code>src/layouts/MainLayout.jsx</code>:</p>
+                        <pre><code class="language-jsx">import { NavLink, Outlet } from "react-router";
+
+function MainLayout() {
+    return (
+        &lt;&gt;
+            &lt;nav&gt;
+                &lt;NavLink to="/" end&gt;Home&lt;/NavLink&gt;
+                &lt;NavLink to="/chi-siamo"&gt;Chi siamo&lt;/NavLink&gt;
+                &lt;NavLink to="/servizi"&gt;Servizi&lt;/NavLink&gt;
+                &lt;NavLink to="/contatti"&gt;Contatti&lt;/NavLink&gt;
+            &lt;/nav&gt;
+            &lt;Outlet /&gt;
+        &lt;/&gt;
+    );
+}
+
+export default MainLayout;</code></pre>
+
+                        <p>File <code>src/App.jsx</code>:</p>
+                        <pre><code class="language-jsx">import { Link, Route, Routes, useNavigate, useParams } from "react-router";
+import MainLayout from "./layouts/MainLayout";
+
+const servizi = {
+    "web-design": { titolo: "Web design", testo: "Progettiamo siti semplici e piacevoli da usare." },
+    consulenza: { titolo: "Consulenza", testo: "Ti aiutiamo a scegliere gli strumenti giusti." }
+};
+
+function Home() {
+    const navigate = useNavigate();
+
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Studio Aurora&lt;/h1&gt;
+            &lt;p&gt;Idee digitali per piccole attività.&lt;/p&gt;
+            &lt;button onClick={() =&gt; navigate("/servizi")}&gt;Scopri i servizi&lt;/button&gt;
+        &lt;/main&gt;
+    );
+}
+
+function ChiSiamo() {
+    return &lt;main&gt;&lt;h1&gt;Chi siamo&lt;/h1&gt;&lt;p&gt;Siamo un piccolo studio creativo.&lt;/p&gt;&lt;/main&gt;;
+}
+
+function Servizi() {
+    return (
+        &lt;main&gt;
+            &lt;h1&gt;Servizi&lt;/h1&gt;
+            &lt;p&gt;Scegli un servizio.&lt;/p&gt;
+            &lt;Link to="/servizi/web-design"&gt;Web design&lt;/Link&gt;
+            &lt;Link to="/servizi/consulenza"&gt;Consulenza&lt;/Link&gt;
+        &lt;/main&gt;
+    );
+}
+
+function DettaglioServizio() {
+    const { serviceId } = useParams();
+    const servizio = servizi[serviceId];
+
+    if (!servizio) {
+        return &lt;main&gt;&lt;h1&gt;Servizio non trovato&lt;/h1&gt;&lt;Link to="/servizi"&gt;Torna ai servizi&lt;/Link&gt;&lt;/main&gt;;
+    }
+
+    return &lt;main&gt;&lt;h1&gt;{servizio.titolo}&lt;/h1&gt;&lt;p&gt;{servizio.testo}&lt;/p&gt;&lt;/main&gt;;
+}
+
+function Contatti() {
+    return &lt;main&gt;&lt;h1&gt;Contatti&lt;/h1&gt;&lt;p&gt;Scrivici per conoscere il progetto.&lt;/p&gt;&lt;/main&gt;;
+}
+
+function PaginaNonTrovata() {
+    return &lt;main&gt;&lt;h1&gt;404&lt;/h1&gt;&lt;p&gt;Pagina non trovata.&lt;/p&gt;&lt;Link to="/"&gt;Home&lt;/Link&gt;&lt;/main&gt;;
+}
+
+function App() {
+    return (
+        &lt;Routes&gt;
+            &lt;Route path="/" Component={MainLayout}&gt;
+                &lt;Route index Component={Home} /&gt;
+                &lt;Route path="chi-siamo" Component={ChiSiamo} /&gt;
+                &lt;Route path="servizi" Component={Servizi} /&gt;
+                &lt;Route path="servizi/:serviceId" Component={DettaglioServizio} /&gt;
+                &lt;Route path="contatti" Component={Contatti} /&gt;
+            &lt;/Route&gt;
+            &lt;Route path="*" Component={PaginaNonTrovata} /&gt;
+        &lt;/Routes&gt;
+    );
+}
+
+export default App;</code></pre>
+                    </div>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

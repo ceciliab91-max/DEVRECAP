@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richieste HTTP - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">Richieste HTTP</div>
+            <ul>
+                <li><a href="#web2">Web 2.0</a></li>
+                <li><a href="#devtools">DevTools</a></li>
+                <li><a href="#status">Status Code</a></li>
+                <li><a href="#metodi-http">Metodi HTTP</a></li>
+                <li><a href="#fetch">fetch()</a></li>
+                <li><a href="#primo-then">Prima risposta</a></li>
+                <li><a href="#secondo-then">Dati</a></li>
+                <li><a href="#metodi-js">Metodi in JS</a></li>
+                <li><a href="#headers">Header</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Richieste HTTP con JavaScript</h1>
+            <p class="intro">Web 2.0, metodi HTTP, header, status code e la funzione fetch().</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+
+            <section id="web2">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Web 2.0 e le richieste HTTP</h2>
+                </header>
+
+                <div class="note">
+                    <p>Con <strong>Web 2.0</strong> si intende la capacità delle pagine web di richiedere informazioni ai server in modo dinamico, senza dover ricaricare l'intera pagina. Questo ha reso possibile creare applicazioni web interattive e reattive come quelle a cui siamo abituati oggi.</p>
+                </div>
+
+                <p>Nel web delle origini, ogni aggiornamento di contenuto richiedeva il caricamento completo di una nuova pagina dal server. Con il Web 2.0 le cose cambiano: la pagina rimane aperta e, quando ha bisogno di nuovi dati, li richiede al server in background, ricevendo solo le informazioni necessarie e aggiornando solo la parte della pagina che cambia.</p>
+                <p>Questo tipo di comunicazione prende il nome di <strong>richiesta HTTP asincrona</strong>. Il termine <strong>asincrona</strong> significa che la richiesta viene inviata e il browser non si blocca ad aspettare la risposta: continua a funzionare normalmente, e quando la risposta arriva viene elaborata.</p>
+                <p>Il primo strumento che ha reso possibile tutto questo si chiamava <strong>XMLHttpRequest</strong> (spesso abbreviato in <em>XHR</em>), introdotto da Microsoft nei primi anni 2000 e poi adottato da tutti i browser. Era potente ma complesso da usare: richiedeva molte righe di codice anche per fare operazioni semplici.</p>
+                <p>Nel <strong>2015</strong>, con l'arrivo di ES6, è stato introdotto il <strong>Fetch API</strong>, un'interfaccia moderna e molto più semplice da usare. <code>fetch()</code> ha sostituito <code>XMLHttpRequest</code> nella maggior parte dei progetti, rendendo il codice più pulito e leggibile.</p>
+
+                <h3>Esempio</h3>
+                <p>La stessa richiesta scritta prima con <code>XMLHttpRequest</code> e poi con <code>fetch()</code>:</p>
+                <pre><code class="language-javascript">// Con XMLHttpRequest
+const xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://jsonplaceholder.typicode.com/posts/1');
+xhr.onload = () => {
+    if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        console.log(data.title);
+    }
+};
+xhr.send();
+
+// Con fetch()
+fetch('https://jsonplaceholder.typicode.com/posts/1')
+    .then(response => response.json())
+    .then(data => console.log(data.title));</code></pre>
+            </section>
+
+            <section id="devtools">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Osservare le richieste con i DevTools</h2>
+                </header>
+
+                <div class="note">
+                    <p>I <strong>DevTools</strong> (strumenti per sviluppatori) del browser permettono di osservare in tempo reale tutte le richieste HTTP effettuate dalla pagina. Si aprono con <kbd>F12</kbd> oppure con il tasto destro del mouse sulla pagina e selezionando <em>Ispeziona</em>.</p>
+                </div>
+
+                <p>Ogni browser moderno include i DevTools, accessibili tramite <kbd>F12</kbd> o con la combinazione <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> (su Windows e Linux) oppure <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>I</kbd> (su macOS). Una volta aperti, la scheda da selezionare è quella chiamata <strong>Rete</strong> (in italiano) o <strong>Network</strong> (in inglese, nella maggior parte dei browser).</p>
+                <p>In questa scheda vengono elencate tutte le richieste effettuate dalla pagina nel momento in cui viene caricata o durante l'interazione dell'utente. Per ogni richiesta è possibile vedere: l'URL, il metodo HTTP usato, il codice di stato ricevuto, la dimensione della risposta e il tempo impiegato.</p>
+                <p>Per concentrarsi sulle sole richieste HTTP delle API — escludendo immagini, CSS, font e script — si usa il filtro <strong>Fetch/XHR</strong> disponibile nella barra dei filtri della scheda Network. In questo modo restano visibili solo le richieste asincrone effettuate con <code>fetch()</code> o con <code>XMLHttpRequest</code>.</p>
+                <p>Cliccando su una singola richiesta si apre un pannello di dettaglio con quattro sezioni principali utili per il debug:</p>
+                <ul>
+                    <li><strong>Headers</strong> — mostra gli header della richiesta e della risposta, il metodo e il codice di stato</li>
+                    <li><strong>Preview</strong> — mostra il corpo della risposta formattato (ad esempio come albero JSON)</li>
+                    <li><strong>Response</strong> — mostra il corpo della risposta come testo grezzo</li>
+                    <li><strong>Timing</strong> — mostra quanto tempo ha impiegato ogni fase della richiesta</li>
+                </ul>
+            </section>
+
+            <section id="status">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>HTTP Status Code</h2>
+                </header>
+
+                <div class="note">
+                    <p>Ogni richiesta HTTP riceve sempre una risposta dal server. Insieme ai dati (o in assenza di essi), il server restituisce un <strong>codice di stato</strong> numerico che descrive l'esito dell'operazione.</p>
+                </div>
+
+                <p>Quando il client invia una richiesta HTTP, il server elabora la richiesta e risponde sempre. La risposta contiene un <strong>codice di stato</strong> (status code): un numero a tre cifre che indica se la richiesta è andata a buon fine, se c'è stato un errore e di che tipo. Conoscere questi codici è essenziale per capire cosa sta succedendo tra client e server.</p>
+                <p>I codici sono raggruppati per centinaia in cinque categorie principali. Le prime due cifre indicano la categoria, la terza cifra specifica il tipo preciso di risposta all'interno di quella categoria.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Significato generale</th>
+                            <th>Codici comuni</th>
+                            <th>Descrizione</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1xx</strong></td>
+                            <td>Informazionale</td>
+                            <td><code>100 Continue</code></td>
+                            <td>Il server ha ricevuto la richiesta, elaborazione in corso</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3"><strong>2xx</strong></td>
+                            <td rowspan="3">Successo</td>
+                            <td><code>200 OK</code></td>
+                            <td>Richiesta riuscita, i dati sono nella risposta</td>
+                        </tr>
+                        <tr>
+                            <td><code>201 Created</code></td>
+                            <td>Risorsa creata con successo (tipico di POST)</td>
+                        </tr>
+                        <tr>
+                            <td><code>204 No Content</code></td>
+                            <td>Richiesta riuscita, ma la risposta non contiene dati (tipico di DELETE)</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2"><strong>3xx</strong></td>
+                            <td rowspan="2">Reindirizzamento</td>
+                            <td><code>301 Moved Permanently</code></td>
+                            <td>La risorsa si trova ora a un altro URL in modo permanente</td>
+                        </tr>
+                        <tr>
+                            <td><code>302 Found</code></td>
+                            <td>La risorsa si trova temporaneamente a un altro URL</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="4"><strong>4xx</strong></td>
+                            <td rowspan="4">Errore del client</td>
+                            <td><code>400 Bad Request</code></td>
+                            <td>La richiesta è malformata o contiene dati non validi</td>
+                        </tr>
+                        <tr>
+                            <td><code>401 Unauthorized</code></td>
+                            <td>Autenticazione richiesta: l'utente non è riconosciuto</td>
+                        </tr>
+                        <tr>
+                            <td><code>403 Forbidden</code></td>
+                            <td>Accesso vietato: l'utente è riconosciuto ma non ha i permessi</td>
+                        </tr>
+                        <tr>
+                            <td><code>404 Not Found</code></td>
+                            <td>La risorsa richiesta non esiste a quell'URL</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2"><strong>5xx</strong></td>
+                            <td rowspan="2">Errore del server</td>
+                            <td><code>500 Internal Server Error</code></td>
+                            <td>Errore generico lato server durante l'elaborazione</td>
+                        </tr>
+                        <tr>
+                            <td><code>503 Service Unavailable</code></td>
+                            <td>Il server non è disponibile, ad esempio per manutenzione</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="metodi-http">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Metodi HTTP</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il <strong>metodo HTTP</strong> indica al server che tipo di operazione il client vuole eseguire sulla risorsa indicata dall'URL. I metodi principali sono <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>.</p>
+                </div>
+
+                <p>Ogni richiesta HTTP è composta da un URL (l'indirizzo della risorsa) e da un metodo che descrive l'intenzione del client. Puoi immaginare l'URL come l'indirizzo di un oggetto e il metodo come l'azione che vuoi compiere su quell'oggetto: leggerlo, crearne uno nuovo, modificarlo o eliminarlo.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metodo</th>
+                            <th>Operazione</th>
+                            <th>Usa il body?</th>
+                            <th>Status tipico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td>Legge una risorsa</td>
+                            <td>No</td>
+                            <td><code>200 OK</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td>Crea una nuova risorsa</td>
+                            <td>Sì</td>
+                            <td><code>201 Created</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT</code></td>
+                            <td>Sostituisce completamente una risorsa</td>
+                            <td>Sì</td>
+                            <td><code>200 OK</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td>Modifica parzialmente una risorsa</td>
+                            <td>Sì</td>
+                            <td><code>200 OK</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td>Elimina una risorsa</td>
+                            <td>No</td>
+                            <td><code>204 No Content</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="fetch">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>La funzione fetch()</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>fetch()</code> è la funzione JavaScript per inviare richieste HTTP. Riceve come primo argomento l'URL della risorsa e restituisce una <strong>Promise</strong>, cioè un valore che non è subito disponibile ma arriverà in futuro.</p>
+                </div>
+
+                <p>Una <strong>Promise</strong> rappresenta un'operazione asincrona: quando la risposta del server arriva, la Promise si risolve e il risultato viene passato alla funzione dentro <code>.then()</code>. I metodi <code>.then()</code> si possono concatenare: il primo riceve la risposta HTTP grezza, il secondo riceve i dati effettivi dopo averli trasformati.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts/1')
+    .then(response => response.json())
+    .then(data => console.log(data));</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Usa <code>fetch()</code> per richiedere i dati del post con id <code>5</code> da <code>https://jsonplaceholder.typicode.com/posts/5</code> e stampa in console l'intero oggetto ricevuto.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts/5')
+    .then(response => response.json())
+    .then(data => console.log(data));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="primo-then">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Il primo .then(): l'oggetto response</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il primo <code>.then()</code> riceve un oggetto <code>response</code> che rappresenta la risposta HTTP grezza del server. Non contiene ancora i dati veri: contiene le informazioni sulla risposta (status, header) e i metodi per leggere il corpo.</p>
+                </div>
+
+                <p>Quando la Promise di <code>fetch()</code> si risolve, passa al primo <code>.then()</code> un oggetto <code>Response</code>. Questo oggetto descrive la risposta del server prima ancora di leggerne il contenuto: è come ricevere una busta ancora chiusa, di cui però si può già vedere il mittente e il timbro postale.</p>
+                <p>Le proprietà più importanti di <code>response</code> sono:</p>
+                <ul>
+                    <li><code>response.status</code> — il codice di stato numerico (es. <code>200</code>, <code>404</code>)</li>
+                    <li><code>response.statusText</code> — il messaggio testuale associato (es. <code>"OK"</code>, <code>"Not Found"</code>)</li>
+                    <li><code>response.ok</code> — un booleano: vale <code>true</code> se lo status è tra <code>200</code> e <code>299</code>, <code>false</code> altrimenti</li>
+                    <li><code>response.headers</code> — l'oggetto che contiene gli header della risposta, leggibili con <code>.get('nome-header')</code></li>
+                </ul>
+                <p>Per leggere il corpo della risposta si usano i metodi asincroni dell'oggetto <code>response</code>. Ciascuno di questi metodi restituisce a sua volta una Promise, per cui va preceduto da <code>return</code> dentro il <code>.then()</code> per passare il risultato al <code>.then()</code> successivo:</p>
+                <ul>
+                    <li><code>response.json()</code> — analizza il corpo come JSON e lo trasforma in un oggetto JavaScript</li>
+                    <li><code>response.text()</code> — legge il corpo come testo semplice</li>
+                    <li><code>response.blob()</code> — legge il corpo come dato binario (utile per immagini o file)</li>
+                </ul>
+                <p>Il metodo da usare dipende dal formato in cui il server ha risposto. Nella maggior parte delle API moderne si usa <code>response.json()</code>.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts/1')
+    .then(response => {
+        console.log(response.status);       // 200
+        console.log(response.statusText);   // "OK"
+        console.log(response.ok);           // true
+
+        const tipo = response.headers.get('Content-Type');
+        console.log(tipo);                  // "application/json; charset=utf-8"
+
+        return response.json();
+    })
+    .then(data => console.log(data));</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Fai una richiesta a <code>https://jsonplaceholder.typicode.com/posts/1</code> e nel primo <code>.then()</code> stampa in console: il codice di stato, il valore di <code>response.ok</code> e il valore dell'header <code>Content-Type</code> della risposta. Poi restituisci i dati come JSON per il secondo <code>.then()</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts/1')
+    .then(response => {
+        console.log(response.status);
+        console.log(response.ok);
+        console.log(response.headers.get('Content-Type'));
+        return response.json();
+    })
+    .then(data => console.log(data));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="secondo-then">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Il secondo .then(): i dati</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il secondo <code>.then()</code> riceve il risultato del metodo chiamato nel primo <code>.then()</code>. Se è stato usato <code>response.json()</code>, riceve un oggetto JavaScript pronto da usare.</p>
+                </div>
+
+                <p>Il secondo <code>.then()</code> è il punto in cui si lavora con i dati veri della risposta. A questo punto il corpo della risposta è già stato letto e trasformato: se nel primo <code>.then()</code> è stato chiamato <code>response.json()</code>, il parametro del secondo <code>.then()</code> sarà un oggetto JavaScript con tutte le proprietà del JSON ricevuto.</p>
+                <p>Da questo momento in poi si può usare il parametro come qualsiasi altro oggetto JavaScript: leggere proprietà, stamparle in console, mostrarle nella pagina o salvarle in una variabile.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts/1')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.id);       // 1
+        console.log(data.title);    // "sunt aut facere..."
+        console.log(data.body);     // testo del post
+        console.log(data.userId);   // 1
+    });</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Fai una richiesta a <code>https://jsonplaceholder.typicode.com/users/1</code> e nel secondo <code>.then()</code> stampa in console il nome, l'email e il nome della città dell'utente (<code>data.address.city</code>).</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/users/1')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.name);
+        console.log(data.email);
+        console.log(data.address.city);
+    });</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="metodi-js">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Usare i metodi HTTP con fetch()</h2>
+                </header>
+
+                <div class="note">
+                    <p>Con <code>fetch()</code> il metodo predefinito è <code>GET</code>. Per usare un metodo diverso si passa un secondo argomento alla funzione: un oggetto di configurazione con la proprietà <code>method</code> e, se necessario, <code>body</code>.</p>
+                </div>
+
+                <p>L'oggetto di configurazione può contenere tre proprietà principali: <code>method</code> per il metodo HTTP, <code>body</code> per i dati da inviare al server (obbligatorio per POST, PUT e PATCH), e <code>headers</code> per gli header della richiesta. Il body deve essere una stringa: per inviare un oggetto JavaScript lo si converte con <code>JSON.stringify()</code>.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">// POST — crea una nuova risorsa
+fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Nuovo post', userId: 1 }),
+    headers: { 'Content-Type': 'application/json' }
+})
+    .then(response => response.json())
+    .then(data => console.log(data));
+
+// PATCH — modifica solo il titolo
+fetch('https://jsonplaceholder.typicode.com/posts/1', {
+    method: 'PATCH',
+    body: JSON.stringify({ title: 'Titolo aggiornato' }),
+    headers: { 'Content-Type': 'application/json' }
+})
+    .then(response => response.json())
+    .then(data => console.log(data));
+
+// DELETE — elimina la risorsa
+fetch('https://jsonplaceholder.typicode.com/posts/1', {
+    method: 'DELETE'
+})
+    .then(response => console.log('Status: ' + response.status));</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Invia una richiesta <code>POST</code> a <code>https://jsonplaceholder.typicode.com/posts</code> con le proprietà <code>title</code>, <code>body</code> e <code>userId</code>. Nel secondo <code>.then()</code> stampa in console l'id della risorsa creata.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({
+        title: 'Il mio post',
+        body: 'Contenuto del post',
+        userId: 1
+    }),
+    headers: { 'Content-Type': 'application/json' }
+})
+    .then(response => response.json())
+    .then(data => console.log('Id creato: ' + data.id));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="headers">
+                <header>
+                    <p class="index">Capitolo 9</p>
+                    <h2>Header HTTP</h2>
+                </header>
+
+                <div class="note">
+                    <p>Gli <strong>header</strong> sono informazioni aggiuntive che viaggiano insieme alla richiesta o alla risposta HTTP. Non fanno parte del corpo del messaggio, ma descrivono come interpretarlo.</p>
+                </div>
+
+                <p>Puoi immaginare la richiesta HTTP come una busta: il <strong>body</strong> è la lettera dentro la busta, mentre gli <strong>header</strong> sono le informazioni scritte sulla busta stessa (mittente, tipo di contenuto, lingua, ecc.). Il server legge gli header prima di aprire la busta, per sapere come gestire il contenuto.</p>
+                <p>Gli header sono coppie chiave-valore. Con <code>fetch()</code> si impostano tramite la proprietà <code>headers</code> nell'oggetto di configurazione. L'header più comune nelle richieste è <code>Content-Type</code>, che indica al server in quale formato sono i dati inviati nel body. Quando si inviano dati JSON, il valore è <code>application/json</code>. Gli header della risposta si leggono con <code>response.headers.get('nome-header')</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header</th>
+                            <th>Direzione</th>
+                            <th>Scopo</th>
+                            <th>Esempio di valore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Content-Type</code></td>
+                            <td>Richiesta e risposta</td>
+                            <td>Specifica il formato dei dati nel body</td>
+                            <td><code>application/json</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Authorization</code></td>
+                            <td>Richiesta</td>
+                            <td>Trasmette credenziali di autenticazione</td>
+                            <td><code>Bearer il-mio-token</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Accept</code></td>
+                            <td>Richiesta</td>
+                            <td>Indica al server il formato di risposta atteso</td>
+                            <td><code>application/json</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Cache-Control</code></td>
+                            <td>Richiesta e risposta</td>
+                            <td>Controlla il comportamento della cache</td>
+                            <td><code>no-cache</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Test', userId: 1 }),
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer il-mio-token'
+    }
+})
+    .then(response => {
+        const contentType = response.headers.get('Content-Type');
+        console.log('Tipo di risposta: ' + contentType);
+        return response.json();
+    })
+    .then(data => console.log(data));</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Invia una richiesta <code>POST</code> con l'header <code>Content-Type: application/json</code> e un body con <code>title</code> e <code>userId</code>. Nel primo <code>.then()</code> leggi e stampa il valore dell'header <code>Content-Type</code> della risposta, poi restituisci i dati come JSON. Nel secondo <code>.then()</code> stampa il titolo del post creato.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({ title: 'Prova header', userId: 2 }),
+    headers: { 'Content-Type': 'application/json' }
+})
+    .then(response => {
+        const tipo = response.headers.get('Content-Type');
+        console.log('Content-Type risposta: ' + tipo);
+        return response.json();
+    })
+    .then(data => console.log(data.title));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Invia una richiesta <code>POST</code> a <code>https://jsonplaceholder.typicode.com/posts</code> con le proprietà <code>title</code>, <code>body</code> e <code>userId</code>, impostando l'header <code>Content-Type: application/json</code>. Nel primo <code>.then()</code> stampa il codice di stato e il valore di <code>response.ok</code>, poi restituisci i dati come JSON. Nel secondo <code>.then()</code> stampa il messaggio <code>'Risorsa creata con id: '</code> seguito dall'id restituito dal server.</p>
+
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-javascript">fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({
+        title: 'Dispensa HTTP',
+        body: 'Contenuto della dispensa',
+        userId: 1
+    }),
+    headers: { 'Content-Type': 'application/json' }
+})
+    .then(response => {
+        console.log(response.status);
+        console.log(response.ok);
+        return response.json();
+    })
+    .then(data => console.log('Risorsa creata con id: ' + data.id));</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Skill con Mistral Vibe - Dispensa didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">Skill</div>
+                <ul>
+                    <li><a href="#scopo">Scopo</a></li>
+                    <li><a href="#vibe">Vibe</a></li>
+                    <li><a href="#struttura">Struttura</a></li>
+                    <li><a href="#creare">Creare</a></li>
+                    <li><a href="#complesse">Skill complesse</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>Creare skill con Mistral Vibe</h1>
+                <p class="intro">Come trasformare un metodo ripetibile in istruzioni e risorse che Vibe può riconoscere e usare nel progetto.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="scopo">
+                    <header>
+                        <p class="index">Capitolo 1</p>
+                        <h2>A che cosa servono</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una skill è una cartella che contiene un metodo riutilizzabile: istruzioni, regole e file di supporto per un compito preciso.</p>
+                    </div>
+
+                    <p>Un prompt descrive ciò che vogliamo ottenere in una singola conversazione. Una skill, invece, conserva il modo corretto di affrontare un lavoro che si ripete: per esempio preparare un report, applicare uno stile editoriale, usare un'API o controllare un tipo di file.</p>
+                    <p>Le skill aiutano Vibe a essere coerente. Invece di rispiegare ogni volta tono, passaggi e vincoli, queste informazioni vivono in un posto revisionabile dal team e restano vicine al progetto.</p>
+                    <p>Una buona skill è focalizzata: un obiettivo chiaro, istruzioni concrete e soltanto le risorse che servono davvero. Se due attività richiedono metodi molto diversi, è preferibile creare due skill distinte.</p>
+                </section>
+
+                <section id="vibe">
+                    <header>
+                        <p class="index">Capitolo 2</p>
+                        <h2>Skill in Vibe</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Mistral Vibe segue lo standard Agent Skills: una skill è una directory con un file obbligatorio chiamato <code>SKILL.md</code>.</p>
+                    </div>
+
+                    <p>Per Vibe Code, le skill legate a un progetto vivono nella cartella <code>.vibe/skills/</code>. Quando Vibe lavora in una directory considerata attendibile, scopre le skill presenti lì e può usarle per il progetto corrente.</p>
+
+                    <pre><code class="language-text">.vibe/
+└── skills/
+    └── nome-skill/
+        └── SKILL.md</code></pre>
+
+                    <p>Vibe può scegliere una skill automaticamente quando la richiesta corrisponde alla sua descrizione, oppure l'utente può richiamarla in modo esplicito con <code>/nome-skill</code>. Impostando <code>user-invocable: true</code> nel frontmatter, la skill appare anche tra i comandi disponibili.</p>
+
+                    <p>La documentazione ufficiale di Mistral descrive le <a href="https://docs.mistral.ai/vibe/code/cli/skills" target="_blank" rel="noopener noreferrer">posizioni e i campi delle skill di Vibe Code</a>, inclusa la cartella di progetto <code>.vibe/skills/</code>.</p>
+                </section>
+
+                <section id="struttura">
+                    <header>
+                        <p class="index">Capitolo 3</p>
+                        <h2>Come sono composte</h2>
+                    </header>
+
+                    <p>Il primo file è sempre <code>SKILL.md</code>. Inizia con il <strong>frontmatter YAML</strong>, cioè i metadati che Vibe legge per riconoscere e presentare la skill. Dopo il frontmatter arrivano le istruzioni Markdown che l'agente segue quando la skill viene attivata.</p>
+
+                    <pre><code class="language-markdown">---
+name: api-summary
+description: Usare quando occorre leggere una risposta API e produrre una sintesi breve con errori e dati principali.
+user-invocable: true
+allowed-tools:
+  - read_file
+  - grep
+---
+
+# API summary
+
+1. Leggere la risposta e identificare i dati importanti.
+2. Segnalare gli errori o i campi mancanti.
+3. Restituire una sintesi nel formato richiesto.</code></pre>
+
+                    <ul>
+                        <li><code>name</code> è il nome tecnico usato per richiamare la skill.</li>
+                        <li><code>description</code> spiega quando attivarla: è il trigger più importante.</li>
+                        <li><code>user-invocable</code> rende disponibile il comando <code>/api-summary</code>.</li>
+                        <li><code>allowed-tools</code> limita gli strumenti che la skill può usare.</li>
+                    </ul>
+
+                    <p>Accanto a <code>SKILL.md</code> possono esistere file aggiuntivi: <code>references/</code> per istruzioni estese, <code>assets/</code> per template o file da riutilizzare e <code>scripts/</code> per operazioni automatiche e ripetibili.</p>
+                </section>
+
+                <section id="creare">
+                    <header>
+                        <p class="index">Capitolo 4</p>
+                        <h2>Come crearle</h2>
+                    </header>
+
+                    <p>Si inizia da un caso reale. Prima di scrivere file, individua un'attività che richiede sempre gli stessi passaggi, le stesse regole o gli stessi materiali. Una skill per “fare tutto con il codice” è troppo ampia; una skill per “generare il changelog dalle modifiche Git” ha invece un confine chiaro.</p>
+
+                    <p>Poi si crea la cartella in <code>.vibe/skills/</code>, si scrive una descrizione che inizi idealmente con “Usare quando…” e si aggiunge il procedimento nel corpo di <code>SKILL.md</code>. Le istruzioni devono dire all'agente che cosa controllare, che cosa produrre e che cosa evitare.</p>
+
+                    <pre><code class="language-text">.vibe/skills/
+└── changelog-git/
+    └── SKILL.md</code></pre>
+
+                    <h3>Convenzioni per i nomi</h3>
+
+                    <p>Usa nomi brevi, descrittivi e facili da prevedere. Per la cartella della skill e per i file di supporto, la convenzione più chiara è il <em>kebab-case</em>: tutte lettere minuscole e parole separate da trattini. Il nome della cartella dovrebbe coincidere con il valore di <code>name</code> nel frontmatter: <code>changelog-git</code>, non <code>ChangelogGit</code> né <code>skill changelog</code>.</p>
+
+                    <ul>
+                        <li><strong>Cartella della skill:</strong> <code>changelog-git/</code>, <code>report-settimanale/</code>.</li>
+                        <li><strong>File principale:</strong> <code>SKILL.md</code> va mantenuto esattamente con questo nome e in maiuscolo.</li>
+                        <li><strong>Indice e cartelle comuni:</strong> <code>index.md</code>, <code>references/</code>, <code>assets/</code> e <code>scripts/</code> restano in minuscolo.</li>
+                        <li><strong>File interni:</strong> usa nomi espliciti come <code>convenzioni-commit.md</code>, <code>modello-release.md</code> o <code>controlla-branch.js</code>.</li>
+                    </ul>
+
+                    <p>Evita spazi, accenti, simboli e nomi generici come <code>file1.md</code>. Percorsi coerenti rendono più semplice per Vibe, per l'agente e per il team trovare la risorsa giusta senza ambiguità.</p>
+
+                    <p>Dopo il primo utilizzo, osserva il risultato. Se l'agente non attiva la skill, migliora la descrizione. Se si attiva ma sbaglia un passaggio, aggiungi o correggi l'istruzione interessata. Le skill efficaci nascono da piccoli miglioramenti successivi, non da un manuale enorme scritto in anticipo.</p>
+                </section>
+
+                <section id="complesse">
+                    <header>
+                        <p class="index">Capitolo 5</p>
+                        <h2>Skill complesse</h2>
+                    </header>
+
+                    <p>Quando una competenza contiene più sottocompetenze, <code>SKILL.md</code> non deve trasformarsi in un testo infinito. Può restare la porta d'ingresso e usare un file <code>index.md</code> come indice dei materiali da consultare.</p>
+
+                    <pre><code class="language-text">.vibe/skills/
+└── brand-system/
+    ├── SKILL.md
+    ├── index.md
+    └── references/
+        ├── tono-di-voce.md
+        ├── colori.md
+        └── componenti.md</code></pre>
+
+                    <p><code>index.md</code> non è un file magico caricato automaticamente: è un indice esplicito. Il corpo di <code>SKILL.md</code> deve dire all'agente quando aprirlo, per esempio quando la richiesta coinvolge più parti del sistema di brand.</p>
+
+                    <pre><code class="language-markdown">## Navigazione
+
+Se la richiesta riguarda più di una sottocompetenza,
+leggere index.md e scegliere soltanto i riferimenti necessari.</code></pre>
+
+                    <p>Dentro <code>index.md</code> si elencano le sottocompetenze e i rispettivi file. Per esempio: tono di voce per la scrittura, colori per l'interfaccia, componenti per i layout. In questo modo l'agente carica solo la parte utile, senza appesantire ogni richiesta con tutte le regole della competenza complessa.</p>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

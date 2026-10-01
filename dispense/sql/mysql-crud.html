@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CRUD e transazioni con MySQL - Dispensa didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">MySQL</div>
+                <ul>
+                    <li><a href="#crud">CRUD</a></li>
+                    <li><a href="#select">SELECT</a></li>
+                    <li><a href="#insert">INSERT</a></li>
+                    <li><a href="#update">UPDATE</a></li>
+                    <li><a href="#delete">DELETE</a></li>
+                    <li><a href="#join">JOIN</a></li>
+                    <li><a href="#funzioni">FUNZIONI</a></li>
+                    <li><a href="#having">HAVING</a></li>
+                    <li><a href="#order-by">ORDER BY</a></li>
+                    <li><a href="#limit">LIMIT</a></li>
+                    <li><a href="#transaction">TRANSACTION</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>CRUD e transazioni con MySQL</h1>
+                <p class="intro">Leggere, analizzare, collegare e modificare i dati, controllando le operazioni con <code>COMMIT</code> e <code>ROLLBACK</code>.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="crud">
+                    <header>
+                        <p class="index">Capitolo 1</p>
+                        <h2>Le quattro operazioni CRUD</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><strong>CRUD</strong> riassume le quattro operazioni fondamentali sui dati: Create, Read, Update e Delete.</p>
+                    </div>
+
+                    <ul>
+                        <li><strong>Create:</strong> creare un nuovo record con <code>INSERT INTO</code>.</li>
+                        <li><strong>Read:</strong> leggere uno o pi&ugrave; record con <code>SELECT</code>.</li>
+                        <li><strong>Update:</strong> modificare record esistenti con <code>UPDATE</code>.</li>
+                        <li><strong>Delete:</strong> eliminare record con <code>DELETE</code>.</li>
+                    </ul>
+
+                    <p>Gli esempi usano una tabella <code>products</code> gi&agrave; esistente con queste colonne:</p>
+
+                    <pre><code class="language-text">products
++----------------+----------------+--------------------------------+
+| Colonna        | Tipo           | Significato                    |
++----------------+----------------+--------------------------------+
+| id             | INT            | Identificativo del prodotto    |
+| name           | VARCHAR(255)   | Nome del prodotto              |
+| price          | DECIMAL(8,2)   | Prezzo                         |
+| stock_quantity | INT            | Quantit&agrave; disponibile          |
+| is_deleted     | INT(1)         | 0 = attivo, 1 = eliminato      |
+| created_at     | DATETIME       | Data di creazione              |
+| updated_at     | DATETIME       | Data dell'ultima modifica      |
++----------------+----------------+--------------------------------+</code></pre>
+
+                    <p>Ogni istruzione SQL termina con un punto e virgola. Le parole chiave sono scritte in maiuscolo per riconoscerle pi&ugrave; facilmente.</p>
+                </section>
+
+                <section id="select">
+                    <header>
+                        <p class="index">Capitolo 2</p>
+                        <h2>Leggere i dati con SELECT</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>SELECT</code> legge i dati senza modificarli. &Egrave; l'istruzione da usare anche prima di un aggiornamento o di una cancellazione.</p>
+                    </div>
+
+                    <p>Dopo <code>SELECT</code> indichiamo le colonne da leggere; dopo <code>FROM</code> specifichiamo la tabella. Il carattere <code>*</code>, chiamato asterisco, seleziona <strong>tutte le colonne</strong>:</p>
+
+                    <pre><code class="language-sql">SELECT *
+FROM `products`;</code></pre>
+
+                    <p><code>SELECT *</code> &egrave; comodo per esplorare rapidamente una tabella. Nelle query dell'applicazione &egrave; per&ograve; preferibile elencare soltanto le colonne necessarie: il risultato &egrave; pi&ugrave; chiaro e il database trasferisce meno dati.</p>
+
+                    <p>Per leggere soltanto identificativo, nome e prezzo scriviamo:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`;</code></pre>
+
+                    <p>Possiamo usare <code>WHERE</code> per filtrare i risultati:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `is_deleted` = 0
+    AND `price` &lt; 50.00;</code></pre>
+
+                    <ul>
+                        <li><code>WHERE</code> conserva soltanto i record che rispettano una condizione.</li>
+                        <li><code>AND</code> richiede che entrambe le condizioni siano vere.</li>
+                    </ul>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Leggi identificativo, nome e quantit&agrave; dei prodotti attivi che hanno meno di cinque pezzi.</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `stock_quantity`
+FROM `products`
+WHERE `is_deleted` = 0
+    AND `stock_quantity` &lt; 5;</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="insert">
+                    <header>
+                        <p class="index">Capitolo 3</p>
+                        <h2>Inserire dati con INSERT INTO</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>INSERT INTO</code> crea un nuovo record. L'ordine dei valori deve corrispondere esattamente all'ordine delle colonne.</p>
+                    </div>
+
+                    <pre><code class="language-sql">INSERT INTO `products` (
+    `name`,
+    `price`,
+    `stock_quantity`
+) VALUES (
+    'Tastiera meccanica',
+    79.90,
+    12
+);</code></pre>
+
+                    <p>Non inseriamo <code>id</code> perch&eacute; &egrave; generato automaticamente. Omettiamo anche le colonne di log e <code>is_deleted</code>, che ricevono i propri valori predefiniti.</p>
+                    <p>Le stringhe usano gli apici singoli, mentre i numeri non li richiedono. Per inserire pi&ugrave; record separiamo i gruppi di valori con una virgola:</p>
+
+                    <pre><code class="language-sql">INSERT INTO `products` (
+    `name`,
+    `price`,
+    `stock_quantity`
+) VALUES
+    ('Mouse wireless', 29.90, 20),
+    ('Webcam HD', 54.50, 8);</code></pre>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Inserisci un monitor dal prezzo di 189,90 euro con sei pezzi disponibili.</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <pre><code class="language-sql">INSERT INTO `products` (
+    `name`,
+    `price`,
+    `stock_quantity`
+) VALUES (
+    'Monitor 24 pollici',
+    189.90,
+    6
+);</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="update">
+                    <header>
+                        <p class="index">Capitolo 4</p>
+                        <h2>Modificare dati con UPDATE</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>UPDATE</code> modifica record gi&agrave; esistenti. Senza <code>WHERE</code>, modifica tutti i record della tabella.</p>
+                    </div>
+
+                    <p>Prima controlliamo con <code>SELECT</code> quali record corrispondono alla condizione:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `id` = 1;</code></pre>
+
+                    <p>Se il record &egrave; quello corretto, possiamo modificarlo usando lo stesso <code>WHERE</code>:</p>
+
+                    <pre><code class="language-sql">UPDATE `products`
+SET
+    `price` = 69.90,
+    `stock_quantity` = 15
+WHERE `id` = 1;</code></pre>
+
+                    <p><code>SET</code> contiene le nuove assegnazioni. Possiamo modificare una o pi&ugrave; colonne, separandole con una virgola. MySQL aggiorna automaticamente <code>updated_at</code> se la colonna usa <code>ON UPDATE CURRENT_TIMESTAMP</code>.</p>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Controlla e poi porta a zero la quantit&agrave; del prodotto con <code>id</code> uguale a 4.</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `stock_quantity`
+FROM `products`
+WHERE `id` = 4;
+
+UPDATE `products`
+SET
+    `stock_quantity` = 0
+WHERE `id` = 4;</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="delete">
+                    <header>
+                        <p class="index">Capitolo 5</p>
+                        <h2>Eliminare dati con DELETE</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>DELETE</code> elimina record. Senza <code>WHERE</code>, elimina tutti i record della tabella.</p>
+                    </div>
+
+                    <p>Come per <code>UPDATE</code>, eseguiamo prima un <code>SELECT</code> con la stessa condizione:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`
+FROM `products`
+WHERE `id` = 8;</code></pre>
+
+                    <p>Dopo aver verificato il record, possiamo eliminarlo definitivamente:</p>
+
+                    <pre><code class="language-sql">DELETE FROM `products`
+WHERE `id` = 8;</code></pre>
+
+                    <p>Prima di un <code>DELETE</code> bisogna controllare anche le chiavi esterne e le relative azioni <code>ON DELETE</code>: una cancellazione potrebbe essere bloccata oppure propagarsi ad altre tabelle.</p>
+                    <p>Quando &egrave; utile conservare la cronologia, possiamo applicare una <strong>cancellazione logica</strong>: il record resta nel database, ma viene marcato come eliminato.</p>
+
+                    <pre><code class="language-sql">UPDATE `products`
+SET
+    `is_deleted` = 1
+WHERE `id` = 8;</code></pre>
+
+                    <p>Le normali letture dovranno quindi filtrare i record con <code>WHERE `is_deleted` = 0</code>.</p>
+                </section>
+
+                <section id="join">
+                    <header>
+                        <p class="index">Capitolo 6</p>
+                        <h2>I tipi di JOIN</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una <code>JOIN</code> collega i record di due tabelle attraverso colonne correlate, solitamente una chiave primaria e una chiave esterna.</p>
+                    </div>
+
+                    <h3>INNER JOIN</h3>
+
+                    <p><code>INNER JOIN</code> restituisce soltanto i record che trovano una corrispondenza in entrambe le tabelle:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `products`.`id`,
+    `products`.`name`,
+    `categories`.`name`
+FROM `products`
+INNER JOIN `categories`
+    ON `categories`.`id` = `products`.`id_category`;</code></pre>
+
+                    <p>La parola <code>INNER</code> pu&ograve; essere omessa: scrivere soltanto <code>JOIN</code> produce lo stesso risultato.</p>
+
+                    <h3>LEFT JOIN</h3>
+
+                    <p><code>LEFT JOIN</code> mantiene tutti i record della tabella a sinistra, cio&egrave; <code>products</code>. Se un prodotto non ha una categoria collegata, le colonne di <code>categories</code> contengono <code>NULL</code>.</p>
+
+                    <pre><code class="language-sql">SELECT
+    `products`.`id`,
+    `products`.`name`,
+    `categories`.`name`
+FROM `products`
+LEFT JOIN `categories`
+    ON `categories`.`id` = `products`.`id_category`;</code></pre>
+
+                    <h3>RIGHT JOIN</h3>
+
+                    <p><code>RIGHT JOIN</code> mantiene tutti i record della tabella a destra, cio&egrave; <code>categories</code>. Una categoria priva di prodotti compare comunque; le colonne di <code>products</code> contengono <code>NULL</code>.</p>
+
+                    <pre><code class="language-sql">SELECT
+    `products`.`id`,
+    `products`.`name`,
+    `categories`.`name`
+FROM `products`
+RIGHT JOIN `categories`
+    ON `categories`.`id` = `products`.`id_category`;</code></pre>
+
+                    <p>Spesso una <code>RIGHT JOIN</code> viene riscritta come <code>LEFT JOIN</code> invertendo l'ordine delle tabelle, perch&eacute; risulta pi&ugrave; immediata da leggere.</p>
+
+                    <h3>NATURAL JOIN</h3>
+
+                    <p><code>NATURAL JOIN</code> crea automaticamente il collegamento usando tutte le colonne che hanno lo stesso nome nelle due tabelle. Per questo motivo non richiede la condizione <code>ON</code>:</p>
+
+                    <pre><code class="language-sql">SELECT *
+FROM `products`
+NATURAL JOIN `categories`;</code></pre>
+
+                    <p>Nel nostro schema le due tabelle hanno diverse colonne con lo stesso nome. <code>NATURAL JOIN</code> le userebbe tutte per creare il collegamento. &Egrave; quindi pi&ugrave; sicuro specificare la relazione con <code>ON</code> quando vogliamo controllare con precisione le colonne confrontate.</p>
+                </section>
+
+                <section id="funzioni">
+                    <header>
+                        <p class="index">Capitolo 7</p>
+                        <h2>Calcolare valori con le funzioni SQL</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Le <strong>funzioni aggregate</strong> ricevono i valori di pi&ugrave; record e producono un risultato riassuntivo.</p>
+                    </div>
+
+                    <ul>
+                        <li><code>COUNT</code> conta i record o i valori presenti.</li>
+                        <li><code>SUM</code> somma i valori di una colonna numerica.</li>
+                        <li><code>AVG</code> calcola la media dei valori.</li>
+                        <li><code>MIN</code> trova il valore pi&ugrave; piccolo.</li>
+                        <li><code>MAX</code> trova il valore pi&ugrave; grande.</li>
+                    </ul>
+
+                    <p>Possiamo usare pi&ugrave; funzioni nella stessa query:</p>
+
+                    <pre><code class="language-sql">SELECT
+    COUNT(`id`) AS `product_count`,
+    SUM(`stock_quantity`) AS `total_stock`,
+    AVG(`price`) AS `average_price`,
+    MIN(`price`) AS `lowest_price`,
+    MAX(`price`) AS `highest_price`
+FROM `products`
+WHERE `is_deleted` = 0;</code></pre>
+
+                    <p>Il <code>WHERE</code> filtra prima i record; le funzioni lavorano soltanto sui record rimasti. <code>AS</code> assegna un alias leggibile a ogni colonna del risultato.</p>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Conta i prodotti attivi della categoria 1 e calcola il loro prezzo medio.</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <pre><code class="language-sql">SELECT
+    COUNT(`id`) AS `product_count`,
+    AVG(`price`) AS `average_price`
+FROM `products`
+WHERE `id_category` = 1
+    AND `is_deleted` = 0;</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="having">
+                    <header>
+                        <p class="index">Capitolo 8</p>
+                        <h2>Filtrare i gruppi con HAVING</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>HAVING</code> filtra i risultati prodotti da <code>GROUP BY</code> e dalle funzioni aggregate.</p>
+                    </div>
+
+                    <p><code>WHERE</code> filtra i singoli record prima del raggruppamento; <code>HAVING</code> filtra i gruppi dopo che MySQL ha calcolato funzioni come <code>COUNT</code> e <code>AVG</code>.</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id_category`,
+    COUNT(`id`) AS `product_count`,
+    AVG(`price`) AS `average_price`
+FROM `products`
+WHERE `is_deleted` = 0
+GROUP BY `id_category`
+HAVING
+    COUNT(`id`) &gt;= 5
+    AND AVG(`price`) &gt; 50.00;</code></pre>
+
+                    <p>La query crea un gruppo per ogni categoria e conserva soltanto le categorie con almeno cinque prodotti attivi e un prezzo medio superiore a 50 euro.</p>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Raggruppa i prodotti attivi per categoria e mostra soltanto le categorie la cui disponibilit&agrave; totale supera 100 pezzi.</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                            <div class="panel">
+                                <pre><code class="language-sql">SELECT
+    `id_category`,
+    SUM(`stock_quantity`) AS `total_stock`
+FROM `products`
+WHERE `is_deleted` = 0
+GROUP BY `id_category`
+HAVING SUM(`stock_quantity`) &gt; 100;</code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="order-by">
+                    <header>
+                        <p class="index">Capitolo 9</p>
+                        <h2>Ordinare i risultati con ORDER BY</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>ORDER BY</code> ordina i record restituiti da una query in base a una o pi&ugrave; colonne.</p>
+                    </div>
+
+                    <ul>
+                        <li><code>ASC</code> ordina in modo crescente ed &egrave; la direzione predefinita.</li>
+                        <li><code>DESC</code> ordina in modo decrescente.</li>
+                    </ul>
+
+                    <p>Questa query mostra prima i prodotti pi&ugrave; costosi:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `is_deleted` = 0
+ORDER BY `price` DESC;</code></pre>
+
+                    <p>Possiamo indicare pi&ugrave; colonne. MySQL usa la seconda quando due record hanno lo stesso valore nella prima:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `is_deleted` = 0
+ORDER BY
+    `price` DESC,
+    `name` ASC;</code></pre>
+                </section>
+
+                <section id="limit">
+                    <header>
+                        <p class="index">Capitolo 10</p>
+                        <h2>Limitare i risultati con LIMIT</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>LIMIT</code> stabilisce il numero massimo di record restituiti dalla query.</p>
+                    </div>
+
+                    <p>Per ottenere soltanto i primi cinque prodotti:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+ORDER BY `id` ASC
+LIMIT 5;</code></pre>
+
+                    <p><code>OFFSET</code> indica quanti record saltare prima di iniziare a restituire i risultati. &Egrave; utile per dividere un elenco in pagine:</p>
+
+                    <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+ORDER BY `id` ASC
+LIMIT 10 OFFSET 20;</code></pre>
+
+                    <p>La query salta i primi venti record e restituisce i dieci successivi, cio&egrave; la terza pagina di un elenco da dieci elementi. Con <code>LIMIT</code> &egrave; importante usare <code>ORDER BY</code>, altrimenti l'ordine dei record non &egrave; garantito.</p>
+                </section>
+
+                <section id="transaction">
+                    <header>
+                        <p class="index">Capitolo 11</p>
+                        <h2>TRANSACTION, COMMIT e ROLLBACK</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una <strong>transazione</strong> raggruppa pi&ugrave; operazioni: possiamo confermarle tutte insieme oppure annullarle tutte insieme.</p>
+                    </div>
+
+                    <p>Normalmente MySQL usa l'<strong>autocommit</strong>: ogni istruzione completata con successo viene confermata subito. <code>START TRANSACTION</code> apre invece una transazione esplicita.</p>
+
+                    <ul>
+                        <li><code>COMMIT</code> conferma definitivamente tutte le modifiche della transazione.</li>
+                        <li><code>ROLLBACK</code> annulla le modifiche non ancora confermate.</li>
+                    </ul>
+
+                    <p>In questo esempio cambiamo prezzo e quantit&agrave; dello stesso prodotto. Dopo aver controllato il risultato, confermiamo entrambe le modifiche:</p>
+
+                    <pre><code class="language-sql">START TRANSACTION;
+
+UPDATE `products`
+SET
+    `price` = 64.90
+WHERE `id` = 1;
+
+UPDATE `products`
+SET
+    `stock_quantity` = `stock_quantity` + 5
+WHERE `id` = 1;
+
+SELECT
+    `id`,
+    `name`,
+    `price`,
+    `stock_quantity`
+FROM `products`
+WHERE `id` = 1;
+
+COMMIT;</code></pre>
+
+                    <p>Se un'istruzione fallisce oppure il risultato del <code>SELECT</code> non &egrave; corretto, non eseguiamo <code>COMMIT</code>: usiamo <code>ROLLBACK</code>.</p>
+
+                    <p>Durante una prova possiamo annullare una modifica volontariamente:</p>
+
+                    <pre><code class="language-sql">START TRANSACTION;
+
+UPDATE `products`
+SET
+    `price` = `price` * 0.90
+WHERE `is_deleted` = 0;
+
+SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `is_deleted` = 0;
+
+ROLLBACK;</code></pre>
+
+                    <p>Dopo <code>ROLLBACK</code>, i prezzi tornano ai valori precedenti. Per ogni transazione scegliamo una sola conclusione: <code>COMMIT</code> oppure <code>ROLLBACK</code>.</p>
+
+                    <div class="note">
+                        <p>Gli esempi richiedono tabelle con motore <code>InnoDB</code>. I comandi che cambiano la struttura del database possono causare un commit implicito: qui usiamo le transazioni per <code>INSERT</code>, <code>UPDATE</code> e <code>DELETE</code>.</p>
+                    </div>
+                </section>
+
+                <section class="task" id="esercizio-finale">
+                    <h3>Esercizio finale</h3>
+                    <p>Gestisci il catalogo con queste operazioni: leggi i cinque prodotti attivi meno costosi; inserisci un prodotto; modifica in sicurezza il prodotto con <code>id</code> uguale a 3; infine prova la sua cancellazione logica dentro una transazione e annullala.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-sql">SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `is_deleted` = 0
+ORDER BY `price` ASC
+LIMIT 5;
+
+INSERT INTO `products` (
+    `name`,
+    `price`,
+    `stock_quantity`
+) VALUES (
+    'Supporto per notebook',
+    34.90,
+    10
+);
+
+SELECT
+    `id`,
+    `name`,
+    `price`
+FROM `products`
+WHERE `id` = 3;
+
+UPDATE `products`
+SET
+    `price` = 31.90
+WHERE `id` = 3;
+
+START TRANSACTION;
+
+UPDATE `products`
+SET
+    `is_deleted` = 1
+WHERE `id` = 3;
+
+SELECT
+    `id`,
+    `name`,
+    `is_deleted`
+FROM `products`
+WHERE `id` = 3;
+
+ROLLBACK;</code></pre>
+                    </div>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

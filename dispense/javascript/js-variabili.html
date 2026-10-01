@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Base - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">JavaScript Base</div>
+            <ul>
+                <li><a href="#scripts">Script</a></li>
+                <li><a href="#variables">Variabili</a></li>
+                <li><a href="#types">Tipi</a></li>
+                <li><a href="#strings">Stringhe</a></li>
+                <li><a href="#numbers">Numeri</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Fondamenti di JavaScript</h1>
+            <p class="intro">Script, variabili, tipi di dato, stringhe e operazioni numeriche.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <section id="scripts">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Inserire uno script in una pagina HTML</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il tag <code>&lt;script&gt;</code> può contenere JavaScript scritto direttamente nella pagina, collegare un file esterno con <code>src</code> oppure ospitare dati non eseguibili, come JSON.</p>
+                    <p>Il tag <code>&lt;noscript&gt;</code> mostra un contenuto alternativo quando JavaScript non è disponibile o non è attivo.</p>
+                </div>
+
+                <p>Uno script può essere inserito in tre modi principali: direttamente nella pagina, in un file separato oppure su un singolo tag tramite un evento. La scelta dipende da quanto codice devi scrivere e da quanto vuoi tenere ordinato il progetto.</p>
+                <p>Il codice inline è utile per esempi semplici, il file separato è più comodo quando il progetto cresce, mentre il codice legato a un evento serve per azioni rapide su un elemento preciso.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-html">&lt;!-- Script in pagina --&gt;
+&lt;script&gt;
+    console.log('Messaggio scritto direttamente nella pagina');
+&lt;/script&gt;
+
+&lt;!-- Script in file separato --&gt;
+&lt;script src="assets/main.js"&gt;&lt;/script&gt;
+
+&lt;!-- Script collegato a un singolo elemento --&gt;
+&lt;button onclick="console.log('Click sul pulsante')"&gt;Premi qui&lt;/button&gt;</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un esempio con uno script esterno e aggiungi un contenuto alternativo per chi non ha JavaScript attivo.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;script src="assets/main.js"&gt;&lt;/script&gt;
+
+&lt;noscript&gt;
+    Attiva JavaScript per usare tutte le funzionalità della pagina.
+&lt;/noscript&gt;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="types">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Tipi di script e attributi utili</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>type="text/javascript"</code> è la forma classica, <code>type="module"</code> abilita i moduli e <code>type="application/json"</code> serve per inserire dati JSON non eseguibili.</p>
+                    <p><code>defer</code> rinvia l'esecuzione fino a quando l'HTML è stato analizzato, mentre <code>async</code> esegue il file appena è disponibile.</p>
+                </div>
+
+                <p>Alcuni attributi cambiano il comportamento del tag <code>&lt;script&gt;</code>. <code>type="module"</code> permette di usare il sistema dei moduli, mentre <code>type="application/json"</code> è utile quando vuoi conservare dati dentro la pagina senza eseguirli.</p>
+                <p><code>defer</code> è adatto ai file esterni che devono aspettare la fine del parsing dell'HTML. <code>async</code> è utile quando il file può partire appena viene scaricato, senza dipendere dall'ordine della pagina.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-html">&lt;script src="assets/main.js" defer&gt;&lt;/script&gt;
+
+&lt;script type="module"&gt;
+    console.log('Questo script usa il tipo module');
+&lt;/script&gt;
+
+&lt;script type="application/json" id="config"&gt;
+    {
+        "tema": "chiaro",
+        "lingua": "it"
+    }
+&lt;/script&gt;</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un tag <code>&lt;script&gt;</code> con <code>defer</code> e un secondo tag con <code>type="module"</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-html">&lt;script src="assets/main.js" defer&gt;&lt;/script&gt;
+
+&lt;script type="module"&gt;
+    console.log('Modulo attivo');
+&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="variables">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Variabili in JavaScript</h2>
+                </header>
+
+                <div class="note">
+                    <p>In JavaScript moderno si usano soprattutto <code>let</code> e <code>const</code>. <code>var</code> è una sintassi storica e conviene evitarla nei nuovi progetti.</p>
+                </div>
+
+                <p>Una variabile è un contenitore che salva un valore. Con <code>let</code> dichiari un valore che può cambiare, mentre con <code>const</code> dichiari un valore che non deve essere riassegnato. Questo aiuta a rendere il codice più chiaro e più sicuro da leggere.</p>
+                <p><code>var</code> esiste ancora, ma oggi si preferisce non usarlo perché il suo comportamento è meno chiaro e meno utile per scrivere codice moderno.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-javascript">let nome = 'Luca';
+const anno = 2026;
+let presente = true;
+
+nome = 'Marco';</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea una variabile per il nome dello studente, una costante per l'anno corrente e una variabile booleana per la presenza.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">let studente = 'Anna';
+const anno = 2026;
+let presente = false;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="types">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Tipi di dato fondamentali</h2>
+                </header>
+
+                <div class="note">
+                    <p>I tre tipi base trattati sono <code>string</code>, <code>number</code> e <code>boolean</code>.</p>
+                </div>
+
+                <p>Una <strong>string</strong> è un testo, un <strong>number</strong> è un valore numerico e un <strong>boolean</strong> può valere solo <code>true</code> o <code>false</code>. Questi tipi servono per rappresentare informazioni diverse in modo corretto.</p>
+                <p>Quando scegli il tipo giusto, il codice diventa più leggibile e più facile da usare nelle operazioni successive. È importante distinguere tra testo e numero, perché non si comportano nello stesso modo.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-javascript">const corso = 'JavaScript Base';
+const lezioni = 8;
+const online = true;</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi una stringa per il nome di un docente, un number per gli anni di esperienza e un boolean per dire se insegna online.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const docente = 'Giulia';
+const esperienza = 5;
+const online = false;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="strings">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Concatenazione e template literal</h2>
+                </header>
+
+                <div class="note">
+                    <p>La concatenazione unisce stringhe con <code>+</code>, mentre i template literal usano i backtick e l'interpolazione con <code>${...}</code>.</p>
+                </div>
+
+                <p>Quando vuoi costruire una frase con più pezzi di testo, puoi unirli con la concatenazione. Con i template literal il risultato è più leggibile, soprattutto quando devi inserire variabili dentro una frase.</p>
+                <p>I template literal sono molto utili perché permettono di scrivere una stringa lunga senza interromperla in tanti pezzi separati.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-javascript">const nome = 'Sara';
+
+const messaggio1 = 'Ciao ' + nome + '! Benvenuta al corso.';
+const messaggio2 = `Ciao ${nome}! Benvenuta al corso.`;</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea la stessa frase prima con concatenazione e poi con un template literal.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const studente = 'Paolo';
+const corso = 'JavaScript Base';
+
+const frase1 = 'Lo studente ' + studente + ' segue il corso ' + corso + '.';
+const frase2 = `Lo studente ${studente} segue il corso ${corso}.`;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="numbers">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Operazioni algebriche sui numeri</h2>
+                </header>
+
+                <div class="note">
+                    <p>Con i numeri puoi usare somma, sottrazione, moltiplicazione, divisione e resto della divisione.</p>
+                </div>
+
+                <p>I valori numerici permettono di fare calcoli direttamente nel codice. Gli operatori principali sono <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> e <code>%</code>.</p>
+                <p>Questi operatori servono per sommare, togliere, moltiplicare, dividere e trovare il resto. Sono la base per qualsiasi calcolo semplice in JavaScript.</p>
+
+                <h3>Esempio pratico</h3>
+                <pre><code class="language-javascript">const a = 12;
+const b = 5;
+
+const somma = a + b;
+const differenza = a - b;
+const prodotto = a * b;
+const divisione = a / b;
+const resto = a % b;</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Usando <code>20</code> e <code>4</code>, calcola somma, prodotto e divisione.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">const x = 20;
+const y = 4;
+
+const somma = x + y;
+const prodotto = x * y;
+const divisione = x / y;</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Prepara una pagina HTML con uno script esterno caricato con <code>defer</code>, un messaggio alternativo con <code>noscript</code>, tre variabili per nome, anno e presenza, un testo costruito sia con concatenazione sia con template literal e un piccolo calcolo numerico.</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-html">&lt;script src="assets/main.js" defer&gt;&lt;/script&gt;
+
+&lt;noscript&gt;
+    Attiva JavaScript per usare tutte le funzionalità della pagina.
+&lt;/noscript&gt;
+
+&lt;script&gt;
+    const nome = 'Anna';
+    const anno = 2026;
+    let presente = true;
+
+    const frase1 = 'Lo studente ' + nome + ' partecipa nel ' + anno + '.';
+    const frase2 = `Lo studente ${nome} partecipa nel ${anno}.`;
+
+    const a = 10;
+    const b = 2;
+    const somma = a + b;
+&lt;/script&gt;</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

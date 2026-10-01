@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React - Eventi, Hook e useState</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="brand">React Base</div>
+            <ul>
+                <li><a href="#eventi">Eventi</a></li>
+                <li><a href="#comuni">Eventi comuni</a></li>
+                <li><a href="#hook">Hook</a></li>
+                <li><a href="#usestate">useState</a></li>
+                <li><a href="#reattivita">Reattività</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Eventi, Hook e stato locale</h1>
+            <p class="intro">Gestione delle interazioni e stato reattivo nei componenti React.</p>
+        </div>
+    </header>
+
+    <main>
+        <article>
+<section id="eventi">
+    <header>
+        <p class="index">Capitolo 1</p>
+        <h2>Gestione eventi in React</h2>
+    </header>
+
+    <div class="note">
+        <p>Un evento è una azione compiuta dall'utente mentre usa la pagina, come un click su un bottone o la scrittura in un campo di testo. In React si gestisce assegnando una funzione a una prop speciale, come <code>onClick</code>.</p>
+    </div>
+
+    <p>Ogni elemento JSX può reagire a un evento tramite una prop dedicata. La prop più usata è <code>onClick</code>, che si applica a un elemento come un bottone e indica quale funzione eseguire quando quell'elemento viene cliccato.</p>
+    <p>Il valore della prop deve essere il nome della funzione, senza le parentesi tonde: se si scrivono le parentesi, la funzione viene eseguita subito durante il rendering, invece che al momento del click. A volte però serve proprio eseguire subito una piccola operazione al click, come passare un valore diverso a una funzione: in quel caso si scrive una funzione freccia dentro <code>onClick</code>, così il codice al suo interno parte solo quando l'utente clicca davvero.</p>
+
+    <h3>Esempio</h3>
+    <pre><code class="language-jsx">function BottoneMessaggio() {
+    let numero = 0;
+
+    function saluta() {
+        console.log("Click ricevuto");
+    }
+
+    function incrementa(valore) {
+        numero = numero + valore;
+        console.log("Numero attuale:", numero);
+    }
+
+    return (
+        &lt;div&gt;
+            // Corretto: la funzione viene passata, non eseguita
+            &lt;button onClick={saluta}&gt;
+                Premi qui
+            &lt;/button&gt;
+
+            // Sbagliato: la funzione verrebbe eseguita subito
+            // &lt;button onClick={saluta()}&gt;
+            //     Premi qui
+            // &lt;/button&gt;
+
+            // Funzione freccia: incrementa di 1 solo al click
+            &lt;button onClick={() =&gt; incrementa(1)}&gt;
+                Incrementa
+            &lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+    <div class="exercise">
+        <h3>Esercizio</h3>
+        <p>Crea un componente con un bottone che, al click, esegue una funzione e stampa in console un messaggio.</p>
+
+        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+        <div class="panel">
+            <pre><code class="language-jsx">function BottoneConferma() {
+    function confermaClick() {
+        console.log("Bottone premuto");
+    }
+
+    return (
+        &lt;button onClick={confermaClick}&gt;
+            Conferma
+        &lt;/button&gt;
+    );
+}</code></pre>
+        </div>
+    </div>
+</section>
+
+            <section id="comuni">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Eventi più comuni</h2>
+                </header>
+
+                <div class="note">
+                    <p>React mette a disposizione molte prop evento diverse. Le più usate servono a gestire click sui bottoni, scrittura nei campi di testo, invio dei form, focus della tastiera e passaggio del mouse sopra un elemento.</p>
+                </div>
+
+                <p>Ogni evento è pensato per un tipo di interazione precisa. Un bottone tipicamente reagisce a <code>onClick</code>, un campo di input reagisce a <code>onChange</code> mentre l'utente digita, e un form intero reagisce a <code>onSubmit</code> quando viene inviato.</p>
+                <p>Conoscere questi eventi permette di scegliere quello corretto in base a cosa deve succedere nella pagina. Un errore comune è usare <code>onClick</code> per intercettare la scrittura in un campo di testo, quando in realtà per quel caso serve <code>onChange</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Descrizione</th>
+                            <th>Elementi comuni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>onClick</code></td>
+                            <td>L'utente preme e rilascia il mouse su un elemento.</td>
+                            <td>button, a, div</td>
+                        </tr>
+                        <tr>
+                            <td><code>onSubmit</code></td>
+                            <td>Viene inviato un form.</td>
+                            <td>form</td>
+                        </tr>
+                        <tr>
+                            <td><code>onChange</code></td>
+                            <td>Il valore di un campo cambia.</td>
+                            <td>input, select, textarea</td>
+                        </tr>
+                        <tr>
+                            <td><code>onInput</code></td>
+                            <td>Il valore viene modificato durante la digitazione.</td>
+                            <td>input, textarea</td>
+                        </tr>
+                        <tr>
+                            <td><code>onFocus</code></td>
+                            <td>Un elemento riceve il focus.</td>
+                            <td>input, button, a</td>
+                        </tr>
+                        <tr>
+                            <td><code>onBlur</code></td>
+                            <td>Un elemento perde il focus.</td>
+                            <td>input, button, a</td>
+                        </tr>
+                        <tr>
+                            <td><code>onKeyDown</code></td>
+                            <td>L'utente preme un tasto sulla tastiera.</td>
+                            <td>input, document</td>
+                        </tr>
+                        <tr>
+                            <td><code>onKeyUp</code></td>
+                            <td>L'utente rilascia un tasto sulla tastiera.</td>
+                            <td>input, document</td>
+                        </tr>
+                        <tr>
+                            <td><code>onMouseOver</code></td>
+                            <td>Il puntatore entra in un elemento.</td>
+                            <td>div, button, img</td>
+                        </tr>
+                        <tr>
+                            <td><code>onMouseOut</code></td>
+                            <td>Il puntatore esce da un elemento.</td>
+                            <td>div, button, img</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-jsx">function CampoNome() {
+    function scriviInConsole() {
+        console.log("Valore modificato");
+    }
+
+    function inviaForm() {
+        console.log("Form inviato");
+    }
+
+    return (
+        &lt;form onSubmit={inviaForm}&gt;
+            &lt;input type="text" onChange={scriviInConsole} /&gt;
+            &lt;button&gt;Invia&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un componente con un input che reagisce a <code>onChange</code> e un bottone che reagisce a <code>onClick</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">function InterazioniBase() {
+    function gestisciCambio() {
+        console.log("Input modificato");
+    }
+
+    function gestisciClick() {
+        console.log("Bottone cliccato");
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;input type="text" onChange={gestisciCambio} /&gt;
+            &lt;button onClick={gestisciClick}&gt;
+                Conferma
+            &lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="hook">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Che cos'è un Hook</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un Hook è una funzione speciale che permette a un componente funzione di "agganciarsi" a funzionalità interne di React, come la memorizzazione di uno stato.</p>
+                </div>
+
+                <p>Un componente funzione, di per sé, esegue il proprio codice e restituisce del JSX, ma ogni volta che viene rieseguito perde le variabili dichiarate al suo interno con <code>let</code> o <code>const</code>. Questo significa che un valore come un contatore non potrebbe essere ricordato tra un click e l'altro senza uno strumento apposito.</p>
+                <p>Gli Hook risolvono questo problema: sono funzioni fornite da React che, se chiamate dentro un componente, permettono di conservare valori tra un rendering e l'altro e di collegare il componente ad altre funzionalità di React. Il nome di ogni Hook inizia sempre con il prefisso <code>use</code>, come <code>useState</code>: questo rende immediatamente riconoscibile che si tratta di un Hook e non di una funzione qualsiasi.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-jsx">import { useState } from "react";
+
+function EsempioHook() {
+    const [valore, setValore] = useState(0);
+
+    return (
+        &lt;p&gt;Valore: {valore}&lt;/p&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Scrivi un componente che usa un Hook e mostra a schermo un numero iniziale uguale a 5.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from "react";
+
+function NumeroIniziale() {
+    const [numero, setNumero] = useState(5);
+
+    return (
+        &lt;p&gt;Numero: {numero}&lt;/p&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="usestate">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>L'Hook useState</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>useState</code> è l'Hook che permette di aggiungere una variabile di stato a un componente. Restituisce sempre due valori: lo stato attuale e la funzione che serve per aggiornarlo.</p>
+                </div>
+
+                <p><code>useState</code> si importa dal pacchetto <code>react</code> e si chiama all'inizio del componente, passando come argomento il valore iniziale dello stato. Questo valore iniziale viene usato solo la prima volta che il componente viene creato.</p>
+                <p>La funzione restituisce un array con due elementi, che di solito si estraggono con la destrutturazione: il primo elemento è il valore corrente dello stato, il secondo è la funzione da chiamare per cambiarlo, per convenzione chiamata <code>setNomeStato</code>. Lo stato non va mai modificato direttamente assegnando un nuovo valore alla variabile: bisogna sempre usare la funzione di aggiornamento, altrimenti React non si accorge del cambiamento e non aggiorna la pagina.</p>
+                <p>Ogni volta che la funzione di aggiornamento viene chiamata con un valore diverso da quello attuale, React rieseguisce il componente usando il nuovo valore, così l'interfaccia mostra sempre il dato aggiornato.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-jsx">import { useState } from "react";
+
+function Contatore() {
+    const [count, setCount] = useState(0);
+
+    function incrementa() {
+        setCount(count + 1);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;p&gt;Conteggio: {count}&lt;/p&gt;
+            &lt;button onClick={incrementa}&gt;
+                Aggiungi
+            &lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Realizza un componente con uno stato iniziale uguale a 0 e un bottone che aumenta il valore di 1 a ogni click.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from "react";
+
+function Incremento() {
+    const [numero, setNumero] = useState(0);
+
+    function aumenta() {
+        setNumero(numero + 1);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;p&gt;Valore: {numero}&lt;/p&gt;
+            &lt;button onClick={aumenta}&gt;
+                Incrementa
+            &lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="reattivita">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Reattività e aggiornamento UI</h2>
+                </header>
+
+                <div class="note">
+                    <p>La reattività è il comportamento per cui l'interfaccia si aggiorna automaticamente quando cambia uno stato, senza bisogno di ricaricare la pagina.</p>
+                </div>
+
+                <p>Quando la funzione di aggiornamento dello stato viene chiamata, React confronta il nuovo valore con quello precedente e, se sono diversi, rieseguisce il componente per calcolare il nuovo contenuto da mostrare. Questo collega direttamente lo stato a tutto ciò che dipende da esso nel JSX, come testo, numeri o blocchi mostrati con il conditional rendering.</p>
+                <p>Uno stato booleano, per esempio, può decidere se un blocco di JSX viene mostrato oppure no grazie allo short-circuiting con l'operatore <code>&amp;&amp;</code>. Ogni volta che lo stato booleano cambia valore, il blocco condizionale appare o scompare automaticamente, senza altro codice aggiuntivo.</p>
+
+                <h3>Esempio</h3>
+                <pre><code class="language-jsx">import { useState } from "react";
+
+function MessaggioVisibile() {
+    const [visibile, setVisibile] = useState(false);
+
+    function cambiaStato() {
+        setVisibile(!visibile);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;button onClick={cambiaStato}&gt;
+                Cambia stato
+            &lt;/button&gt;
+
+            {visibile &amp;&amp; &lt;p&gt;Messaggio visibile&lt;/p&gt;}
+        &lt;/div&gt;
+    );
+}</code></pre>
+
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un componente con uno stato booleano che alterna tra contenuto visibile e contenuto nascosto quando premi un bottone.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">import { useState } from "react";
+
+function ToggleMessaggio() {
+    const [aperto, setAperto] = useState(false);
+
+    function alternaMessaggio() {
+        setAperto(!aperto);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;button onClick={alternaMessaggio}&gt;
+                Alterna messaggio
+            &lt;/button&gt;
+
+            {aperto &amp;&amp; &lt;p&gt;Il messaggio ora è visibile&lt;/p&gt;}
+        &lt;/div&gt;
+    );
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Prepara un componente React con un input che reagisce a <code>onChange</code>, un bottone che modifica uno stato booleano, un secondo bottone che incrementa un contatore e un messaggio mostrato con short-circuiting. Usa almeno un evento di input, <code>onClick</code> e l'Hook <code>useState</code>.</p>
+
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-jsx">import { useState } from "react";
+
+function PannelloInterattivo() {
+    const [aperto, setAperto] = useState(false);
+    const [count, setCount] = useState(0);
+
+    function gestisciCambio() {
+        console.log("Input modificato");
+    }
+
+    function alternaPannello() {
+        setAperto(!aperto);
+    }
+
+    function aumentaCount() {
+        setCount(count + 1);
+    }
+
+    return (
+        &lt;div&gt;
+            &lt;input type="text" onChange={gestisciCambio} /&gt;
+
+            &lt;button onClick={alternaPannello}&gt;
+                {aperto ? "Nascondi" : "Mostra"}
+            &lt;/button&gt;
+
+            &lt;button onClick={aumentaCount}&gt;
+                Incrementa
+            &lt;/button&gt;
+
+            {aperto &amp;&amp; &lt;p&gt;Pannello aperto&lt;/p&gt;}
+            &lt;p&gt;Click: {count}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

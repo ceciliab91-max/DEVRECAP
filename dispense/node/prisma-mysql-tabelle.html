@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma: gestione delle tabelle - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Prisma + MySQL</div>
+            <ul>
+                <li><a href="#setup">Setup</a></li>
+                <li><a href="#model">Model</a></li>
+                <li><a href="#migration">Migration</a></li>
+                <li><a href="#client">Client</a></li>
+                <li><a href="#verifica">Verifica</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 1 · Database</p>
+            <h1>Prisma e MySQL: gestione delle tabelle</h1>
+            <p class="intro">Configurare Prisma 7 con MySQL, definire un model, creare e aggiornare le tabelle con le
+                migration, collegare il client e verificare i dati con uno script.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="setup">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Cos'è un ORM e a cosa serve Prisma</h2>
+                </header>
+                <p>Un <strong>ORM</strong> (<em>Object-Relational Mapping</em>) è uno strato di codice che si mette
+                    tra l'applicazione e il database relazionale: traduce gli oggetti che usiamo in JavaScript
+                    (oggetti, array, classi) nelle righe delle tabelle SQL, e viceversa. Invece di scrivere query SQL
+                    a mano, chiami funzioni JavaScript — <code>create</code>, <code>findMany</code>,
+                    <code>update</code> — e l'ORM genera ed esegue la query al posto tuo, poi restituisce il
+                    risultato già trasformato in oggetti JS pronti da usare.</p>
+                <pre><code class="language-text">Codice JavaScript          Prisma (ORM)              MySQL
+   oggetti, array   ──▶   traduce in SQL    ──▶   tabelle e righe
+   client.product
+     .findMany()     ◀──  righe → oggetti   ◀──   risultato query</code></pre>
+                <p><strong>Prisma</strong> è l'ORM che useremo: descriviamo la struttura del database in
+                    <code>schema.prisma</code> e Prisma genera le istruzioni SQL necessarie per MySQL. In Prisma un
+                    <code>model</code> corrisponde a una tabella e un campo corrisponde a una colonna.</p>
+                <h3>Preparare il progetto</h3>
+                <p>Crea prima un database vuoto in MySQL (e uno "shadow", che vedremo tra poco):</p>
+                <pre><code class="language-sql">CREATE DATABASE express_store;
+CREATE DATABASE express_store_shadow;</code></pre>
+                <p>Nel terminale crea il progetto e installa Prisma 7, il client e l'adapter MySQL:</p>
+                <pre><code class="language-bash">mkdir hello-prisma
+cd hello-prisma
+pnpm init
+pnpm add @prisma/client@7.10.0 @prisma/adapter-mariadb@7.10.0 dotenv
+pnpm add -D prisma@7.10.0
+mkdir prisma</code></pre>
+                <p>Aggiungi a <code>package.json</code> gli script che useremo in questa dispensa:</p>
+                <pre><code class="language-json">{
+  "scripts": {
+    "validate": "prisma validate",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "studio": "prisma studio",
+    "test:db": "node test-db.js"
+  }
+}</code></pre>
+                <p>Le variabili di connessione vanno in <code>.env</code>, che non va mai caricato su Git. Copia il
+                    contenuto da un <code>.env.example</code> come questo:</p>
+                <pre><code class="language-bash"># URL usata dalla Prisma CLI per migration, introspezione e Prisma Studio.
+# DATABASE_URL=mysql://UTENTE:PASSWORD@INDIRIZZO_DB:PORTA_DB/NOME_DB
+DATABASE_URL="mysql://prisma_user:prisma_password@localhost:3306/express_store"
+
+# URL dello shadow database.
+# La CLI lo usa per rieseguire le migration e confrontarle con il database reale.
+SHADOW_DATABASE_URL="mysql://prisma_user:prisma_password@localhost:3306/express_store_shadow"
+
+# Parametri usati a runtime dall'adapter MariaDB in prisma-client.js.
+DATABASE_HOST="localhost"
+DATABASE_PORT="3306"
+DATABASE_USER="prisma_user"
+DATABASE_PASSWORD="prisma_password"
+DATABASE_NAME="express_store"</code></pre>
+                <p>Lo <strong>shadow database</strong> è un database vuoto che Prisma crea e distrugge internamente ad
+                    ogni <code>migrate dev</code>, per verificare che la sequenza delle migration sia coerente prima
+                    di applicarla a quello reale. Deve esistere ma restare sempre vuoto: non scriverci a mano.</p>
+                <p>In Prisma 7 lo schema non contiene più l'URL del database: è la CLI a leggerlo da un file di
+                    configurazione dedicato, <code>prisma.config.ts</code>, nella radice del progetto:</p>
+                <pre><code class="language-ts">// Carica le variabili definite nel file .env prima della configurazione Prisma.
+import "dotenv/config";
+
+// Importa gli strumenti di configurazione messi a disposizione da Prisma CLI.
+import { defineConfig, env } from "prisma/config";
+
+// Esporta la configurazione usata dai comandi della CLI Prisma.
+export default defineConfig({
+    // Indica dove si trova il file dello schema Prisma.
+    schema: "prisma/schema.prisma",
+
+    // Indica la cartella in cui Prisma salverà le migration SQL.
+    migrations: {
+        path: "prisma/migrations"
+    },
+
+    // Configura il datasource usato dalla CLI.
+    // In Prisma 7 la URL viene definita qui e non nel file schema.prisma.
+    datasource: {
+        // Database del progetto, usato da migrate, studio e introspezione.
+        url: env("DATABASE_URL"),
+
+        // Database di appoggio che la CLI usa per ricalcolare le migration.
+        // Deve esistere già ed essere vuoto: Prisma lo svuota a ogni `migrate dev`.
+        shadowDatabaseUrl: env("SHADOW_DATABASE_URL")
+    }
+});</code></pre>
+                <p>Comandi come <code>prisma migrate dev</code> o <code>prisma studio</code> leggono la connessione da
+                    qui; il codice dell'app, invece, si collega al database tramite l'adapter che vedremo nel
+                    capitolo <a href="#client">Client</a>.</p>
+            </section>
+            <section id="model">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Creare una tabella con un model</h2>
+                </header>
+                <p>Nel file <code>prisma/schema.prisma</code> definiamo il generatore del client, il database MySQL e
+                    il model <code>Product</code>, che rappresenta i prodotti di uno store:</p>
+                <pre><code class="language-js">generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  createdAt   DateTime @default(now())
+}</code></pre>
+                <ul>
+                    <li><code>id</code> è la chiave primaria; <code>autoincrement()</code> genera il valore
+                        progressivo.</li>
+                    <li><code>price</code> è un <code>Decimal</code>, non un <code>Float</code>: per i valori
+                        monetari serve precisione esatta, mentre i numeri in virgola mobile possono introdurre
+                        piccoli errori di arrotondamento. <code>@db.Decimal(10, 2)</code> indica 10 cifre totali, 2
+                        dopo la virgola.</li>
+                    <li><code>String?</code> rende <code>description</code> facoltativa.</li>
+                    <li><code>@default(now())</code> salva automaticamente data e ora della creazione.</li>
+                    <li>Il blocco <code>datasource</code> dichiara solo il <code>provider</code>: l'URL di
+                        connessione la fornisce <code>prisma.config.ts</code> (capitolo precedente), non lo schema.
+                    </li>
+                </ul>
+                <div class="note">
+                    <p>Il nome del model è singolare (<code>Product</code>). Prisma crea per impostazione predefinita
+                        una tabella chiamata <code>Product</code>. Se hai già una tabella con un nome diverso, puoi
+                        collegarla con <code>@@map("products")</code>.</p>
+                </div>
+            </section>
+            <section id="migration">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Applicare e aggiornare la struttura</h2>
+                </header>
+                <p>Una <code>migration</code> è un file SQL versionato che registra una modifica alle tabelle. Una
+                    volta applicata non va più modificata a mano: eventuali correzioni si fanno con una nuova
+                    migration successiva.</p>
+                <h3>Il ciclo di lavoro dopo ogni modifica dello schema</h3>
+                <p>Ogni volta che cambi lo <code>schema.prisma</code> — la prima volta per creare le tabelle, poi
+                    ogni volta che aggiungi un campo o ne modifichi il tipo — ripeti sempre gli stessi tre passi,
+                    nello stesso ordine, usando le shortcut già definite in <code>package.json</code>:</p>
+                <pre><code class="language-bash">pnpm validate               # 1. esegue "prisma validate"
+pnpm migrate --name &lt;nome&gt;  # 2. esegue "prisma migrate dev --name &lt;nome&gt;"
+pnpm generate               # 3. esegue "prisma generate"</code></pre>
+                <ol>
+                    <li><code>pnpm validate</code> controlla che lo <code>schema.prisma</code> sia sintatticamente
+                        corretto, prima di toccare il database.</li>
+                    <li><code>pnpm migrate --name &lt;nome&gt;</code> confronta lo schema con lo stato attuale del
+                        database (tramite lo shadow database), genera il file SQL della differenza e lo applica.
+                    </li>
+                    <li><code>pnpm generate</code> rigenera <code>Prisma Client</code>, perché il tipo
+                        <code>Product</code> usato nel codice deve riflettere i campi appena aggiunti.</li>
+                </ol>
+                <p>La primissima volta il database è ancora vuoto, quindi il <code>&lt;nome&gt;</code> convenzionale
+                    è <code>init</code>:</p>
+                <pre><code class="language-bash">pnpm migrate --name init</code></pre>
+                <h3>Due esempi reali: <code>add_in_stock</code> e <code>add_is_featured</code></h3>
+                <p>Il progetto è cresciuto con due colonne aggiunte in momenti diversi, seguendo esattamente questo
+                    ciclo. Il primo passo era già stato fatto: lo riassumiamo. Il secondo lo vediamo per intero, con
+                    schema <strong>prima</strong>, schema <strong>dopo</strong>, comando lanciato e SQL generato — il
+                    modo più chiaro per vedere cosa cambia a ogni migration.</p>
+                <h4>Passo 1 — <code>add_in_stock</code> (già applicata)</h4>
+                <p>Al model <code>Product</code> del capitolo 2 è stata aggiunta la riga
+                    <code>inStock Boolean @default(true)</code>, poi lanciato:</p>
+                <pre><code class="language-bash">pnpm migrate --name add_in_stock</code></pre>
+                <p>SQL generato in <code>prisma/migrations/20260914175411_add_in_stock/migration.sql</code>:</p>
+                <pre><code class="language-sql">-- AlterTable
+ALTER TABLE `Product` ADD COLUMN `inStock` BOOLEAN NOT NULL DEFAULT true;</code></pre>
+                <h4>Passo 2 — <code>add_is_featured</code></h4>
+                <p>Schema <strong>prima</strong> (stato dopo <code>add_in_stock</code>):</p>
+                <pre><code class="language-js">model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  createdAt   DateTime @default(now())
+  inStock     Boolean  @default(true)
+}</code></pre>
+                <p>Schema <strong>dopo</strong> (aggiunto <code>isFeatured</code>):</p>
+                <pre><code class="language-js">model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  createdAt   DateTime @default(now())
+  inStock     Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+}</code></pre>
+                <p>Comando lanciato:</p>
+                <pre><code class="language-bash">pnpm migrate --name add_is_featured</code></pre>
+                <p>SQL generato in <code>prisma/migrations/20260915151211_add_is_featured/migration.sql</code>:</p>
+                <pre><code class="language-sql">-- AlterTable
+ALTER TABLE `Product` ADD COLUMN `isFeatured` BOOLEAN NOT NULL DEFAULT false;</code></pre>
+                <p>Subito dopo si rigenera il client con <code>pnpm generate</code>. Per verificare che tutto sia in
+                    ordine si usa <code>prisma migrate status</code>: non ha uno script dedicato, quindi va lanciato
+                    con <code>pnpm exec</code>:</p>
+                <pre><code class="language-bash">pnpm generate
+pnpm exec prisma migrate status</code></pre>
+                <p>Se tutto è a posto, il comando conferma che il database è allineato allo storico delle migration
+                    (<code>init</code>, <code>add_in_stock</code>, <code>add_is_featured</code>) con un messaggio del
+                    tipo <code>Database schema is up to date!</code>. Per ispezionare visivamente tabelle e record,
+                    avvia <code>pnpm studio</code>.</p>
+                <div class="note">
+                    <p>Per controllare che l'intera sequenza di migration si riapplichi da zero in modo pulito, esiste
+                        <code>pnpm exec prisma migrate reset</code>: cancella il database, lo ricrea vuoto e riapplica
+                        in ordine tutte le migration. È un'operazione distruttiva, va usata solo su database di
+                        sviluppo e la CLI chiede sempre conferma prima di procedere.</p>
+                </div>
+            </section>
+            <section id="client">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Il client Prisma</h2>
+                </header>
+                <p>Dopo <code>prisma generate</code> il client va istanziato una sola volta e riutilizzato in tutto il
+                    codice. Usiamo l'adapter <code>@prisma/adapter-mariadb</code> installato al capitolo 1: collega
+                    <code>PrismaClient</code> al driver MySQL/MariaDB usando i parametri letti da <code>.env</code>.
+                </p>
+                <p>Crea <code>prisma-client.js</code> nella radice del progetto:</p>
+                <pre><code class="language-js">// Carica le variabili d'ambiente dal file .env.
+import "dotenv/config";
+
+// Importa il client generato da Prisma.
+import { PrismaClient } from "@prisma/client";
+
+// Importa l'adapter che collega Prisma Client al driver MariaDB/MySQL.
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+
+// Crea l'adapter usando i parametri di connessione definiti nel file .env.
+const adapter = new PrismaMariaDb({
+    // Indirizzo del server MySQL.
+    host: process.env.DATABASE_HOST,
+
+    // Converte la porta da stringa di ambiente a numero JavaScript.
+    port: Number(process.env.DATABASE_PORT),
+
+    // Utente MySQL dell'applicazione.
+    user: process.env.DATABASE_USER,
+
+    // Password dell'utente MySQL dell'applicazione.
+    password: process.env.DATABASE_PASSWORD,
+
+    // Nome del database a cui collegarsi.
+    database: process.env.DATABASE_NAME,
+
+    // Numero massimo di connessioni che il pool può mantenere aperte.
+    connectionLimit: 5
+});
+
+// Crea Prisma Client configurandolo con l'adapter MySQL/MariaDB.
+export const client = new PrismaClient({ adapter });</code></pre>
+                <p>Da qui in poi basta importare <code>client</code> ovunque serva interrogare il database, senza
+                    aprire una nuova connessione ogni volta. Nella prossima dispensa, <a href='/lezioni/prisma-tipi-annotazioni-relazioni'>Prisma: tipi, annotazioni e relazioni</a>,
+                    completiamo lo schema con le relazioni tra i model.</p>
+            </section>
+            <section id="verifica">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Verificare i dati con uno script</h2>
+                </header>
+                <p>Prima ancora di scrivere rotte Express, possiamo verificare che tabella e client funzionino con un
+                    piccolo script Node. Nessuna riga di SQL: Prisma la maschera (astrae) tramite JavaScript.</p>
+                <p>Crea <code>test-db.js</code>:</p>
+                <pre><code class="language-js">// Esempio di codice JS che sfrutta il nostro client Prisma.
+// Nessuna riga di SQL: Prisma maschera (astrae) via JavaScript le query.
+import { Prisma } from "@prisma/client";
+import { client } from "./prisma-client.js";
+
+try {
+  // Crea un nuovo prodotto: Prisma genera l'INSERT corrispondente.
+  const product = await client.product.create({
+    data: {
+      name: "Felpa Basic",
+      price: new Prisma.Decimal("29.90"),
+      description: "Felpa girocollo in cotone",
+      inStock: true,
+      isFeatured: true
+    }
+  });
+
+  console.log("Prodotto creato:", product);
+
+  // Legge tutti i prodotti ordinati per data di creazione.
+  const products = await client.product.findMany({
+    orderBy: { createdAt: "desc" }
+  });
+
+  console.table(
+    products.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price.toString(),
+      inStock: item.inStock,
+      isFeatured: item.isFeatured
+    }))
+  );
+} finally {
+  // Chiude il pool di connessioni aperto dall'adapter.
+  await client.$disconnect();
+}</code></pre>
+                <p>Eseguilo con lo script definito in <code>package.json</code>:</p>
+                <pre><code class="language-bash">pnpm test:db</code></pre>
+                <ul>
+                    <li><code>new Prisma.Decimal("8.50")</code> crea un valore <code>Decimal</code> a partire da una
+                        stringa: è il modo corretto di passare un prezzo, per non perdere precisione.</li>
+                    <li><code>console.table</code> stampa i risultati di <code>findMany</code> in una tabella
+                        leggibile nel terminale.</li>
+                    <li><code>client.$disconnect()</code> nel <code>finally</code> chiude sempre il pool di
+                        connessioni, anche se una query genera un errore.</li>
+                </ul>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi al model <code>Product</code> un nuovo campo <code>discountPercent Int @default(0)</code>,
+                        crea la migration <code>add_discount_percent</code> e aggiorna <code>test-db.js</code> per
+                        impostare e stampare anche questo valore.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">model Product {
+  id               Int      @id @default(autoincrement())
+  name             String
+  price            Decimal  @db.Decimal(10, 2)
+  description      String?
+  createdAt        DateTime @default(now())
+  inStock          Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  discountPercent  Int      @default(0)
+}</code></pre>
+                        <pre><code class="language-bash">pnpm validate
+pnpm migrate --name add_discount_percent
+pnpm generate</code></pre>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

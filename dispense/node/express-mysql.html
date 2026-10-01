@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express e MySQL: connessione e CRUD - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body><a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + MySQL</div>
+            <ul>
+                <li><a href="#setup">Setup</a></li>
+                <li><a href="#env">.env</a></li>
+                <li><a href="#connection">Connessione</a></li>
+                <li><a href="#read">Leggere</a></li>
+                <li><a href="#injection">Sicurezza</a></li>
+                <li><a href="#write">Scrivere</a></li>
+                <li><a href="#delete">Eliminare</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Express e MySQL: connessione e CRUD</h1>
+            <p class="intro">Collegare Express a MySQL e usare le quattro operazioni CRUD con codice essenziale.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="setup">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Preparare il progetto</h2>
+                </header>
+                <p>Express riceve le richieste HTTP. MySQL conserva i dati nelle tabelle. Il package <code>mysql2</code>
+                    permette a Node.js di comunicare con il database.</p>
+                <pre><code class="language-bash">mkdir express-mysql
+cd express-mysql
+pnpm init
+pnpm add express mysql2 dotenv</code></pre>
+                <p>Nel file <code>package.json</code> aggiungi queste proprietà:</p>
+                <pre><code class="language-json">{
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server.js"
+  }
+}</code></pre>
+                <p>In MySQL creiamo il database e una tabella per gli esempi.</p>
+                <pre><code class="language-sql">CREATE DATABASE express_mysql;
+USE express_mysql;
+
+CREATE TABLE products (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100),
+  price DECIMAL(10, 2),
+  description TEXT
+);</code></pre>
+                <div class="note">
+                    <p>Usiamo <code>products</code> solo come esempio. Le stesse query funzionano anche con una tabella
+                        di libri, utenti o post.</p>
+                </div>
+            </section>
+            <section id="env">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Configurare il file .env</h2>
+                </header>
+                <p>Come visto nella lezione sui middleware, leggiamo il file <code>.env</code> con <code>dotenv</code>.
+                    Per la connessione al database ci servono queste variabili, al posto di scrivere host, utente,
+                    password e nome del database direttamente in <code>server.js</code>.</p>
+                <pre><code class="language-bash">DB_HOST="localhost"
+DB_PORT="3306"
+DB_USER="root"
+DB_PASSWORD="password"
+DB_NAME="express_mysql"</code></pre>
+                <div class="note">
+                    <p>Non pubblicare mai il file <code>.env</code> su GitHub: può contenere password. Aggiungi
+                        <code>.env</code> al file <code>.gitignore</code>.</p>
+                </div>
+            </section>
+            <section id="connection">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Creare la connessione</h2>
+                </header>
+                <p>Usiamo <code>mysql2/promise</code> invece della versione base: ogni metodo restituisce una
+                    <code>Promise</code>, quindi possiamo scrivere il codice con <code>async/await</code> invece che con
+                    le callback. Creiamo un file dedicato che si occupa solo di connettersi al database.</p>
+                <pre><code class="language-text">express-mysql/
+├── .env
+├── data/
+│   └── db.js
+├── package.json
+└── server.js</code></pre>
+                <pre><code class="language-js">// data/db.js
+import { createConnection } from 'mysql2/promise';
+
+const config = {
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+};
+
+// Top-level await: la connessione viene creata una sola volta,
+// quando questo file viene importato per la prima volta.
+const connection = await createConnection(config);
+
+console.log('MySQL connesso!');
+
+export default connection;</code></pre>
+                <p>In <code>server.js</code> importiamo la connessione già pronta e la usiamo nelle rotte.</p>
+                <pre><code class="language-js">// server.js
+import 'dotenv/config';
+import express from 'express';
+import connection from './data/db.js';
+
+const app = express();
+const port = 3000;
+
+app.use(express.json());</code></pre>
+                <div class="note">
+                    <p><code>'dotenv/config'</code> va importato per primo: solo così <code>data/db.js</code> trova le
+                        variabili già disponibili in <code>process.env</code> quando legge <code>config</code>.</p>
+                </div>
+                <div class="note">
+                    <p>Se il database non è raggiungibile, <code>createConnection</code> rifiuta la Promise e l'app
+                        non parte: l'errore compare direttamente nel terminale, senza bisogno di un callback per
+                        controllarlo.</p>
+                </div>
+                <div class="note">
+                    <p>Questa resta una connessione singola, utile per vedere chiaramente cosa succede. In un progetto
+                        con molti utenti contemporanei si userebbe invece un <em>pool</em> di connessioni
+                        (<code>mysql.createPool()</code>), che ne tiene aperte più di una e le riutilizza tra le
+                        richieste.</p>
+                </div>
+            </section>
+            <section id="read">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Read: leggere i prodotti</h2>
+                </header>
+                <p>Con <code>connection.query()</code> inviamo una query SQL e otteniamo un array
+                    <code>[rows, fields]</code>: il primo elemento sono le righe restituite da MySQL. Usiamo
+                    <code>async/await</code> dentro un <code>try/catch</code>, come già fatto con le rotte async di
+                    Express.</p>
+                <pre><code class="language-js">// GET /products
+app.get('/products', async (req, res) => {
+  try {
+    const [products] = await connection.query('SELECT * FROM products');
+    res.json(products);
+  } catch (error) {
+    console.error('Errore durante la lettura dei prodotti:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});</code></pre>
+                <p>Per leggere un solo prodotto usiamo l'id nell'URL. Quando la query ha parametri usiamo
+                    <code>connection.execute()</code> invece di <code>connection.query()</code>: prepara la query sul
+                    server MySQL e le passa i valori separatamente, è il vero <em>prepared statement</em>. Il simbolo
+                    <code>?</code> è il segnaposto per ogni valore dell'array.</p>
+                <pre><code class="language-js">// GET /products/1
+app.get('/products/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const sql = 'SELECT * FROM products WHERE id = ?';
+    const [products] = await connection.execute(sql, [id]);
+
+    if (products.length === 0) {
+      return res.status(404).json({ error: 'Prodotto non trovato' });
+    }
+
+    res.json(products[0]);
+  } catch (error) {
+    console.error('Errore durante la lettura del prodotto:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});</code></pre>
+                <div class="note">
+                    <p>Usa sempre <code>?</code> e <code>execute()</code> per i valori ricevuti dal client. Non
+                        costruire mai una query concatenando direttamente testo e dati ricevuti dalla richiesta: nel
+                        prossimo capitolo vediamo perché.</p>
+                </div>
+            </section>
+            <section id="injection">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>SQL injection e prepared statement</h2>
+                </header>
+                <p>Immaginiamo di aggiungere a <code>GET /products</code> un filtro per nome, costruendo la query
+                    concatenando direttamente il valore ricevuto dal client.</p>
+                <pre><code class="language-js">// Versione VULNERABILE, solo per capire il problema
+app.get('/products', async (req, res) => {
+  const { name } = req.query;
+
+  let sql = 'SELECT * FROM products';
+  if (name) {
+    sql += ` WHERE name = '${name}'`;
+  }
+
+  const [products] = await connection.query(sql);
+  res.json(products);
+});</code></pre>
+                <p>Con <code>GET /products?name=Tastiera</code> funziona. Ma un client può inviare del testo pensato
+                    per modificare la query stessa, per esempio <code>GET /products?name=x' OR '1'='1</code>: il
+                    valore diventa parte della query SQL e restituisce <strong>tutti</strong> i prodotti, ignorando il
+                    filtro. Con query più elaborate si arriva a leggere, modificare o cancellare dati che non
+                    dovrebbero essere accessibili.</p>
+                <p>La soluzione è non inserire mai il valore direttamente nella stringa SQL. Con <code>?</code> e
+                    <code>execute()</code>, MySQL riceve la query e i parametri separatamente: il valore resta sempre
+                    un dato, mai una porzione di comando SQL.</p>
+                <pre><code class="language-js">// Versione sicura
+app.get('/products', async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    let sql = 'SELECT * FROM products';
+    const params = [];
+
+    if (name) {
+      sql += ' WHERE name = ?';
+      params.push(name);
+    }
+
+    const [products] = await connection.execute(sql, params);
+    res.json(products);
+  } catch (error) {
+    console.error('Errore durante la lettura dei prodotti:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});</code></pre>
+                <div class="note">
+                    <p>La <strong>SQL injection</strong> è una delle vulnerabilità più comuni e pericolose per un'API.
+                        La regola è semplice: i valori che arrivano dal client vanno sempre passati come parametri a
+                        <code>execute()</code>, mai concatenati nel testo della query.</p>
+                </div>
+            </section>
+            <section id="write">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Create e Update: aggiungere e modificare</h2>
+                </header>
+                <p>Per creare un prodotto leggiamo i dati dal body e usiamo <code>INSERT</code> con
+                    <code>execute()</code>. Il risultato contiene <code>insertId</code>, l'id assegnato da MySQL.</p>
+                <pre><code class="language-js">// POST /products
+app.post('/products', async (req, res) => {
+  try {
+    const { name, price, description } = req.body;
+    const sql = 'INSERT INTO products (name, price, description) VALUES (?, ?, ?)';
+    const [result] = await connection.execute(sql, [name, price, description]);
+
+    res.status(201).json({ id: result.insertId, name, price, description });
+  } catch (error) {
+    console.error('Errore durante la creazione del prodotto:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});</code></pre>
+                <pre><code class="language-json">POST http://localhost:3000/products
+Content-Type: application/json
+
+{ "name": "Tastiera", "price": 59.9, "description": "Layout italiano" }</code></pre>
+                <p>Per modificare un prodotto usiamo <code>UPDATE</code>. Se <code>affectedRows</code> è zero, l'id
+                    richiesto non esiste.</p>
+                <pre><code class="language-js">// PUT /products/1
+app.put('/products/:id', async (req, res) => {
+  try {
+    const { name, price, description } = req.body;
+    const id = req.params.id;
+    const sql = 'UPDATE products SET name = ?, price = ?, description = ? WHERE id = ?';
+    const [result] = await connection.execute(sql, [name, price, description, id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Prodotto non trovato' });
+    }
+
+    res.json({ id, name, price, description });
+  } catch (error) {
+    console.error('Errore durante la modifica del prodotto:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea <code>POST /products</code>. Invia da Postman un prodotto con nome, prezzo e descrizione,
+                        poi controlla con <code>GET /products</code> che sia stato salvato.</p>
+                </div>
+            </section>
+            <section id="delete">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Delete: eliminare un prodotto</h2>
+                </header>
+                <p>Per eliminare un record usiamo <code>DELETE</code>. Anche qui controlliamo <code>affectedRows</code>
+                    per sapere se MySQL ha trovato il prodotto.</p>
+                <pre><code class="language-js">// DELETE /products/1
+app.delete('/products/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const sql = 'DELETE FROM products WHERE id = ?';
+    const [result] = await connection.execute(sql, [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Prodotto non trovato' });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Errore durante l\'eliminazione del prodotto:', error);
+    res.status(500).json({ error: 'Errore del database' });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server pronto su http://localhost:${port}`);
+});</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operazione</th>
+                            <th>Metodo HTTP</th>
+                            <th>Query SQL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Leggere tutti</td>
+                            <td><code>GET /products</code></td>
+                            <td><code>SELECT</code></td>
+                        </tr>
+                        <tr>
+                            <td>Leggere uno</td>
+                            <td><code>GET /products/:id</code></td>
+                            <td><code>SELECT ... WHERE</code></td>
+                        </tr>
+                        <tr>
+                            <td>Creare</td>
+                            <td><code>POST /products</code></td>
+                            <td><code>INSERT</code></td>
+                        </tr>
+                        <tr>
+                            <td>Modificare</td>
+                            <td><code>PUT /products/:id</code></td>
+                            <td><code>UPDATE</code></td>
+                        </tr>
+                        <tr>
+                            <td>Eliminare</td>
+                            <td><code>DELETE /products/:id</code></td>
+                            <td><code>DELETE</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: API dei libri</h3>
+                <p>Crea una tabella <code>books</code> con <code>id</code>, <code>title</code>, <code>author</code> e
+                    <code>price</code>. Realizza le cinque rotte viste per la tabella <code>products</code>, modificando
+                    nomi di tabella e campi.</p>
+                <p>Prova ogni rotta con Postman: lista, dettaglio, creazione, modifica ed eliminazione.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

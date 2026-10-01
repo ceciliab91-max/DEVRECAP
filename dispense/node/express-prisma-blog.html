@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma in Express: un blog con i tag - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + Prisma</div>
+            <ul>
+                <li><a href="#setup">Setup</a></li>
+                <li><a href="#drawsql">DrawSQL</a></li>
+                <li><a href="#export">Export per l'AI</a></li>
+                <li><a href="#controllo">Controllo schema</a></li>
+                <li><a href="#create">Post con tag</a></li>
+                <li><a href="#server">Server</a></li>
+                <li><a href="#lista">GET lista</a></li>
+                <li><a href="#dettaglio">GET dettaglio</a></li>
+                <li><a href="#crea">POST</a></li>
+                <li><a href="#modifica">PUT</a></li>
+                <li><a href="#elimina">DELETE</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 3 · API</p>
+            <h1>Prisma in Express: un blog con i tag</h1>
+            <p class="intro">Dal diagramma su DrawSQL allo <code>schema.prisma</code> generato con l'AI, fino alle
+                CRUD dei post in Express: tre tabelle, una relazione molti-a-molti e una query Prisma per ogni
+                rotta.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="setup">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Creare il progetto</h2>
+                </header>
+                <div class="note">
+                    <p><code>prisma init</code> prepara i file di Prisma, ma con valori pensati per PostgreSQL: vanno
+                        adattati a MySQL <strong>prima</strong> di scrivere lo schema.</p>
+                </div>
+                <p>Creiamo il progetto e installiamo Prisma 7: <code>@prisma/client</code> e l'adapter MySQL servono
+                    all'app, mentre la CLI <code>prisma</code> serve solo in sviluppo (<code>-D</code>).</p>
+                <pre><code class="language-bash">mkdir hello-blog
+cd hello-blog
+pnpm init
+pnpm add @prisma/client@7 @prisma/adapter-mariadb@7 dotenv
+pnpm add -D prisma@7
+pnpm exec prisma init</code></pre>
+                <p><code>prisma init</code> crea <code>prisma.config.ts</code>, <code>prisma/schema.prisma</code> e
+                    <code>.env</code>, e installa le skill AI di Prisma, utili quando più avanti chiederemo all'AI di
+                    generare lo schema. Ora sistemiamo i tre file.</p>
+
+                <h3>1. <code>.env</code>: aggiungere lo shadow database</h3>
+                <p>Oltre a <code>DATABASE_URL</code> aggiungiamo <code>SHADOW_DATABASE_URL</code>, il database vuoto
+                    che <code>migrate dev</code> usa per verificare le migration, e i parametri per l'adapter:</p>
+                <pre><code class="language-bash">DATABASE_URL="mysql://prisma_user:prisma_password@localhost:3306/blog"
+SHADOW_DATABASE_URL="mysql://prisma_user:prisma_password@localhost:3306/blog_shadow"
+
+# Parametri usati dall'adapter in prisma-client.js.
+DATABASE_HOST="localhost"
+DATABASE_PORT="3306"
+DATABASE_USER="prisma_user"
+DATABASE_PASSWORD="prisma_password"
+DATABASE_NAME="blog"</code></pre>
+                <p>Entrambi i database (<code>blog</code> e <code>blog_shadow</code>) devono esistere già in
+                    MySQL.</p>
+
+                <h3>2. <code>prisma.config.ts</code>: aggiungere <code>shadowDatabaseUrl</code></h3>
+                <pre><code class="language-ts">import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations"
+  },
+  datasource: {
+    url: env("DATABASE_URL"),
+    // Da aggiungere a mano: prisma init non lo inserisce.
+    shadowDatabaseUrl: env("SHADOW_DATABASE_URL")
+  }
+});</code></pre>
+
+                <h3>3. <code>schema.prisma</code>: MySQL e client JavaScript</h3>
+                <p>Cambiamo i due <code>provider</code>: <code>mysql</code> per il database e
+                    <code>prisma-client-js</code> per il client, così da poterlo importare da
+                    <code>@prisma/client</code>. Se nel generator c'è una riga <code>output</code>, la togliamo.</p>
+                <pre><code class="language-js">generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}</code></pre>
+
+                <h3>Il client e gli script</h3>
+                <p>Come nella <a href='/lezioni/prisma-mysql-tabelle#client'>prima dispensa su Prisma</a>, creiamo
+                    <code>prisma-client.js</code>, che collega Prisma a MySQL tramite l'adapter:</p>
+                <pre><code class="language-js">import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+
+const adapter = new PrismaMariaDb({
+  host: process.env.DATABASE_HOST,
+  port: Number(process.env.DATABASE_PORT),
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  connectionLimit: 5
+});
+
+export const client = new PrismaClient({ adapter });</code></pre>
+                <p>E aggiungiamo a <code>package.json</code> gli script usati nei prossimi capitoli:</p>
+                <pre><code class="language-json">{
+  "type": "module",
+  "scripts": {
+    "validate": "prisma validate",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate"
+  }
+}</code></pre>
+            </section>
+
+            <section id="drawsql">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Progettare lo schema su DrawSQL</h2>
+                </header>
+                <div class="note">
+                    <p>Prima si disegna, poi si scrive codice: su <a href="https://drawsql.app/">drawsql.app</a>
+                        progettiamo tabelle e relazioni in modo visuale, senza ancora pensare alla sintassi di
+                        Prisma.</p>
+                </div>
+                <p>Il blog ha <strong>post</strong> e <strong>tag</strong>. Un post può avere più tag e lo stesso tag
+                    può stare su più post: è una relazione <strong>molti-a-molti</strong> (N:N). In un database
+                    relazionale non si collega direttamente <code>Post</code> a <code>Tag</code>: serve una terza
+                    tabella, detta <strong>tabella ponte</strong>, in cui ogni riga dice «questo post ha questo
+                    tag».</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tabella</th>
+                            <th>Colonne</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Post</code></td>
+                            <td><code>id</code>, <code>title</code>, <code>content</code></td>
+                            <td>Gli articoli del blog</td>
+                        </tr>
+                        <tr>
+                            <td><code>Tag</code></td>
+                            <td><code>id</code>, <code>name</code></td>
+                            <td>Le etichette (es. «prisma», «express»)</td>
+                        </tr>
+                        <tr>
+                            <td><code>PostTag</code></td>
+                            <td><code>id</code>, <code>post_id</code>, <code>tag_id</code></td>
+                            <td>Il ponte: una riga per ogni coppia post–tag</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Su DrawSQL le relazioni si disegnano trascinando la colonna chiave esterna sulla chiave primaria
+                    a cui punta: <code>PostTag.post_id → Post.id</code> e <code>PostTag.tag_id → Tag.id</code>.
+                    Entrambe sono <em>molti-a-uno</em> viste dal ponte: tante righe di <code>PostTag</code> puntano
+                    allo stesso post (o allo stesso tag).</p>
+                <figure>
+                    <img src="assets/img/drawsql-blog-schema.webp" width="1175" height="566"
+                        alt="Diagramma DrawSQL con le tabelle Post (id, title, content), Tag (id, name) e PostTag (id, post_id, tag_id); le linee collegano PostTag.post_id a Post.id e PostTag.tag_id a Tag.id.">
+                    <figcaption>Lo schema del blog disegnato su DrawSQL.</figcaption>
+                </figure>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Il post «Introduzione a Prisma» ha i tag «prisma» e «database». Il post «Rotte in Express» ha
+                        i tag «express» e «prisma». Quante righe ci sono in <code>PostTag</code>? E quante in
+                        <code>Tag</code>?</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-plaintext">Tag:     3 righe  → prisma, database, express («prisma» è UNO solo, condiviso)
+PostTag: 4 righe  → (post 1, prisma) (post 1, database) (post 2, express) (post 2, prisma)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="export">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Esportare lo schema per l'AI</h2>
+                </header>
+                <div class="note">
+                    <p><em>File &gt; Export &gt; Markdown for AI</em> produce una descrizione testuale del diagramma
+                        che un'AI può trasformare in <code>schema.prisma</code>.</p>
+                </div>
+                <p>Il file esportato contiene due parti. La prima descrive tabelle, colonne e relazioni ed è quella
+                    che ci interessa:</p>
+                <pre><code class="language-markdown"># Schema: Blog
+Database: mysql
+Tables: 3
+
+## Post
+id, title, content
+
+## Tag
+id, name
+
+## PostTag
+id, post_id, tag_id
+
+## Relationships
+PostTag.post_id → Post.id (many-to-one)
+PostTag.tag_id → Tag.id (many-to-one)</code></pre>
+                <p>La seconda parte sono istruzioni rivolte all'AI su come restituire eventuali modifiche al
+                    diagramma in un formato che DrawSQL sa importare («DrawSQL patch»). Per generare lo schema Prisma
+                    non servono: si possono lasciare, ma nel prompt chiediamo esplicitamente <em>solo</em> lo
+                    <code>schema.prisma</code>.</p>
+                <h3>Un prompt di esempio</h3>
+                <pre><code class="language-plaintext">Sto usando Prisma 7 con MySQL in un progetto JavaScript.
+Generami SOLO i model per il file schema.prisma a partire da questo schema DrawSQL.
+
+Regole:
+- nomi dei campi in camelCase (postId), con @map verso il nome della colonna (post_id);
+- ogni relazione con @relation e con il campo inverso nell'altro model;
+- content deve poter contenere testi lunghi;
+- nella tabella ponte, la coppia (postId, tagId) deve essere unica;
+- eliminando un post o un tag, le righe collegate di PostTag vanno eliminate.
+
+[incolla qui il Markdown esportato da DrawSQL]</code></pre>
+                <p>Più il prompt è preciso, meno correzioni dovremo fare dopo. Le regole elencate sono proprio i
+                    punti che controlleremo nel prossimo capitolo.</p>
+            </section>
+
+            <section id="controllo">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Controllare lo schema prima della migrazione</h2>
+                </header>
+                <div class="note">
+                    <p>L'AI scrive in fretta ma sbaglia con sicurezza: lo schema generato si <strong>legge riga per
+                            riga</strong> prima di lanciare <code>pnpm migrate</code>, perché la migrazione modifica
+                        il database vero.</p>
+                </div>
+                <p>Un risultato corretto somiglia a questo. Le righe <code>generator</code> e
+                    <code>datasource</code> restano quelle sistemate nel <a href="#setup">capitolo 1</a>: all'AI
+                    chiediamo solo i model.</p>
+                <pre><code class="language-js">model Post {
+  id      Int       @id @default(autoincrement())
+  title   String    @db.VarChar(255)
+  content String    @db.Text
+  tags    PostTag[]
+}
+
+model Tag {
+  id    Int       @id @default(autoincrement())
+  name  String    @db.VarChar(50)
+  posts PostTag[]
+}
+
+model PostTag {
+  id     Int  @id @default(autoincrement())
+  postId Int  @map("post_id")
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId  Int  @map("tag_id")
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  // La COPPIA è unica: lo stesso tag una volta sola per post.
+  @@unique([postId, tagId])
+}</code></pre>
+                <h3>La checklist</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Controlla che...</th>
+                            <th>Perché</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>generator</code> e <code>datasource</code> siano quelli del progetto</td>
+                            <td>L'AI a volte aggiunge <code>url = env(...)</code> nel datasource: con Prisma 7 la
+                                connessione sta in <code>prisma.config.ts</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ogni <code>@relation</code> abbia il campo inverso</td>
+                            <td><code>PostTag.post</code> richiede <code>Post.tags</code>, altrimenti Prisma dà
+                                errore di validazione</td>
+                        </tr>
+                        <tr>
+                            <td>Le chiavi esterne siano <code>Int</code> come gli <code>id</code></td>
+                            <td>Tipi diversi fanno fallire la relazione</td>
+                        </tr>
+                        <tr>
+                            <td><code>content</code> sia <code>@db.Text</code></td>
+                            <td>Un <code>String</code> semplice in MySQL diventa <code>VARCHAR(191)</code>: troppo
+                                corto per un articolo</td>
+                        </tr>
+                        <tr>
+                            <td>Ci sia <code>@@unique([postId, tagId])</code></td>
+                            <td>Senza, lo stesso tag può finire due volte sullo stesso post</td>
+                        </tr>
+                        <tr>
+                            <td>Ci sia <code>onDelete: Cascade</code> sul ponte</td>
+                            <td>Senza, eliminare un post che ha dei tag fallisce</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Solo quando la checklist è tutta verde:</p>
+                <pre><code class="language-bash">pnpm validate               # controlla che lo schema sia valido
+pnpm migrate --name blog    # crea la migration e la applica al database
+pnpm generate               # rigenera il client con i nuovi model</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Questo model è stato generato dall'AI. Trova i due errori.</p>
+                    <pre><code class="language-js">model PostTag {
+  id     Int    @id @default(autoincrement())
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id])
+  tagId  Int    @map("tag_id")
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+}</code></pre>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">model PostTag {
+  id     Int  @id @default(autoincrement())
+  postId Int  @map("post_id") // 1. era String: deve essere Int come Post.id
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId  Int  @map("tag_id")
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId]) // 2. mancava: la coppia deve essere unica
+}
+// Bonus: anche onDelete: Cascade mancava sulla relazione con Post.</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="create">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Un post con due tag in una sola chiamata</h2>
+                </header>
+                <div class="note">
+                    <p>Con le <strong>scritture annidate</strong> Prisma crea il post, i tag e le righe del ponte in
+                        una sola chiamata: niente <code>INSERT</code> separati e niente id da passare a mano.</p>
+                </div>
+                <h3>Cosa fa <code>create</code></h3>
+                <p>Inserisce <strong>una</strong> nuova riga nella tabella del model. I valori delle colonne vanno in <code>data</code>; l'<code>id</code> non si passa, lo genera il database con <code>autoincrement()</code>.</p>
+                <pre><code class="language-js">// SQL: INSERT INTO Post (title, content) VALUES ('Ciao', 'Primo post');
+await client.post.create({
+  data: { title: "Ciao", content: "Primo post" }
+});</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opzione</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>data</code></td>
+                            <td>I valori della nuova riga. Può contenere anche le relazioni (<code>create</code>, <code>connect</code>): è la scrittura annidata di questo capitolo</td>
+                        </tr>
+                        <tr>
+                            <td><code>select / include</code></td>
+                            <td>Quali campi e relazioni restituire nella risposta (facoltativo)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Restituisce</strong>: la riga appena creata, <code>id</code> compreso. Se viola un vincolo (per esempio un <code>@unique</code>) lancia un errore.</p>
+                <h3>La scrittura annidata</h3>
+                <p>Per un post con due tag, in SQL servirebbero cinque <code>INSERT</code> (un post, due tag, due righe di
+                    <code>PostTag</code>) e dovremmo recuperare ogni <code>id</code> generato per usarlo nella query
+                    successiva. Con Prisma descriviamo invece la <em>forma</em> dei dati, seguendo le relazioni dello
+                    schema: <code>Post → tags (PostTag) → tag (Tag)</code>.</p>
+                <p>Crea un file <code>seed.js</code> nella radice del progetto:</p>
+                <pre><code class="language-js">import "dotenv/config";
+import { client } from "./prisma-client.js";
+
+const post = await client.post.create({
+  data: {
+    title: "Introduzione a Prisma",
+    content: "Prisma è un ORM per Node.js...",
+    // tags è la lista di righe PostTag collegate al post.
+    tags: {
+      // Crea DUE righe nel ponte...
+      create: [
+        // ...e per ognuna crea anche il Tag a cui punta.
+        { tag: { create: { name: "prisma" } } },
+        { tag: { create: { name: "database" } } }
+      ]
+    }
+  },
+  // Nella risposta vogliamo anche le righe del ponte, con il tag dentro.
+  include: { tags: { include: { tag: true } } }
+});
+
+console.log(JSON.stringify(post, null, 2));
+await client.$disconnect();</code></pre>
+                <pre><code class="language-bash">node seed.js</code></pre>
+                <p>Il risultato mostra la struttura a tre livelli. <code>postId</code> e <code>tagId</code> li ha
+                    compilati Prisma da solo:</p>
+                <pre><code class="language-json">{
+  "id": 1,
+  "title": "Introduzione a Prisma",
+  "content": "Prisma è un ORM per Node.js...",
+  "tags": [
+    { "id": 1, "postId": 1, "tagId": 1, "tag": { "id": 1, "name": "prisma" } },
+    { "id": 2, "postId": 1, "tagId": 2, "tag": { "id": 2, "name": "database" } }
+  ]
+}</code></pre>
+                <h3>Collegare un tag che esiste già</h3>
+                <p>Al posto di <code>create</code> si usa <code>connect</code>, indicando l'<code>id</code> del tag
+                    esistente. È quello che faremo nella rotta POST.</p>
+                <pre><code class="language-js">await client.post.create({
+  data: {
+    title: "Rotte in Express",
+    content: "Un router raggruppa le rotte...",
+    tags: {
+      create: [
+        { tag: { connect: { id: 1 } } },          // "prisma", esiste già
+        { tag: { create: { name: "express" } } }  // nuovo
+      ]
+    }
+  }
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea il post «Relazioni N:N» collegato ai tag già esistenti con id 1 e 2.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">await client.post.create({
+  data: {
+    title: "Relazioni N:N",
+    content: "Una tabella ponte collega due tabelle...",
+    tags: {
+      create: [
+        { tag: { connect: { id: 1 } } },
+        { tag: { connect: { id: 2 } } }
+      ]
+    }
+  }
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="server">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Prisma dentro Express</h2>
+                </header>
+                <div class="note">
+                    <p><code>server.js</code> avvia l'app e monta i router; le rotte dei post stanno in
+                        <code>routers/postRouter.js</code>, che importa il client Prisma creato <strong>una volta
+                            sola</strong> in <code>prisma-client.js</code>.</p>
+                </div>
+                <p>Installiamo Express nello stesso progetto. La struttura è quella vista nella dispensa sul <a href='/lezioni/express-router'>Router di Express</a>:</p>
+                <pre><code class="language-bash">pnpm add express</code></pre>
+                <pre><code class="language-plaintext">hello-blog/
+├── prisma/
+│   └── schema.prisma
+├── routers/
+│   └── postRouter.js
+├── prisma-client.js
+└── server.js</code></pre>
+                <h3><code>server.js</code></h3>
+                <pre><code class="language-js">import express from "express";
+import postRouter from "./routers/postRouter.js";
+
+const app = express();
+
+// Senza questa riga req.body è undefined nelle rotte POST e PUT.
+app.use(express.json());
+
+// Tutte le rotte di postRouter iniziano con /blogs.
+app.use("/blogs", postRouter);
+
+app.listen(3000, () =&gt; {
+  console.log("Server in ascolto su http://localhost:3000");
+});</code></pre>
+                <h3><code>routers/postRouter.js</code></h3>
+                <pre><code class="language-js">import express from "express";
+import { client } from "../prisma-client.js";
+
+const router = express.Router();
+
+// ...qui le rotte dei prossimi capitoli...
+
+export default router;</code></pre>
+                <p>Dato che il router è montato su <code>/blogs</code>, al suo interno i percorsi sono relativi:
+                    <code>router.get("/")</code> risponde a <code>GET /blogs</code> e
+                    <code>router.get("/:id")</code> a <code>GET /blogs/:id</code>.</p>
+                <p>Ogni query Prisma restituisce una Promise, quindi i gestori delle rotte sono
+                    <code>async</code> e usano <code>await</code>. Il <code>try/catch</code> intercetta gli errori
+                    del database e risponde con un errore invece di far cadere il server.</p>
+            </section>
+
+            <section id="lista">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2><code>GET /blogs</code>: la lista dei post</h2>
+                </header>
+                <div class="note">
+                    <p><code>findMany</code> legge più righe; con <code>select</code> annidato scegliamo esattamente
+                        quali campi tornano, anche dentro le relazioni.</p>
+                </div>
+                <h3>Cosa fa <code>findMany</code></h3>
+                <p>Legge <strong>tutte le righe</strong> che rispettano un filtro. Senza opzioni restituisce l'intera tabella.</p>
+                <pre><code class="language-js">// SQL: SELECT * FROM Post;
+await client.post.findMany();
+
+// SQL: SELECT id, title FROM Post WHERE title LIKE '%Prisma%' ORDER BY id DESC;
+await client.post.findMany({
+  where: { title: { contains: "Prisma" } },
+  select: { id: true, title: true },
+  orderBy: { id: "desc" }
+});</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opzione</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>where</code></td>
+                            <td>Quali righe: il filtro, come il <code>WHERE</code> di SQL</td>
+                        </tr>
+                        <tr>
+                            <td><code>select</code></td>
+                            <td>Solo i campi elencati, anche dentro le relazioni</td>
+                        </tr>
+                        <tr>
+                            <td><code>include</code></td>
+                            <td>Tutti i campi, più le relazioni indicate</td>
+                        </tr>
+                        <tr>
+                            <td><code>orderBy</code></td>
+                            <td>L'ordine: <code>"asc"</code> o <code>"desc"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>take / skip</code></td>
+                            <td>Quante righe prendere / quante saltarne</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Restituisce</strong>: un <strong>array</strong>, vuoto (<code>[]</code>) se nessuna riga corrisponde. Non lancia mai un errore per «non trovato».</p>
+                <p>Con <code>include</code> otterremmo tutte le colonne del ponte (<code>id</code>,
+                    <code>postId</code>, <code>tagId</code>), che al client non servono. Con <code>select</code>
+                    chiediamo solo quello che vogliamo mostrare:</p>
+                <pre><code class="language-js">router.get("/", async (req, res) =&gt; {
+  try {
+    const posts = await client.post.findMany({
+      select: {
+        id: true,
+        title: true,
+        // Attraverso il ponte prendiamo solo il nome del tag.
+        tags: { select: { tag: { select: { id: true, name: true } } } }
+      },
+      orderBy: { id: "desc" }
+    });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                <pre><code class="language-json">[
+  {
+    "id": 1,
+    "title": "Introduzione a Prisma",
+    "tags": [
+      { "tag": { "id": 1, "name": "prisma" } },
+      { "tag": { "id": 2, "name": "database" } }
+    ]
+  }
+]</code></pre>
+                <h3>Appiattire i tag</h3>
+                <p>Quel <code>{ "tag": { ... } }</code> è la riga del ponte: al frontend basta la lista dei tag.
+                    Una piccola funzione, in cima a <code>postRouter.js</code>, la «appiattisce» con <code>map</code>:</p>
+                <pre><code class="language-js">// Da [{ tag: { id, name } }] a [{ id, name }].
+const flattenTags = (post) =&gt; ({
+  ...post,
+  tags: post.tags.map((postTag) =&gt; postTag.tag)
+});
+
+// Nella rotta:
+res.json(posts.map(flattenTags));</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Modifica <code>GET /blogs</code> per restituire anche i primi 100 caratteri di
+                        <code>content</code> in un campo <code>excerpt</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">const posts = await client.post.findMany({
+  select: {
+    id: true,
+    title: true,
+    content: true,
+    tags: { select: { tag: { select: { id: true, name: true } } } }
+  }
+});
+
+res.json(posts.map((post) =&gt; {
+  const { content, ...rest } = flattenTags(post);
+  return { ...rest, excerpt: content.slice(0, 100) };
+}));</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dettaglio">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2><code>GET /blogs/:id</code>: un solo post</h2>
+                </header>
+                <div class="note">
+                    <p><code>findUnique</code> cerca per <code>id</code> e restituisce <code>null</code> se non
+                        trova nulla: in quel caso rispondiamo <strong>404</strong>.</p>
+                </div>
+                <h3>Cosa fa <code>findUnique</code></h3>
+                <p>Legge <strong>una sola riga</strong>, cercandola per un campo che la identifica in modo univoco: l'<code>@id</code> o un campo <code>@unique</code>. Per filtrare su altri campi si usa <code>findFirst</code>.</p>
+                <pre><code class="language-js">// SQL: SELECT * FROM Post WHERE id = 1;
+await client.post.findUnique({ where: { id: 1 } });</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opzione</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>where</code></td>
+                            <td>Obbligatorio: il campo univoco da cercare (qui <code>id</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>select / include</code></td>
+                            <td>Quali campi e relazioni restituire, come in <code>findMany</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Restituisce</strong>: un <strong>oggetto</strong>, oppure <code>null</code> se la riga non esiste. Per questo controlliamo <code>if (!post)</code>.</p>
+                <p>I parametri dell'URL arrivano sempre come stringhe: <code>req.params.id</code> vale
+                    <code>"1"</code>, non <code>1</code>. Prisma vuole un <code>Int</code>, quindi lo convertiamo con
+                    <code>Number()</code>.</p>
+                <pre><code class="language-js">router.get("/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+
+  try {
+    const post = await client.post.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        tags: { select: { tag: { select: { id: true, name: true } } } }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post non trovato" });
+    }
+
+    res.json(flattenTags(post));
+  } catch (error) {
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Cosa succede con <code>GET /blogs/abc</code>? Aggiungi un controllo che risponda
+                        <strong>400</strong> se l'id non è un numero.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">// Number("abc") è NaN: Prisma lancerebbe un errore di validazione (500).
+const id = Number(req.params.id);
+
+if (Number.isNaN(id)) {
+  return res.status(400).json({ error: "Id non valido" });
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="crea">
+                <header>
+                    <p class="index">Capitolo 9</p>
+                    <h2><code>POST /blogs</code>: creare un post</h2>
+                </header>
+                <div class="note">
+                    <p>I dati arrivano in <code>req.body</code> (grazie a <code>express.json()</code>). La query è la
+                        scrittura annidata del capitolo 5, con <code>connect</code> per collegare tag esistenti.</p>
+                </div>
+                <p>È la stessa <code>create</code> vista nel <a href="#create">capitolo 5</a>: cambia solo la
+                    provenienza dei dati, che ora arrivano dal client invece di essere scritti nel codice.</p>
+                <p>Il client manda titolo, contenuto e la lista degli id dei tag:</p>
+                <pre><code class="language-json">{ "title": "Rotte in Express", "content": "Un router...", "tagIds": [1, 3] }</code></pre>
+                <p>Con <code>map</code> trasformiamo ogni id nella riga del ponte da creare:</p>
+                <pre><code class="language-js">router.post("/", async (req, res) =&gt; {
+  const { title, content, tagIds = [] } = req.body;
+
+  if (!title || !content) {
+    return res.status(400).json({ error: "title e content sono obbligatori" });
+  }
+
+  try {
+    const post = await client.post.create({
+      data: {
+        title,
+        content,
+        // [1, 3] → [{ tag: { connect: { id: 1 } } }, { tag: { connect: { id: 3 } } }]
+        tags: { create: tagIds.map((id) =&gt; ({ tag: { connect: { id } } })) }
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        tags: { select: { tag: { select: { id: true, name: true } } } }
+      }
+    });
+
+    // 201 Created: è stata creata una nuova risorsa.
+    res.status(201).json(flattenTags(post));
+  } catch (error) {
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                <pre><code class="language-bash">curl -X POST -H "Content-Type: application/json" \
+  -d '{"title":"Rotte in Express","content":"Un router...","tagIds":[1,3]}' \
+  http://localhost:3000/blogs</code></pre>
+                <div class="note">
+                    <p>Il <code>select</code> è lo stesso in tre rotte: puoi salvarlo in una costante
+                        (<code>const postSelect = { ... }</code>) e riusarlo.</p>
+                </div>
+            </section>
+
+            <section id="modifica">
+                <header>
+                    <p class="index">Capitolo 10</p>
+                    <h2><code>PUT /blogs/:id</code>: modificare un post</h2>
+                </header>
+                <div class="note">
+                    <p><code>update</code> vuole un <code>where</code> su un campo univoco e i nuovi valori in
+                        <code>data</code>. Se l'id non esiste Prisma lancia l'errore <code>P2025</code>.</p>
+                </div>
+                <h3>Cosa fa <code>update</code></h3>
+                <p>Modifica <strong>una riga esistente</strong>, individuata con un campo univoco. Si scrivono solo i campi da cambiare: gli altri restano come sono.</p>
+                <pre><code class="language-js">// SQL: UPDATE Post SET title = 'Nuovo titolo' WHERE id = 1;
+await client.post.update({
+  where: { id: 1 },
+  data: { title: "Nuovo titolo" }
+});</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opzione</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>where</code></td>
+                            <td>Obbligatorio: quale riga, tramite <code>@id</code> o <code>@unique</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>data</code></td>
+                            <td>I nuovi valori. I campi <code>undefined</code> vengono ignorati</td>
+                        </tr>
+                        <tr>
+                            <td><code>select / include</code></td>
+                            <td>Quali campi e relazioni restituire (facoltativo)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Restituisce</strong>: la riga <strong>dopo</strong> la modifica. Se la riga non esiste lancia l'errore <code>P2025</code>.</p>
+                <p>Aggiorniamo titolo e contenuto. Invece di cercare prima il post, lasciamo fare a Prisma e
+                    trasformiamo l'errore <code>P2025</code> («record non trovato») in un 404:</p>
+                <pre><code class="language-js">router.put("/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+  const { title, content } = req.body;
+
+  try {
+    const post = await client.post.update({
+      where: { id },
+      data: { title, content }
+    });
+    res.json(post);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Post non trovato" });
+    }
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                <p>Se un campo non viene inviato vale <code>undefined</code>, e Prisma lo ignora: quel campo resta
+                    com'era.</p>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Fai in modo che <code>PUT</code> accetti anche <code>tagIds</code> e
+                        <strong>sostituisca</strong> i tag del post. Suggerimento: dentro <code>tags</code> puoi
+                        usare prima <code>deleteMany: {}</code> e poi <code>create</code>.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-js">const { title, content, tagIds = [] } = req.body;
+
+await client.post.update({
+  where: { id },
+  data: {
+    title,
+    content,
+    tags: {
+      deleteMany: {},  // 1. cancella tutte le righe del ponte di questo post
+      create: tagIds.map((tagId) =&gt; ({ tag: { connect: { id: tagId } } })) // 2. ricrea
+    }
+  }
+});</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="elimina">
+                <header>
+                    <p class="index">Capitolo 11</p>
+                    <h2><code>DELETE /blogs/:id</code>: eliminare un post</h2>
+                </header>
+                <div class="note">
+                    <p><code>delete</code> elimina una riga; grazie a <code>onDelete: Cascade</code> nello schema
+                        spariscono anche le righe di <code>PostTag</code>, mentre i tag restano.</p>
+                </div>
+                <h3>Cosa fa <code>delete</code></h3>
+                <p>Elimina <strong>una riga</strong>, individuata con un campo univoco. Le righe collegate si comportano come dice <code>onDelete</code> nello schema.</p>
+                <pre><code class="language-js">// SQL: DELETE FROM Post WHERE id = 1;
+await client.post.delete({ where: { id: 1 } });</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Opzione</th>
+                            <th>A cosa serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>where</code></td>
+                            <td>Obbligatorio: quale riga, tramite <code>@id</code> o <code>@unique</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Restituisce</strong>: la riga <strong>appena eliminata</strong> (utile per mostrare cosa è stato cancellato). Se non esiste lancia l'errore <code>P2025</code>.</p>
+                <pre><code class="language-js">router.delete("/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+
+  try {
+    await client.post.delete({ where: { id } });
+    // 204 No Content: operazione riuscita, nessun corpo nella risposta.
+    res.sendStatus(204);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Post non trovato" });
+    }
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                <h3>Riepilogo</h3>
+                <p>Le rotte sono tutte in <code>routers/postRouter.js</code>; il prefisso <code>/blogs</code> lo
+                    aggiunge <code>app.use</code> in <code>server.js</code>.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rotta</th>
+                            <th>Query Prisma</th>
+                            <th>Risposta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET /blogs</code></td>
+                            <td><code>findMany</code> + <code>select</code></td>
+                            <td>200</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /blogs/:id</code></td>
+                            <td><code>findUnique</code></td>
+                            <td>200 / 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /blogs</code></td>
+                            <td><code>create</code> + <code>connect</code></td>
+                            <td>201 / 400</td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT /blogs/:id</code></td>
+                            <td><code>update</code></td>
+                            <td>200 / 404</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE /blogs/:id</code></td>
+                            <td><code>delete</code></td>
+                            <td>204 / 404</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="task">
+                <h3>Esercizi per casa</h3>
+                <p><strong>CRUD dei tag</strong>: crea <code>routers/tagRouter.js</code>, montalo su <code>/tags</code> in
+                    <code>server.js</code> e scrivi <code>GET /tags</code>, <code>POST /tags</code> e
+                    <code>DELETE /tags/:id</code> seguendo lo stesso schema delle rotte dei post.</p>
+                <p><strong>I post di un tag</strong>: <code>GET /tags/:id</code> restituisce il tag con la lista dei
+                    titoli dei suoi post (stesso <code>select</code> annidato, ma partendo da <code>Tag</code>).</p>
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-js">// routers/tagRouter.js — montato in server.js con app.use("/tags", tagRouter)
+router.get("/:id", async (req, res) =&gt; {
+  const id = Number(req.params.id);
+
+  try {
+    const tag = await client.tag.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        posts: { select: { post: { select: { id: true, title: true } } } }
+      }
+    });
+
+    if (!tag) {
+      return res.status(404).json({ error: "Tag non trovato" });
+    }
+
+    res.json({ ...tag, posts: tag.posts.map((postTag) =&gt; postTag.post) });
+  } catch (error) {
+    res.status(500).json({ error: "Errore del server" });
+  }
+});</code></pre>
+                </div>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

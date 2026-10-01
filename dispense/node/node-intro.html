@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node e package manager - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+
+    <header>
+        <nav>
+            <div class="brand">NodeJs</div>
+            <ul>
+                <li><a href="#node">Node</a></li>
+                <li><a href="#argomenti-cli">Argomenti CLI</a></li>
+                <li><a href="#package-managers">Package manager</a></li>
+                <li><a href="#progetto">Progetto</a></li>
+                <li><a href="#scripts">Script</a></li>
+                <li><a href="#dipendenze">Dipendenze</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Node e i package manager</h1>
+            <p class="intro">JavaScript lato server, parametri da terminale e package manager.</p>
+        </div>
+    </header>
+
+    <main id="content">
+        <article>
+
+            <section id="node">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Cos'è Node</h2>
+                </header>
+
+                <div class="note">
+                    <p>Node è un runtime JavaScript che funziona fuori dal browser, direttamente sul sistema operativo.</p>
+                    <p>Il linguaggio è sempre JavaScript, ma non esistono le API del DOM: niente <code>document</code>, <code>window</code>, <code>alert</code> o <code>prompt</code>.</p>
+                </div>
+
+                <p>Nel browser JavaScript serve per interagire con la pagina: leggere elementi, rispondere ai click, modificare il DOM. Node usa lo stesso linguaggio in un contesto completamente diverso: il codice gira dal terminale, legge file sul disco, avvia server e gestisce i pacchetti di un progetto.</p>
+                <p>Per questo Node non include le API del browser. Le due cose sono separate: il browser ha il DOM, Node ha le sue API di sistema. Stessa sintassi, ambienti diversi.</p>
+                <p>Nel nostro caso useremo Node principalmente come base per avviare strumenti da terminale, in particolare quelli necessari per creare e avviare progetti front-end moderni.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// app.js
+console.log('Ciao da Node');</code></pre>
+                    <pre><code class="language-bash">node app.js
+# Output: Ciao da Node</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea un file <code>app.js</code> che stampa in console il tuo nome, poi avvialo con Node.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">// app.js
+console.log('Luca');</code></pre>
+                        <pre><code class="language-bash">node app.js</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="argomenti-cli">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Argomenti da terminale</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>process.argv</code> è un array che contiene gli argomenti passati al comando Node.</p>
+                    <p>I primi due elementi sono riservati a Node e al file eseguito, quindi gli argomenti scritti dall'utente iniziano da <code>process.argv[2]</code>.</p>
+                </div>
+
+                <p>Quando lanci uno script da terminale puoi scrivere dei valori dopo il nome del file. Questi valori vengono chiamati argomenti della riga di comando e servono per passare dati allo script senza modificare il codice ogni volta.</p>
+                <p>Node mette questi dati dentro <code>process.argv</code>. Si tratta di un array di stringhe: in posizione <code>0</code> c'è il percorso dell'eseguibile di Node, in posizione <code>1</code> c'è il file eseguito, e dalla posizione <code>2</code> in poi ci sono gli argomenti scritti nel terminale.</p>
+                <p>Questo è utile quando vuoi rendere uno script più flessibile. Per esempio puoi passare un nome, un numero o una parola e far cambiare comportamento al programma senza toccare il file <code>app.js</code>.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-javascript">// app.js
+const nome = process.argv[2];
+
+console.log('Ciao ' + nome);</code></pre>
+
+                    <pre><code class="language-bash">node app.js Marco
+# Output: Ciao Marco</code></pre>
+
+                    <pre><code class="language-javascript">// app.js
+const primoArgomento = process.argv[2];
+const secondoArgomento = process.argv[3];
+
+console.log(primoArgomento);
+console.log(secondoArgomento);</code></pre>
+
+                    <pre><code class="language-bash">node app.js rosso blu
+# Output:
+# rosso
+# blu</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Crea una funzione JavaScript che riceve come parametro il valore inserito dal terminale. Il valore rappresenta un'ora, per esempio <code>1</code>, <code>15</code> oppure <code>23</code>. In base al numero inserito, la funzione deve stampare un saluto adeguato.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-javascript">// app.js
+const ora = Number(process.argv[2]);
+
+function saluta(oraCorrente) {
+    if (oraCorrente >= 6 && oraCorrente < 12) {
+        console.log('Buongiorno');
+    } else if (oraCorrente >= 12 && oraCorrente < 18) {
+        console.log('Buon pomeriggio');
+    } else if (oraCorrente >= 18 && oraCorrente <= 23) {
+        console.log('Buonasera');
+    } else {
+        console.log('Buonanotte');
+    }
+}
+
+saluta(ora);</code></pre>
+
+                        <pre><code class="language-bash">node app.js 15
+# Output: Buon pomeriggio</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="package-managers">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>I package manager</h2>
+                </header>
+
+                <div class="note">
+                    <p>Un package manager installa, aggiorna e rimuove i pacchetti di un progetto JavaScript.</p>
+                    <p>In questo corso useremo sempre <code>pnpm</code>. Gli altri li vediamo solo per sapere che esistono e per riconoscerli quando li incontrerai in altri progetti.</p>
+                </div>
+
+                <p>Quando lavori con JavaScript moderno non scrivi tutto da zero. Usi librerie e strumenti esterni, chiamati <strong>pacchetti</strong>. Un package manager serve proprio a scaricare quei pacchetti, salvarli nel progetto e tenerne traccia nel file <code>package.json</code>.</p>
+                <p>I nomi principali da conoscere sono quattro:</p>
+
+                <ul>
+                    <li><strong>npm</strong> — è il package manager storico, installato insieme a Node.</li>
+                    <li><strong>pnpm</strong> — è l'alternativa che useremo: è veloce, ordinata ed efficiente nello spazio su disco.</li>
+                    <li><strong>yarn</strong> — è un'alternativa a npm, molto diffusa in tanti progetti esistenti.</li>
+                    <li><strong>npx</strong> — non installa pacchetti nel progetto: serve a eseguire comandi forniti da un pacchetto.</li>
+                </ul>
+
+                <p>npm, yarn e pnpm fanno quindi la stessa grande famiglia di operazioni: installano dipendenze e gestiscono il progetto. npx invece serve soprattutto a lanciare comandi una tantum, per esempio quelli che creano la struttura iniziale di un'app.</p>
+                <p>Dato che useremo pnpm, è utile sapere anche come installarlo globalmente. Un'installazione globale significa che quel comando diventa disponibile in tutto il sistema, non solo dentro una singola cartella di progetto.</p>
+
+                <div class="note">
+                    <p>Su Windows può capitare che PowerShell blocchi l'esecuzione degli script. In quel caso bisogna cambiare la Execution Policy, ad esempio con <code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code>.</p>
+                    <p>Su macOS e Linux, invece, alcuni comandi globali richiedono <code>sudo</code>. <code>sudo</code> significa "superuser do" e permette di eseguire un comando con privilegi di amministratore.</p>
+                </div>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-bash"># installare pnpm globalmente con npm
+npm install -g pnpm
+
+# verificare la versione installata
+pnpm --version</code></pre>
+
+                    <pre><code class="language-bash"># Windows PowerShell, se gli script sono bloccati
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# macOS / Linux, se servono privilegi di amministratore
+sudo npm install -g pnpm</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Installa globalmente <code>pnpm</code> sul tuo computer.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-bash">npm install -g pnpm</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="progetto">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Inizializzare un progetto</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>package.json</code> è il file che descrive un progetto: nome, versione, script e dipendenze.</p>
+                    <p>Può essere creato con <code>npm init</code> oppure con <code>pnpm init</code>.</p>
+                </div>
+
+                <p>Ogni progetto parte dalla creazione della cartella e del file <code>package.json</code>. Questo file è il punto centrale del progetto: contiene le informazioni principali e viene letto dai package manager per sapere come deve essere gestito il progetto.</p>
+                <p>Con <code>npm init</code> oppure <code>pnpm init</code> si avvia una piccola procedura guidata che crea il file. In alternativa, in alcuni casi si possono usare opzioni automatiche, ma all'inizio è più utile vedere il file nascere in modo esplicito.</p>
+                <p>Quando poi installerai i pacchetti o aggiungerai gli script, sarà proprio <code>package.json</code> ad aggiornarsi.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-bash">pnpm init
+
+# oppure
+
+npm init</code></pre>
+
+                    <pre><code class="language-json">{
+    "name": "lezione",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "type": "module",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.26.1",
+    "dependencies": {}
+}</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Inizializza un nuovo progetto con <code>pnpm init</code> oppure con <code>npm init</code>.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-bash">pnpm init</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="scripts">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>La chiave scripts</h2>
+                </header>
+
+                <div class="note">
+                    <p>La chiave <code>scripts</code> del file <code>package.json</code> contiene comandi riutilizzabili con un nome breve.</p>
+                    <p>Con <code>pnpm run nome-script</code> esegui il comando associato, senza doverlo riscrivere ogni volta nel terminale.</p>
+                </div>
+
+                <p>Dentro <code>package.json</code> la chiave <code>scripts</code> è un oggetto che contiene coppie <code>nome: comando</code>. Il nome è quello che scriverai nel terminale, il comando è l'istruzione reale che verrà eseguita.</p>
+                <p>Questo permette di standardizzare il progetto. Invece di ricordare ogni volta se il file si chiama <code>app.js</code>, o se il comando è lungo, basta usare uno script con un nome semplice come <code>start</code> o <code>dev</code>.</p>
+                <p>Uno script molto utile in fase di sviluppo usa il flag <code>--watch</code>. Quando Node viene avviato con <code>node --watch app.js</code>, rimane in ascolto e riavvia automaticamente il file ogni volta che lo salvi. Questo evita di fermare e rilanciare il programma manualmente a ogni modifica.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-json">{
+    "name": "mio-progetto",
+    "version": "1.0.0",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "node --watch app.js"
+    }
+}</code></pre>
+
+                    <pre><code class="language-bash">pnpm run start
+pnpm run dev</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi nel <code>package.json</code> gli script <code>start</code> e <code>dev</code>, poi avvia il progetto in modalità watch.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-json">{
+    "scripts": {
+        "start": "node app.js",
+        "dev": "node --watch app.js"
+    }
+}</code></pre>
+
+                        <pre><code class="language-bash">pnpm run dev</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="dipendenze">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Dipendenze</h2>
+                </header>
+
+                <div class="note">
+                    <p><code>dependencies</code> contiene i pacchetti necessari al funzionamento del progetto.</p>
+                    <p><code>devDependencies</code> contiene i pacchetti utili solo durante lo sviluppo, come tool, bundler, linter o strumenti di build.</p>
+                </div>
+
+                <p>Nel file <code>package.json</code> non tutti i pacchetti hanno lo stesso ruolo. Alcuni servono davvero all'app per funzionare, altri servono solo a chi sviluppa il progetto.</p>
+                <p>La chiave <code>dependencies</code> raccoglie i pacchetti usati direttamente dal progetto. Se l'app ha bisogno di React per funzionare, React va qui. La chiave <code>devDependencies</code> raccoglie invece strumenti di supporto: per esempio Vite, ESLint, Prettier o altri tool che aiutano a sviluppare ma che non fanno parte della logica dell'app.</p>
+                <p>Con pnpm la differenza si vede anche nei comandi: <code>pnpm add nome-pacchetto</code> salva il pacchetto in <code>dependencies</code>, mentre <code>pnpm add -D nome-pacchetto</code> lo salva in <code>devDependencies</code>.</p>
+                <p>Nel progetto troverai anche il lockfile. Con pnpm si chiama <code>pnpm-lock.yaml</code>; con npm il file equivalente è <code>package-lock.json</code>. Il suo compito è bloccare le versioni esatte installate, così tutti usano lo stesso ambiente.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-bash">pnpm add react
+pnpm add -D vite</code></pre>
+
+                    <pre><code class="language-json">{
+    "name": "mio-progetto",
+    "version": "1.0.0",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "node --watch app.js"
+    },
+    "dependencies": {
+        "react": "^19.1.0"
+    },
+    "devDependencies": {
+        "vite": "^7.0.0"
+    }
+}</code></pre>
+                </section>
+
+                <section>
+                    <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Installa <code>react</code> come dipendenza normale e <code>vite</code> come dipendenza di sviluppo.</p>
+
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-bash">pnpm add react
+pnpm add -D vite</code></pre>
+                    </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Inizializza un nuovo progetto con <code>pnpm init</code>, crea un file <code>app.js</code> che legge un'ora da <code>process.argv[2]</code> e stampa un saluto adeguato, aggiungi nel <code>package.json</code> gli script <code>start</code> e <code>dev</code>, installa <code>react</code> in <code>dependencies</code> e <code>vite</code> in <code>devDependencies</code>, poi avvia il progetto con <code>pnpm run dev</code>.</p>
+
+                <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                <div class="panel">
+                    <pre><code class="language-bash">pnpm init
+pnpm add react
+pnpm add -D vite</code></pre>
+
+                    <pre><code class="language-javascript">// app.js
+const ora = Number(process.argv[2]);
+
+function saluta(oraCorrente) {
+    if (oraCorrente >= 6 && oraCorrente < 12) {
+        console.log('Buongiorno');
+    } else if (oraCorrente >= 12 && oraCorrente < 18) {
+        console.log('Buon pomeriggio');
+    } else if (oraCorrente >= 18 && oraCorrente <= 23) {
+        console.log('Buonasera');
+    } else {
+        console.log('Buonanotte');
+    }
+}
+
+saluta(ora);</code></pre>
+
+                    <pre><code class="language-json">{
+    "name": "node-intro",
+    "version": "1.0.0",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "node --watch app.js"
+    },
+    "dependencies": {
+        "react": "^19.1.0"
+    },
+    "devDependencies": {
+        "vite": "^7.0.0"
+    }
+}</code></pre>
+
+                    <pre><code class="language-bash">pnpm run dev</code></pre>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

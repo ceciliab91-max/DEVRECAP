@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma: tipi, annotazioni e relazioni</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Prisma + MySQL</div>
+            <ul>
+                <li><a href="#tipi">Tipi</a></li>
+                <li><a href="#annotazioni">Annotazioni</a></li>
+                <li><a href="#uno-a-uno">1:1</a></li>
+                <li><a href="#uno-a-molti">1:N</a></li>
+                <li><a href="#tag">Tag</a></li>
+                <li><a href="#ordini">Ordini</a></li>
+                <li><a href="#utente-ordini">Utente</a></li>
+                <li><a href="#schema-finale">Schema finale</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Parte 2 · Database</p>
+            <h1>Prisma: tipi, annotazioni e relazioni</h1>
+            <p class="intro">Completare il linguaggio dello schema Prisma: i tipi di campo, le annotazioni e le tre
+                forme di relazione, costruendo dal vivo — una migration alla volta — lo schema completo dello
+                store.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="tipi">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>I tipi di campo</h2>
+                </header>
+                <p>Nella dispensa precedente, <a href='/lezioni/prisma-mysql-tabelle'>Prisma e MySQL: gestione delle
+                        tabelle</a>, abbiamo collegato MySQL a Prisma con un solo model, <code>Product</code>. Il
+                    punto di partenza di oggi è quello schema, invariato:</p>
+                <pre><code class="language-js">generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  description String?
+  inStock     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}</code></pre>
+                <p>Ogni tipo Prisma diventa un tipo MySQL preciso:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo Prisma</th>
+                            <th>MySQL</th>
+                            <th>Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>String</code></td>
+                            <td><code>VARCHAR(191)</code></td>
+                            <td>testo breve (nome, email)</td>
+                        </tr>
+                        <tr>
+                            <td><code>Boolean</code></td>
+                            <td><code>TINYINT(1)</code></td>
+                            <td>vero/falso</td>
+                        </tr>
+                        <tr>
+                            <td><code>Int</code></td>
+                            <td><code>INT</code></td>
+                            <td>intero a 32 bit</td>
+                        </tr>
+                        <tr>
+                            <td><code>BigInt</code></td>
+                            <td><code>BIGINT</code></td>
+                            <td>intero a 64 bit</td>
+                        </tr>
+                        <tr>
+                            <td><code>Float</code></td>
+                            <td><code>DOUBLE</code></td>
+                            <td>decimale approssimato</td>
+                        </tr>
+                        <tr>
+                            <td><code>Decimal</code></td>
+                            <td><code>DECIMAL(65,30)</code></td>
+                            <td>decimale esatto: prezzi</td>
+                        </tr>
+                        <tr>
+                            <td><code>DateTime</code></td>
+                            <td><code>DATETIME(3)</code></td>
+                            <td>data e ora</td>
+                        </tr>
+                        <tr>
+                            <td><code>Json</code></td>
+                            <td><code>JSON</code></td>
+                            <td>dati strutturati</td>
+                        </tr>
+                        <tr>
+                            <td><code>Bytes</code></td>
+                            <td><code>LONGBLOB</code></td>
+                            <td>dati binari</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p><strong>Float vs Decimal</strong>: <code>Float</code> ha imprecisioni binarie (<code>0.1 + 0.2
+                            !== 0.3</code>); per i valori monetari usiamo <code>Decimal</code>, come già fa
+                        <code>price</code>.
+                    </p>
+                </div>
+                <p>Accanto a un campo puoi scrivere anche il nome di un <strong>altro model</strong> (campo di
+                    relazione, lo vediamo a partire dal capitolo 3) oppure un <strong>enum</strong> definito da te
+                    (lo vediamo nel capitolo 6). Le <strong>liste scalari</strong> come <code>String[]</code> non
+                    esistono su MySQL: una lista di valori si modella con una tabella di collegamento (capitoli 5 e
+                    6).
+                </p>
+                <p>Gli attributi nativi <code>@db.&lt;Tipo&gt;</code> rifiniscono il mapping quando il default non
+                    basta:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Attributo</th>
+                            <th>MySQL</th>
+                            <th>Quando serve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>@db.VarChar(255)</code></td>
+                            <td><code>VARCHAR(255)</code></td>
+                            <td>testo più lungo di 191</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.Text</code></td>
+                            <td><code>TEXT</code> (65 KB)</td>
+                            <td>descrizioni, biografie</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.LongText</code></td>
+                            <td><code>LONGTEXT</code> (4 GB)</td>
+                            <td>testi molto lunghi</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.TinyInt</code> / <code>@db.SmallInt</code></td>
+                            <td><code>TINYINT</code> / <code>SMALLINT</code></td>
+                            <td>interi piccoli</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.UnsignedInt</code></td>
+                            <td><code>INT UNSIGNED</code></td>
+                            <td>solo positivi</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.Decimal(10, 2)</code></td>
+                            <td><code>DECIMAL(10, 2)</code></td>
+                            <td>precisione personalizzata</td>
+                        </tr>
+                        <tr>
+                            <td><code>@db.Date</code> / <code>@db.Time(3)</code></td>
+                            <td><code>DATE</code> / <code>TIME(3)</code></td>
+                            <td>solo data / solo ora</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p><strong>Attenzione alle colonne di relazione</strong>: la FK deve avere lo stesso tipo
+                        (attributi <code>@db.*</code> inclusi) della colonna a cui punta. Le nostre chiavi primarie
+                        sono <code>Int</code> firmato, quindi le FK sono <code>Int</code> semplici: una
+                        <code>@db.UnsignedInt</code> che punta a una <code>INT</code> firmata viene rifiutata da MySQL
+                        con l'errore 3780.
+                    </p>
+                </div>
+                <h3>Dal vivo: da VARCHAR a TEXT</h3>
+                <p>Le descrizioni dei prodotti possono essere lunghe: passiamo <code>description</code> da
+                    <code>VARCHAR(191)</code> a <code>TEXT</code>.
+                </p>
+                <pre><code class="language-js">  description String?  @db.Text</code></pre>
+                <pre><code class="language-bash">pnpm migrate --name description-to-text
+pnpm generate</code></pre>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): controlla che la colonna
+                    <code>description</code> accetti ora testo lungo.</p>
+            </section>
+            <section id="annotazioni">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Le annotazioni</h2>
+                </header>
+                <p>Quattro simboli, quattro ambiti:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Simbolo</th>
+                            <th>Ambito</th>
+                            <th>Esempi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>@</code></td>
+                            <td>singolo campo</td>
+                            <td><code>@id</code>, <code>@unique</code>, <code>@default(...)</code>,
+                                <code>@relation(...)</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>@@</code></td>
+                            <td>intero model</td>
+                            <td><code>@@index([...])</code>, <code>@@unique([...])</code>, <code>@@map("...")</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>?</code></td>
+                            <td>dopo il tipo</td>
+                            <td>colonna nullable (<code>description String?</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>[]</code></td>
+                            <td>dopo il tipo</td>
+                            <td>lista, lato «molti» di una relazione</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p><code>@id</code> e <code>@default</code> sono due cose diverse: <code>@id</code> definisce il
+                        <em>ruolo</em> del campo (chiave primaria); <code>@default(...)</code> definisce <em>chi
+                            fornisce il valore</em> se non lo passi tu. <code>autoincrement()</code> sta dentro
+                        <code>@default</code> perché è una strategia di riempimento, come <code>now()</code> per
+                        <code>createdAt</code> e <code>true</code> per <code>inStock</code>. Altre strategie:
+                        <code>uuid()</code>, <code>cuid()</code>, <code>nanoid()</code> (id casuali per
+                        <code>String</code>), valori letterali, membri di enum.
+                    </p>
+                </div>
+                <h3>Dal vivo: tracciare le modifiche dei prodotti</h3>
+                <pre><code class="language-js">  updatedAt DateTime @updatedAt</code></pre>
+                <p><code>@updatedAt</code> non è un default: Prisma lo imposta alla creazione <strong>e</strong> lo
+                    ricalcola a ogni <code>update</code>.</p>
+                <pre><code class="language-bash">pnpm migrate --name add-updated-at
+pnpm generate</code></pre>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): modifica un prodotto e
+                    controlla che <code>updatedAt</code> cambi da solo.</p>
+            </section>
+            <section id="uno-a-uno">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Relazione uno-a-uno: User e Profile</h2>
+                </header>
+                <pre><code class="language-text">User ──────1── Profile</code></pre>
+                <p>Un utente ha al massimo un profilo. La foreign key vive nel model «dipendente» e porta
+                    <code>@unique</code>: è quello che rende la relazione 1:1 — senza sarebbe 1:N.
+                </p>
+                <pre><code class="language-js">model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+
+  // Singolare e opzionale: l'utente può esistere senza profilo.
+  profile  Profile?
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String? @db.Text
+  avatar String?
+
+  // FK con @unique: UN solo profilo per utente.
+  userId Int     @unique
+  user   User    @relation(fields: [userId], references: [id])
+}</code></pre>
+                <pre><code class="language-bash">pnpm migrate --name add-user-profile
+pnpm generate</code></pre>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): crea un utente e un profilo,
+                    poi prova a collegare un secondo profilo allo stesso utente — viene rifiutato, perché
+                    <code>userId</code> è <code>@unique</code>.</p>
+                <p>Nel database esiste una sola colonna nuova: <code>Profile.userId INT NOT NULL UNIQUE</code>.
+                    <code>profile</code> e <code>user</code> sono campi <strong>virtuali</strong>: non diventano
+                    colonne, esistono solo nello schema Prisma per rappresentare la relazione.
+                </p>
+                <div class="note">
+                    <p><code>password</code> è un campo dimostrativo per mostrare una tabella «simil
+                        autenticazione»: questa lezione non implementa login o hashing. In un progetto reale la
+                        colonna conterrebbe l'hash (bcrypt/argon2) e mai la password in chiaro, e non andrebbe mai
+                        esposta all'esterno dell'applicazione.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Colonne fisiche</th>
+                            <th>Campi virtuali</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>User</code></td>
+                            <td><code>id</code> PK, <code>email</code> UK, <code>name</code>, <code>password</code>
+                            </td>
+                            <td><code>profile</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Profile</code></td>
+                            <td><code>id</code> PK, <code>bio</code>, <code>avatar</code>, <code>userId</code> FK/UK
+                            </td>
+                            <td><code>user</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="uno-a-molti">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Relazione uno-a-molti: Category e Product</h2>
+                </header>
+                <pre><code class="language-text">Category ──────&lt; Product</code></pre>
+                <p>Una categoria ha molti prodotti; un prodotto appartiene a una categoria. La FK vive nel lato
+                    «molti», senza <code>@unique</code>:</p>
+                <pre><code class="language-js">model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}</code></pre>
+                <p>In <code>Product</code> si aggiungono la colonna fisica e il campo virtuale:</p>
+                <pre><code class="language-js">model Product {
+  // ... campi esistenti ...
+
+  categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+}</code></pre>
+                <div class="note">
+                    <p><strong>Attenzione ai dati esistenti</strong>: la nuova colonna obbligatoria non ha un valore
+                        valido per i prodotti già inseriti. In un database didattico si svuota la tabella prima della
+                        migration:</p>
+                    <pre><code class="language-sql">mysql -u prisma_user -p express_store -e "DELETE FROM Product;"</code></pre>
+                </div>
+                <pre><code class="language-bash">pnpm migrate --name add-categories
+pnpm generate</code></pre>
+                <p><code>onDelete</code> stabilisce cosa fare ai record collegati quando il record «uno» viene
+                    eliminato:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Valore</th>
+                            <th>Effetto</th>
+                            <th>Nel nostro schema</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Cascade</code></td>
+                            <td>elimina anche i collegati</td>
+                            <td><code>Category</code> → prodotti; righe del ponte <code>ProductTag</code> quando si
+                                elimina prodotto o tag</td>
+                        </tr>
+                        <tr>
+                            <td><code>SetNull</code></td>
+                            <td>azzera la FK (richiede colonna opzionale)</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><code>Restrict</code></td>
+                            <td>rifiuta l'eliminazione</td>
+                            <td>default per le FK obbligatorie, es. <code>OrderItem → Product</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): crea una categoria, poi un
+                    prodotto con quella <code>categoryId</code> — dall'interfaccia puoi navigare dal prodotto alla
+                    sua categoria e viceversa.</p>
+            </section>
+            <section id="tag">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Molti-a-molti esplicita: i tag</h2>
+                </header>
+                <pre><code class="language-text">Product &gt;──────&lt; Tag
+     (via ProductTag)</code></pre>
+                <p>Un prodotto ha molti tag, un tag contrassegna molti prodotti. Su MySQL si modella con una
+                    <strong>tabella di collegamento scritta da noi</strong> (model ponte): due relazioni 1:N dentro lo
+                    stesso model.
+                </p>
+                <pre><code class="language-js">model Tag {
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
+  products ProductTag[]
+}
+
+model ProductTag {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tagId     Int
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  // La COPPIA è unica: lo stesso tag una volta sola per prodotto.
+  @@unique([productId, tagId])
+  @@index([tagId])
+}</code></pre>
+                <p>In <code>Product</code> si aggiunge il lato «molti»:</p>
+                <pre><code class="language-js">  tags ProductTag[]</code></pre>
+                <pre><code class="language-bash">pnpm migrate --name add-tags
+pnpm generate</code></pre>
+                <p>Collegare i tag non richiede di scrivere SQL sulla tabella ponte: basta un record
+                    <code>ProductTag</code> con <code>productId</code> e <code>tagId</code>.</p>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): crea a mano una riga
+                    <code>ProductTag</code> con <code>productId</code> e <code>tagId</code> validi.</p>
+            </section>
+            <section id="ordini">
+                <header>
+                    <p class="index">Capitolo 6</p>
+                    <h2>Molti-a-molti esplicita con dati: gli ordini</h2>
+                </header>
+                <pre><code class="language-text">Order &gt;──────&lt; Product
+   (via OrderItem: quantity, unitPrice)</code></pre>
+                <p>Il legame tra ordine e prodotto ha <strong>dati propri</strong> (quanti? a quale prezzo?): il model
+                    ponte li contiene. Il primo enum dello schema valida lo stato dell'ordine direttamente a livello
+                    di database.</p>
+                <pre><code class="language-js">enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+
+  // Dati del legame: valgono per questa riga d'ordine.
+  quantity  Int     @default(1)
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}</code></pre>
+                <p>In <code>Product</code> si aggiunge:</p>
+                <pre><code class="language-js">  orderItems OrderItem[]</code></pre>
+                <pre><code class="language-bash">pnpm migrate --name add-orders
+pnpm generate</code></pre>
+                <div class="note">
+                    <p><code>unitPrice</code> è uno <strong>snapshot</strong>: il prezzo del prodotto <em>al momento
+                            dell'ordine</em>. Se il prezzo del prodotto cambia, gli ordini vecchi restano com'erano.
+                    </p>
+                </div>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): crea un <code>Order</code> e
+                    una riga <code>OrderItem</code> collegata, poi cambia il prezzo del prodotto e controlla che
+                    <code>unitPrice</code> sullo storico non cambi.</p>
+            </section>
+            <section id="utente-ordini">
+                <header>
+                    <p class="index">Capitolo 7</p>
+                    <h2>Relazione uno-a-molti: User e Order</h2>
+                </header>
+                <pre><code class="language-text">User ──────&lt; Order</code></pre>
+                <p>Finora gli ordini erano «anonimi»: nessun collegamento a un utente. Chiudiamo lo schema con
+                    l'ultima relazione, la stessa forma 1:N già vista per <code>Category</code>/<code>Product</code>:
+                    la FK obbligatoria vive nel lato «molti» (<code>Order</code>), senza <code>@unique</code>.</p>
+                <pre><code class="language-js">model User {
+  // ... campi esistenti ...
+  orders Order[]
+}
+
+model Order {
+  // ... campi esistenti ...
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}</code></pre>
+                <div class="note">
+                    <p><strong>Attenzione ai dati esistenti</strong>: come già visto per <code>add-categories</code>,
+                        la nuova colonna obbligatoria non ha un valore valido per gli ordini creati nei test
+                        precedenti. Si svuotano prima della migration:</p>
+                    <pre><code class="language-sql">mysql -u prisma_user -p express_store -e "DELETE FROM OrderItem; DELETE FROM \`Order\`;"</code></pre>
+                </div>
+                <pre><code class="language-bash">pnpm migrate --name add-user-orders
+pnpm generate</code></pre>
+                <p>Nessun <code>onDelete</code> esplicito: una FK obbligatoria ha come default
+                    <code>Restrict</code> — lo stesso comportamento già visto per <code>OrderItem</code> →
+                    <code>Product</code>. Un utente con ordini collegati non può essere eliminato.
+                </p>
+                <p><strong>Verifica in Prisma Studio</strong> (<code>pnpm studio</code>): crea un utente e un ordine
+                    collegato, poi prova a eliminare l'utente — l'operazione viene rifiutata.</p>
+            </section>
+            <section id="schema-finale">
+                <header>
+                    <p class="index">Capitolo 8</p>
+                    <h2>Lo schema finale dello store</h2>
+                </header>
+                <p>Con il collegamento tra <code>User</code> e <code>Order</code> lo schema raggiunge la sua forma
+                    finale: nove model in tutto.</p>
+                <pre><code class="language-js">generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  price       Decimal      @db.Decimal(10, 2)
+  description String?      @db.Text
+  inStock     Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  categoryId  Int
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  tags        ProductTag[]
+  orderItems  OrderItem[]
+
+  @@index([categoryId])
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  profile  Profile?
+  orders   Order[]
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String? @db.Text
+  avatar String?
+  userId Int     @unique
+  user   User    @relation(fields: [userId], references: [id])
+}
+
+model Tag {
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
+  products ProductTag[]
+}
+
+model ProductTag {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tagId     Int
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId])
+  @@index([tagId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  items     OrderItem[]
+
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        Int          @id @default(autoincrement())
+  quantity  Int          @default(1)
+  unitPrice Decimal      @db.Decimal(10, 2)
+
+  orderId   Int
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product      @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}</code></pre>
+                <p>Le cinque relazioni costruite, in sintesi:</p>
+                <pre><code class="language-text">Category ──────&lt; Product &gt;──────&lt; Tag        (via ProductTag)
+                    Product &gt;──────&lt; Order      (via OrderItem: quantity, unitPrice)
+User ──────1── Profile
+User ──────&lt; Order</code></pre>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Relazione</th>
+                            <th>Model</th>
+                            <th>FK fisica</th>
+                            <th>Dove sta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1:1</td>
+                            <td><code>User</code> ↔ <code>Profile</code></td>
+                            <td><code>Profile.userId</code> UNIQUE</td>
+                            <td>lato dipendente</td>
+                        </tr>
+                        <tr>
+                            <td>1:N</td>
+                            <td><code>Category</code> ↔ <code>Product</code></td>
+                            <td><code>Product.categoryId</code> (+ indice)</td>
+                            <td>lato «molti»</td>
+                        </tr>
+                        <tr>
+                            <td>M:N esplicita</td>
+                            <td><code>Product</code> ↔ <code>Tag</code></td>
+                            <td><code>ProductTag.productId</code> + <code>ProductTag.tagId</code></td>
+                            <td>model ponte</td>
+                        </tr>
+                        <tr>
+                            <td>M:N esplicita</td>
+                            <td><code>Order</code> ↔ <code>Product</code></td>
+                            <td><code>OrderItem.orderId</code> + <code>OrderItem.productId</code></td>
+                            <td>model ponte con dati</td>
+                        </tr>
+                        <tr>
+                            <td>1:N</td>
+                            <td><code>User</code> ↔ <code>Order</code></td>
+                            <td><code>Order.userId</code> (+ indice)</td>
+                            <td>lato «molti»</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p>Verifica finale in Prisma Studio (<code>pnpm studio</code>): nove tabelle, l'enum nella colonna
+                        <code>status</code> di <code>Order</code>, e le foreign key con i rispettivi indici.
+                    </p>
+                </div>
+                <h3>Errori in una riga</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sintomo</th>
+                            <th>Rimedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Migration <code>add-categories</code> fallisce su una tabella con righe</td>
+                            <td><code>DELETE FROM Product;</code> prima di rieseguire (colonna obbligatoria senza
+                                default)</td>
+                        </tr>
+                        <tr>
+                            <td>Migration <code>add-user-orders</code> fallisce su una tabella con righe</td>
+                            <td><code>DELETE FROM OrderItem; DELETE FROM \`Order\`;</code> prima di rieseguire
+                                (colonna obbligatoria senza default)</td>
+                        </tr>
+                        <tr>
+                            <td>Studio non mostra le tabelle nuove</td>
+                            <td>Aggiorna la vista: le tabelle compaiono dopo la migration applicata</td>
+                        </tr>
+                        <tr>
+                            <td>Rinominare il tag/file di una migration fatta a mano</td>
+                            <td>Mai a mano: usa <code>pnpm migrate --name ...</code> appena creato; per ripartire
+                                <code>pnpm reset</code>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p><strong>Prossimi passi</strong>: lo schema è completo. Nella prossima dispensa lo mettiamo
+                        alla prova e ci costruiamo sopra l'API REST completa dello store con Express.</p>
+                </div>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: la biblioteca</h3>
+                <p>Progetta lo schema di una biblioteca:</p>
+                <ul>
+                    <li>Un autore scrive molti libri; un libro ha un solo autore.</li>
+                    <li>Un libro può avere più generi (es. "Fantascienza", "Storia") e uno stesso genere si applica a
+                        molti libri: legame "secco", senza dati propri.</li>
+                    <li>Un libro può essere prestato più volte nel tempo a iscritti diversi; ogni prestito ha una data
+                        di inizio, una scadenza, una data di restituzione facoltativa e uno stato (<code>ACTIVE</code>,
+                        <code>RETURNED</code>, <code>OVERDUE</code>).
+                    </li>
+                    <li>Ogni iscritto ha un'email univoca e un nome.</li>
+                </ul>
+                <p><strong>Requisiti</strong>: almeno 5 model più un enum per lo stato del prestito; individua da solo
+                    quale forma di relazione (1:N, M:N esplicita senza dati propri, M:N esplicita con dati propri)
+                    usare in ciascun caso.</p>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: le prenotazioni del cinema</h3>
+                <p>Progetta lo schema di un sistema di prenotazione posti al cinema (un solo cinema, una sola sala):
+                </p>
+                <ul>
+                    <li>Un film ha molte proiezioni, ciascuna con la propria data e ora; ogni proiezione è di un solo
+                        film.</li>
+                    <li>La sala ha posti fissi, identificati da fila e numero.</li>
+                    <li>Un cliente può prenotare più posti per più proiezioni; per la stessa proiezione, lo stesso
+                        posto non può essere prenotato due volte.</li>
+                    <li>Ogni prenotazione registra il prezzo pagato: il prezzo del biglietto può cambiare nel tempo,
+                        quindi va salvato al momento della prenotazione, non ricalcolato dopo.</li>
+                </ul>
+                <p><strong>Requisiti</strong>: almeno 5 model; un vincolo di unicità composto che impedisca il doppio
+                    posto sulla stessa proiezione; il prezzo va <strong>copiato dentro la riga della prenotazione al
+                        momento della transazione</strong>, non ricavato al volo dal prezzo attuale del biglietto —
+                    stesso principio di <code>OrderItem.unitPrice</code> nello store del corso: se il prezzo del
+                    biglietto cambia in seguito, la prenotazione storica continua a mostrare il prezzo con cui è
+                    stata pagata.
+                </p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

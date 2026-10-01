@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package JavaScript e pnpm - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+<body>
+    <a class="skip" href="#content">Vai al contenuto</a>
+
+    <header>
+        <nav>
+            <div class="brand">Package</div>
+            <ul>
+                <li><a href="#cercare">Cercare</a></li>
+                <li><a href="#salute">Valutare</a></li>
+                <li><a href="#versioni">Versioni</a></li>
+                <li><a href="#pnpm">pnpm</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Package JavaScript e pnpm</h1>
+            <p class="intro">Come trovare, valutare e gestire le dipendenze di un progetto.</p>
+        </div>
+    </header>
+
+    <main id="content">
+        <article>
+            <section id="cercare">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Dove cercare un package</h2>
+                </header>
+
+                <div class="note">
+                    <p>Il registro pi&ugrave; usato per i package JavaScript &egrave; <strong>npmjs.com</strong>. Ogni pagina contiene documentazione, versioni pubblicate, dipendenze, repository e statistiche.</p>
+                </div>
+
+                <p>Cerca il package su npm, poi apri la documentazione ufficiale e il repository collegato. Controlla sempre il nome: package con nomi molto simili possono essere progetti diversi.</p>
+
+                <section>
+                    <h3>Esempio</h3>
+                    <pre><code class="language-bash"># installare Bootstrap nel progetto
+pnpm add bootstrap</code></pre>
+                </section>
+            </section>
+
+            <section id="salute">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Valutare lo stato di salute</h2>
+                </header>
+
+                <p>Un package molto scaricato non &egrave; automaticamente un package affidabile. Prima di usarlo, controlla pi&ugrave; segnali insieme:</p>
+                <ul>
+                    <li><strong>Attivit&agrave; recente:</strong> release, commit e risposte alle issue mostrano se il progetto &egrave; mantenuto.</li>
+                    <li><strong>Issue e pull request:</strong> guarda se i problemi importanti vengono discussi e chiusi.</li>
+                    <li><strong>Documentazione:</strong> README, esempi, changelog e istruzioni di migrazione devono essere chiari.</li>
+                    <li><strong>Compatibilit&agrave;:</strong> verifica versione di Node, browser supportati e dipendenze richieste.</li>
+                    <li><strong>Sicurezza e licenza:</strong> controlla vulnerabilit&agrave; note e condizioni d'uso del package.</li>
+                </ul>
+
+                <div class="note">
+                    <p>I download sono utili per capire la diffusione, ma non bastano da soli per giudicare qualit&agrave;, sicurezza e manutenzione.</p>
+                </div>
+            </section>
+
+            <section id="versioni">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>Release e Semantic Versioning</h2>
+                </header>
+
+                <div class="note">
+                    <p>Una versione SemVer segue lo schema <code>MAJOR.MINOR.PATCH</code>, per esempio <code>5.3.3</code>.</p>
+                </div>
+
+                <p>Una <strong>release</strong> &egrave; una versione pubblicata del package. Nel changelog trovi cosa cambia e se l'aggiornamento richiede modifiche al tuo codice.</p>
+                <ul>
+                    <li><strong>Major:</strong> include cambiamenti incompatibili, per esempio da <code>5.3.3</code> a <code>6.0.0</code>.</li>
+                    <li><strong>Minor:</strong> aggiunge funzionalit&agrave; compatibili, per esempio da <code>5.3.3</code> a <code>5.4.0</code>.</li>
+                    <li><strong>Patch:</strong> corregge bug senza cambiare l'uso previsto, per esempio da <code>5.3.3</code> a <code>5.3.4</code>.</li>
+                </ul>
+                <p>Le <strong>issue</strong> sono segnalazioni e discussioni su bug, richieste di funzionalit&agrave; o problemi di documentazione. Prima di aggiornare, verifica se esistono issue importanti ancora aperte.</p>
+
+                <section id="tilde">
+                    <h3>Il simbolo <code>~</code>: aggiornamenti patch</h3>
+                    <p>Il simbolo <code>~</code> blocca la <strong>major</strong> e la <strong>minor</strong>. Permette solo gli aggiornamenti patch.</p>
+                    <pre><code class="language-json">{
+  "dependencies": {
+    "bootstrap": "~5.3.3"
+  }
+}</code></pre>
+                    <p>In questo caso pnpm pu&ograve; installare <code>5.3.3</code>, <code>5.3.4</code>, <code>5.3.5</code> e cos&igrave; via. Non pu&ograve; installare <code>5.4.0</code>.</p>
+                    <div class="note">
+                        <p><code>~5.3.3</code> significa: da <code>5.3.3</code> incluso fino a prima di <code>5.4.0</code>.</p>
+                    </div>
+                </section>
+
+                <section id="caret">
+                    <h3>Il simbolo <code>^</code>: aggiornamenti compatibili</h3>
+                    <p>Il simbolo <code>^</code> blocca solo la <strong>major</strong>. Permette aggiornamenti minor e patch, che SemVer considera compatibili.</p>
+                    <pre><code class="language-json">{
+  "dependencies": {
+    "bootstrap": "^5.3.3"
+  }
+}</code></pre>
+                    <p>In questo caso pnpm pu&ograve; installare <code>5.3.3</code>, <code>5.3.4</code> e anche <code>5.4.0</code>. Non pu&ograve; installare <code>6.0.0</code>, perch&eacute; &egrave; una nuova major.</p>
+                    <div class="note">
+                        <p><code>^5.3.3</code> significa: da <code>5.3.3</code> incluso fino a prima di <code>6.0.0</code>.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Quale scegliere?</h3>
+                    <p>Usa <code>^</code> quando vuoi ricevere automaticamente funzionalit&agrave; compatibili e correzioni. Usa <code>~</code> quando vuoi aggiornare solo le correzioni e rimanere nella stessa minor.</p>
+                    <p>Con versioni <code>0.x</code>, il caret &egrave; pi&ugrave; prudente: <code>^0.3.2</code> permette <code>0.3.x</code>, ma non <code>0.4.0</code>.</p>
+                </section>
+            </section>
+
+            <section id="pnpm">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>Lavorare con i package usando pnpm</h2>
+                </header>
+
+                <p>Esegui questi comandi dalla cartella che contiene <code>package.json</code>. Conserva anche <code>pnpm-lock.yaml</code>: registra la versione esatta installata e rende il progetto riproducibile.</p>
+                <pre><code class="language-bash"># aggiungere una dipendenza
+pnpm add bootstrap
+
+# rimuovere una dipendenza
+pnpm remove bootstrap
+
+# aggiornare rispettando i range del package.json
+pnpm update
+
+# aprire la pagina del package nel browser
+pnpm home bootstrap
+
+# mostrare le licenze delle dipendenze installate
+pnpm licenses list
+
+# aggiornare alle ultime versioni, anche oltre il range attuale
+pnpm update --latest</code></pre>
+                <p><code>pnpm update</code> rispetta i vincoli come <code>^</code> e <code>~</code>. <code>pnpm update --latest</code> cerca invece le versioni pi&ugrave; recenti e pu&ograve; introdurre nuove major: dopo il comando, leggi il changelog ed esegui i test.</p>
+
+                <section>
+                    <div class="exercise">
+                        <h3>Esercizio</h3>
+                        <p>Installa Bootstrap, apri la home del package, controlla le licenze, esegui un aggiornamento e infine rimuovi il package.</p>
+                        <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                        <div class="panel">
+                            <pre><code class="language-bash">pnpm add bootstrap
+pnpm home bootstrap
+pnpm licenses list
+pnpm update
+pnpm update --latest
+pnpm remove bootstrap</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="task">
+                <h3>Esercizio finale</h3>
+                <p>Scegli un package per un'app reale. Controlla ultima release, issue importanti, licenza e compatibilit&agrave;. Spiega se installeresti il package con <code>^</code>, <code>~</code> oppure con una versione precisa.</p>
+            </section>
+        </article>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

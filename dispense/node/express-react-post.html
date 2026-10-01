@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express e React: errori e POST - Dispensa Didattica</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/print.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+</head>
+
+<body><a class="skip" href="#content">Vai al contenuto</a>
+    <header>
+        <nav>
+            <div class="brand">Express + React</div>
+            <ul>
+                <li><a href="#ripasso">Ripasso</a></li>
+                <li><a href="#errori">Errori</a></li>
+                <li><a href="#post-backend">POST: API</a></li>
+                <li><a href="#post-frontend">POST: React</a></li>
+                <li><a href="#ricarica">Ricarica</a></li>
+            </ul>
+        </nav>
+        <div class="hero">
+            <p class="eyebrow">Dispensa della lezione</p>
+            <h1>Express e React: gestire gli errori e inviare dati con POST</h1>
+            <p class="intro">Continuiamo il progetto <code>catalogo</code>: React mostra un messaggio quando l'API non
+                risponde come previsto e crea nuovi prodotti inviandoli a Express.</p>
+        </div>
+    </header>
+    <main id="content">
+        <article>
+            <section id="ripasso">
+                <header>
+                    <p class="index">Capitolo 1</p>
+                    <h2>Da dove partiamo</h2>
+                </header>
+                <p>Nella lezione precedente abbiamo creato il workspace <code>catalogo</code>, avviato con
+                    <code>pnpm all:dev</code>. Il backend risponde a <code>GET /products</code> con un oggetto di forma
+                    fissa:</p>
+                <pre><code class="language-json">{
+  "success": true,
+  "message": "",
+  "data": [
+    { "id": 1, "name": "Mouse Opale Air 5", "descrizione": "...", "price": 30.99 }
+  ]
+}</code></pre>
+                <p>Il frontend lo legge così:</p>
+                <pre><code class="language-jsx">// frontend/src/App.jsx
+import { useState, useEffect, Fragment } from 'react';
+
+const API_URL = 'http://localhost:3000';
+
+function App() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch(`${API_URL}/products`)
+      .then((response) =&gt; response.json())
+      .then((jsonData) =&gt; setProducts(jsonData.data));
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;My Store&lt;/h1&gt;
+      {products.map((product) =&gt; (
+        &lt;Fragment key={product.id}&gt;
+          &lt;h3&gt;{product.name}&lt;/h3&gt;
+          &lt;p&gt;{product.descrizione}&lt;/p&gt;
+          &lt;p&gt;€ {product.price.toFixed(2)}&lt;/p&gt;
+        &lt;/Fragment&gt;
+      ))}
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+                <p>Questo codice funziona solo se tutto va bene. Oggi lo rendiamo più robusto e aggiungiamo la
+                    creazione di un prodotto.</p>
+            </section>
+            <section id="errori">
+                <header>
+                    <p class="index">Capitolo 2</p>
+                    <h2>Gestire gli errori</h2>
+                </header>
+                <p>Prova a spegnere il backend e ricarica la pagina: resta solo il titolo e nella Console compare un
+                    errore. L'utente non sa cosa sia successo. Aggiungiamo uno stato per mostrare un messaggio.</p>
+                <pre><code class="language-jsx">const [error, setError] = useState('');
+
+useEffect(() =&gt; {
+  fetch(`${API_URL}/products`)
+    .then((response) =&gt; {
+      if (!response.ok) {
+        throw new Error('Impossibile caricare i prodotti');
+      }
+      return response.json();
+    })
+    .then((jsonData) =&gt; setProducts(jsonData.data))
+    .catch((err) =&gt; setError(err.message));
+}, []);</code></pre>
+                <p><code>response.ok</code> è <code>true</code> solo se lo status è tra 200 e 299: un 404 o un 500 non
+                    fanno fallire <code>fetch()</code> da soli, quindi lanciamo noi l'errore. Il <code>catch()</code>
+                    riceve sia questo errore sia quelli di rete, per esempio quando il server è spento. Il parametro si
+                    chiama <code>err</code> per non confonderlo con lo stato <code>error</code>.</p>
+                <p>Nel JSX, sotto il titolo, mostriamo l'errore solo se c'è:</p>
+                <pre><code class="language-jsx">{error &amp;&amp; &lt;p&gt;{error}&lt;/p&gt;}</code></pre>
+                <h3>Usare il <code>message</code> del backend</h3>
+                <p>Le nostre risposte contengono già <code>success</code> e <code>message</code>. Quando il backend
+                    risponde con un errore, per esempio <code>{ success: false, message: 'Prodotto non trovato' }</code>,
+                    il testo più utile da mostrare è proprio il suo <code>message</code>.</p>
+                <pre><code class="language-jsx">fetch(`${API_URL}/products`)
+  .then((response) =&gt; response.json())
+  .then((jsonData) =&gt; {
+    if (!jsonData.success) {
+      throw new Error(jsonData.message);
+    }
+    setProducts(jsonData.data);
+  })
+  .catch((err) =&gt; setError(err.message));</code></pre>
+                <div class="note">
+                    <p>Questo controllo funziona solo se <strong>tutte</strong> le rotte rispondono con la stessa forma
+                        <code>{ success, message, data }</code>, anche in caso di errore: è il motivo per cui l'abbiamo
+                        scelta.</p>
+                </div>
+            </section>
+            <section id="post-backend">
+                <header>
+                    <p class="index">Capitolo 3</p>
+                    <h2>POST: la rotta Express</h2>
+                </header>
+                <p>Per creare un prodotto, React invia una richiesta <code>POST</code> con i dati nel body. Perché
+                    Express possa leggerli in <code>req.body</code> serve il middleware <code>express.json()</code>,
+                    registrato in <code>server.js</code> prima delle rotte.</p>
+                <pre><code class="language-js">// backend/server.js
+app.use(cors());
+app.use(express.json());
+
+app.use('/products', productsRouter);</code></pre>
+                <p>Nel router aggiungiamo la rotta: legge <code>req.body</code>, controlla i dati, aggiunge il prodotto
+                    all'array e lo restituisce con lo status <code>201 Created</code>. Anche gli errori rispondono con
+                    la solita forma.</p>
+                <pre><code class="language-js">// backend/routers/productsRouter.js
+router.post('/', (req, res) =&gt; {
+  const { name, descrizione, price } = req.body;
+
+  if (!name || price === undefined) {
+    return res.status(400).json({
+      success: false,
+      message: 'Nome e prezzo sono obbligatori',
+      data: null
+    });
+  }
+
+  const newProduct = { id: products.length + 1, name, descrizione, price };
+  products.push(newProduct);
+
+  res.status(201).json({
+    success: true,
+    message: 'Prodotto creato',
+    data: newProduct
+  });
+});</code></pre>
+                <p>Se mancano nome o prezzo rispondiamo con <code>400 Bad Request</code> invece di creare un prodotto
+                    vuoto. Gli <code>id</code> del file vanno da 1 a 1000 senza buchi, quindi
+                    <code>products.length + 1</code> dà un <code>id</code> libero.</p>
+                <div class="note">
+                    <p>L'array vive nella memoria del server: quando <code>node --watch</code> riavvia Express dopo un
+                        salvataggio, i prodotti aggiunti spariscono e l'array torna quello del file. Per conservarli
+                        servirebbe un database.</p>
+                </div>
+                <p>Prova la rotta con Postman: <code>POST http://localhost:3000/products</code>, body
+                    <em>raw</em> di tipo JSON.</p>
+                <pre><code class="language-json">{
+  "name": "Monitor Opale 27",
+  "descrizione": "Monitor da 27 pollici",
+  "price": 199.9
+}</code></pre>
+            </section>
+            <section id="post-frontend">
+                <header>
+                    <p class="index">Capitolo 4</p>
+                    <h2>POST: la richiesta da React</h2>
+                </header>
+                <p>Nel frontend il body deve essere trasformato in JSON e deve avere l'header
+                    <code>Content-Type</code>. Quando arriva la risposta aggiungiamo il nuovo prodotto allo stato, così
+                    compare subito nella lista.</p>
+                <pre><code class="language-jsx">// frontend/src/App.jsx, dentro il componente App
+function createProduct() {
+  const product = {
+    name: 'Monitor Opale 27',
+    descrizione: 'Monitor da 27 pollici',
+    price: 199.9
+  };
+
+  fetch(`${API_URL}/products`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product),
+  })
+    .then((response) =&gt; response.json())
+    .then((jsonData) =&gt; {
+      if (!jsonData.success) {
+        throw new Error(jsonData.message);
+      }
+      setProducts([...products, jsonData.data]);
+    })
+    .catch((err) =&gt; setError(err.message));
+}</code></pre>
+                <p>Colleghiamo la funzione a un pulsante nel JSX, sotto il titolo.</p>
+                <pre><code class="language-jsx">&lt;button onClick={createProduct}&gt;Aggiungi prodotto&lt;/button&gt;</code></pre>
+                <p>Con 1000 prodotti il nuovo finisce in fondo alla pagina: scorri fino alla fine per vederlo, oppure
+                    aggiungilo in cima con <code>setProducts([jsonData.data, ...products])</code>.</p>
+                <div class="note">
+                    <p>Nella scheda Network, prima della <code>POST</code>, vedrai una richiesta <code>OPTIONS</code>.
+                        Si chiama <strong>preflight</strong>: siccome inviamo JSON a un'altra origine, il browser chiede
+                        prima a Express il permesso. <code>cors()</code> risponde automaticamente e poi parte la
+                        <code>POST</code> vera.</p>
+                </div>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Modifica temporaneamente <code>createProduct()</code> togliendo <code>name</code> dal prodotto
+                        inviato. Cosa vedi nella scheda Network e nella pagina?</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <p>Nella scheda Network la <code>POST</code> ha status <code>400</code> e come risposta
+                            <code>{ success: false, message: 'Nome e prezzo sono obbligatori', data: null }</code>. Il
+                            frontend lancia l'errore con quel <code>message</code> e lo mostra grazie allo stato
+                            <code>error</code>; la lista non cambia.</p>
+                    </div>
+                </div>
+            </section>
+            <section id="ricarica">
+                <header>
+                    <p class="index">Capitolo 5</p>
+                    <h2>Ricaricare i prodotti</h2>
+                </header>
+                <div class="exercise">
+                    <h3>Esercizio</h3>
+                    <p>Aggiungi un pulsante <em>Ricarica prodotti</em>. Al click deve richiedere di nuovo
+                        <code>GET /products</code> e aggiornare lo stato.</p>
+                    <p>Suggerimento: sposta la <code>fetch</code> di <code>useEffect</code> in una funzione
+                        <code>loadProducts()</code> dentro il componente, poi chiamala sia in <code>useEffect</code> sia
+                        al click del pulsante.</p><button class="toggle" type="button"
+                        onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-jsx">function loadProducts() {
+  fetch(`${API_URL}/products`)
+    .then((response) =&gt; response.json())
+    .then((jsonData) =&gt; {
+      if (!jsonData.success) {
+        throw new Error(jsonData.message);
+      }
+      setProducts(jsonData.data);
+    })
+    .catch((err) =&gt; setError(err.message));
+}
+
+useEffect(() =&gt; {
+  loadProducts();
+}, []);
+
+// nel JSX
+&lt;button onClick={loadProducts}&gt;Ricarica prodotti&lt;/button&gt;</code></pre>
+                    </div>
+                </div>
+                <p>Aggiungi un prodotto, poi premi <em>Ricarica prodotti</em>: il prodotto c'è ancora, perché ora è
+                    salvato nell'array del server. Salva un file del backend e ricarica di nuovo: il riavvio di
+                    <code>node --watch</code> lo ha fatto sparire.</p>
+            </section>
+            <section class="task">
+                <h3>Esercizio finale: aggiungere prodotti dal catalogo</h3>
+                <p>Nel progetto <code>catalogo</code> sostituisci il pulsante con dati fissi con un form controllato con
+                    tre campi: nome, descrizione e prezzo. All'invio il form manda la <code>POST</code> a
+                    <code>/products</code>, svuota i campi e mostra subito il nuovo prodotto in cima alla lista.</p>
+                <p>Ricorda che il valore di un <code>&lt;input&gt;</code> è sempre una stringa: prima di inviarlo
+                    trasforma il prezzo in numero con <code>Number()</code>. Se il backend risponde con un errore, mostra
+                    il suo <code>message</code>. Controlla nella scheda Network l'<code>OPTIONS</code> e la
+                    <code>POST</code> con status <code>201</code>.</p>
+            </section>
+        </article>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>

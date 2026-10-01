@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d50e719d-021d-4f92-ba67-9f84699e511a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MySQL e database relazionali - Dispensa didattica</title>
+        <link rel="stylesheet" href="assets/main.css" />
+        <link rel="stylesheet" href="assets/print.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css" />
+    </head>
+    <body>
+        <a class="skip" href="#content">Vai al contenuto</a>
+
+        <header>
+            <nav>
+                <div class="brand">MySQL</div>
+                <ul>
+                    <li><a href="#database">Database</a></li>
+                    <li><a href="#modello">Modello</a></li>
+                    <li><a href="#dati">Dati</a></li>
+                    <li><a href="#tipi">Tipi</a></li>
+                    <li><a href="#vincoli">Vincoli</a></li>
+                    <li><a href="#creare">CREATE TABLE</a></li>
+                    <li><a href="#gestire-tabelle">Gestire tabelle</a></li>
+                    <li><a href="#colonne-log">Colonne log</a></li>
+                </ul>
+            </nav>
+
+            <div class="hero">
+                <p class="eyebrow">Dispensa della lezione</p>
+                <h1>MySQL e database relazionali</h1>
+                <p class="intro">Dalle entit&agrave; del mondo reale alle tabelle: campi, record, tipi di dato e vincoli.</p>
+            </div>
+        </header>
+
+        <main id="content">
+            <article>
+                <section id="database">
+                    <header>
+                        <p class="index">Capitolo 1</p>
+                        <h2>Database relazionali e MySQL</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Un <strong>database</strong> conserva dati organizzati. Un <strong>DBMS</strong> &egrave; il programma che permette di crearli, proteggerli e consultarli. MySQL &egrave; un DBMS relazionale.</p>
+                    </div>
+
+                    <p>Un negozio, una biblioteca o una scuola devono conservare molti dati e ritrovarli con precisione. Un database li mantiene anche dopo la chiusura dell'applicazione e consente a pi&ugrave; persone o programmi di lavorarci in modo controllato.</p>
+                    <p>Nei database relazionali i dati sono organizzati in <strong>tabelle</strong>. Questa dispensa si concentra sulla progettazione e definizione di una singola tabella.</p>
+                    <p>MySQL riceve istruzioni scritte in SQL. Qui usiamo SQL per definire la struttura di una tabella, senza affrontare l'inserimento o la ricerca dei dati.</p>
+                </section>
+
+                <section id="modello">
+                    <header>
+                        <p class="index">Capitolo 2</p>
+                        <h2>Entit&agrave; e attributi</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Un buon attributo contiene un solo fatto. Per esempio, &egrave; meglio avere <code>nome</code> e <code>cognome</code> separati che un unico campo <code>nome_completo</code>, se prevediamo di usarli separatamente.</p>
+                    </div>
+
+                    <p>Prima di aprire MySQL conviene descrivere il problema. Un'<strong>entit&agrave;</strong> &egrave; un concetto del mondo reale che vogliamo memorizzare: un cliente, un libro, un prodotto.</p>
+                    <p>Gli <strong>attributi</strong> sono le caratteristiche dell'entit&agrave;. Per l'entit&agrave; <code>Cliente</code> possiamo usare nome, cognome, email e data di nascita.</p>
+
+                    <pre><code class="language-text">Entit&agrave;: Cliente
+
+Attributi:
+- nome
+- cognome
+- email
+- data di nascita</code></pre>
+
+                    <p>Evitiamo anche i dati che cambiano automaticamente nel tempo. L'et&agrave;, per esempio, diventa presto sbagliata: &egrave; pi&ugrave; utile salvare <code>data_nascita</code>.</p>
+
+                    <section>
+                        <div class="exercise">
+                            <h3>Esercizio</h3>
+                            <p>Per l'entit&agrave; <strong>Prodotto</strong>, scegli quattro attributi utili. Quale dato non salveresti perch&eacute; pu&ograve; essere calcolato?</p>
+                            <button class="toggle" type="button" onclick="toggleSolution(this)">Soluzione</button>
+                            <div class="panel">
+                                <p>Possibili attributi: nome, descrizione, prezzo e disponibilit&agrave;. Non salveremmo il prezzo scontato se pu&ograve; essere calcolato a partire da prezzo e percentuale di sconto.</p>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="dati">
+                    <header>
+                        <p class="index">Capitolo 3</p>
+                        <h2>Dall'entit&agrave; alla tabella</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Una tabella descrive la struttura dei dati; una riga contiene i dati di un singolo elemento.</p>
+                    </div>
+
+                    <p>Nel database l'entit&agrave; <code>Cliente</code> diventa la tabella <code>clienti</code>. I suoi attributi diventano <strong>campi</strong>, chiamati anche <strong>colonne</strong>.</p>
+
+                    <pre><code class="language-text">Tabella: clienti
+
+| id | nome  | cognome | email             |
+|----|-------|----------|-------------------|
+| 1  | Mario | Rossi    | mario@example.com |
+| 2  | Anna  | Bianchi  | anna@example.com  |</code></pre>
+
+                    <ul>
+                        <li><strong>Campi o colonne:</strong> <code>id</code>, <code>nome</code>, <code>cognome</code> ed <code>email</code>.</li>
+                        <li><strong>Tuple, record o righe:</strong> i dati di Mario Rossi e Anna Bianchi.</li>
+                    </ul>
+
+                    <p>I termini tuple, record e riga indicano qui la stessa idea: un insieme di valori riferiti a una sola entit&agrave; concreta.</p>
+                </section>
+
+                <section id="tipi">
+                    <header>
+                        <p class="index">Capitolo 4</p>
+                        <h2>Tipi di dato</h2>
+                    </header>
+
+                    <p>Ogni campo deve dichiarare il tipo di valore che pu&ograve; contenere. La scelta del tipo aiuta MySQL a salvare, confrontare e controllare i dati nel modo corretto.</p>
+
+                    <ul>
+                        <li><code>INT</code> per numeri interi, come un identificatore o la quantit&agrave; disponibile.</li>
+                        <li><code>VARCHAR(n)</code> per testi brevi fino a <code>n</code> caratteri, come nome o email.</li>
+                        <li><code>DECIMAL(p, s)</code> per numeri con decimali esatti, come prezzi e importi.</li>
+                        <li><code>DATE</code> per una data, come la data di nascita.</li>
+                        <li><code>BOOLEAN</code> per un valore vero/falso, come un cliente attivo.</li>
+                    </ul>
+
+                    <pre><code class="language-text">prezzo             DECIMAL(8, 2)  →  19.90
+data_nascita       DATE           →  2004-09-16
+attivo             BOOLEAN        →  TRUE</code></pre>
+
+                    <p><code>VARCHAR(50)</code> non significa che tutti i valori devono avere 50 caratteri: indica il limite massimo. Per un prezzo, invece, evitiamo <code>FLOAT</code> e usiamo <code>DECIMAL</code>, perch&eacute; gli importi richiedono precisione.</p>
+                </section>
+
+                <section id="vincoli">
+                    <header>
+                        <p class="index">Capitolo 5</p>
+                        <h2>Chiave primaria e vincoli</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>I <strong>vincoli</strong> sono regole applicate da MySQL per impedire l'inserimento di dati non validi o incoerenti.</p>
+                    </div>
+
+                    <p>Ogni tabella deve poter distinguere senza ambiguit&agrave; i suoi record. La <strong>chiave primaria</strong> &egrave; il campo che identifica in modo unico ogni riga. Spesso usiamo un campo <code>id</code> con numeri progressivi.</p>
+
+                    <ul>
+                        <li><code>PRIMARY KEY</code>: il valore identifica una sola riga e non pu&ograve; mancare.</li>
+                        <li><code>AUTO_INCREMENT</code>: MySQL assegna automaticamente il prossimo numero a un <code>id</code> intero.</li>
+                        <li><code>NOT NULL</code>: il campo &egrave; obbligatorio.</li>
+                        <li><code>UNIQUE</code>: un valore pu&ograve; comparire una sola volta, per esempio un'email.</li>
+                        <li><code>DEFAULT</code>: assegna un valore quando non ne viene fornito uno.</li>
+                        <li><code>CHECK</code>: accetta solo valori che rispettano una condizione, per esempio un prezzo non negativo.</li>
+                    </ul>
+
+                    <pre><code class="language-sql">prezzo DECIMAL(8, 2) NOT NULL CHECK (prezzo &gt;= 0)
+attivo BOOLEAN NOT NULL DEFAULT TRUE
+email VARCHAR(100) NOT NULL UNIQUE</code></pre>
+
+                    <p>La chiave primaria non &egrave; necessariamente un dato significativo per l'utente. Nome e cognome possono ripetersi, mentre un <code>id</code> resta un identificatore semplice e stabile.</p>
+                </section>
+
+                <section id="creare">
+                    <header>
+                        <p class="index">Capitolo 6</p>
+                        <h2>Creare una tabella con MySQL</h2>
+                    </header>
+
+                    <p>L'istruzione <code>CREATE TABLE</code> trasforma il modello progettato nella struttura concreta del database. Il nome della tabella &egrave; seguito, tra parentesi, dall'elenco dei campi e delle loro regole.</p>
+
+                    <pre><code class="language-sql">CREATE TABLE clienti (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL,
+    cognome VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    data_nascita DATE,
+    attivo BOOLEAN NOT NULL DEFAULT TRUE
+);</code></pre>
+
+                    <p>La tabella contiene soltanto una struttura: dopo aver eseguito il comando esiste <code>clienti</code>, ma non contiene ancora record. Per aggiungere o leggere dati servono istruzioni SQL dedicate.</p>
+
+                </section>
+
+                <section id="gestire-tabelle">
+                    <header>
+                        <p class="index">Capitolo 7</p>
+                        <h2>Creare e rimuovere tabelle</h2>
+                    </header>
+
+                    <div class="note">
+                        <p><code>DROP TABLE</code> elimina definitivamente una tabella e tutti i dati che contiene. Va usato solo quando si &egrave; certi del risultato.</p>
+                    </div>
+
+                    <h3><code>CREATE TABLE IF NOT EXISTS</code></h3>
+                    <p>Se si esegue <code>CREATE TABLE</code> con un nome gi&agrave; presente, MySQL restituisce un errore. Aggiungendo <code>IF NOT EXISTS</code>, MySQL crea la tabella solo se non esiste ancora.</p>
+
+                    <pre><code class="language-sql">CREATE TABLE IF NOT EXISTS clienti (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL,
+    cognome VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    data_nascita DATE,
+    attivo BOOLEAN NOT NULL DEFAULT TRUE
+);</code></pre>
+
+                    <p>Se <code>clienti</code> esiste gi&agrave;, l'istruzione non ne modifica la struttura: MySQL salta semplicemente la creazione.</p>
+
+                    <h3><code>DROP TABLE</code></h3>
+                    <p><code>DROP TABLE</code> rimuove una tabella dal database. Dopo l'esecuzione non restano n&eacute; la struttura n&eacute; i record della tabella.</p>
+
+                    <pre><code class="language-sql">DROP TABLE clienti;</code></pre>
+
+                    <p>La variante <code>IF EXISTS</code> evita un errore quando la tabella indicata non &egrave; presente; non impedisce la cancellazione quando la tabella esiste.</p>
+
+                    <pre><code class="language-sql">DROP TABLE IF EXISTS clienti;</code></pre>
+                </section>
+
+                <section id="colonne-log">
+                    <header>
+                        <p class="index">Capitolo 8</p>
+                        <h2>Colonne di log</h2>
+                    </header>
+
+                    <div class="note">
+                        <p>Le colonne di log temporali registrano automaticamente quando un record viene creato e quando viene modificato.</p>
+                    </div>
+
+                    <p>Queste due colonne possono essere aggiunte alla definizione di una tabella:</p>
+
+                    <pre><code class="language-sql">created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT NULL</code></pre>
+
+                    <ul>
+                        <li><code>created_at</code> riceve automaticamente data e ora correnti quando il record viene creato.</li>
+                        <li><code>updated_at</code> parte da <code>NULL</code> e riceve automaticamente data e ora correnti alla prima modifica del record, poi a ogni modifica successiva.</li>
+                    </ul>
+
+                    <p>Le colonne possono essere collocate insieme agli altri campi nella parentesi di <code>CREATE TABLE</code>.</p>
+                </section>
+
+                <section class="task" id="esercizio-finale">
+                    <h3>Esercizio finale</h3>
+                    <p>Progetta e crea con MySQL una tabella per gestire i dati di un'automobile in vendita.</p>
+                    <button class="toggle" type="button" onclick="toggleSolution(this)">Mostra soluzione</button>
+                    <div class="panel">
+                        <pre><code class="language-sql">CREATE TABLE automobili (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    marca VARCHAR(50) NOT NULL,
+    modello VARCHAR(80) NOT NULL,
+    targa VARCHAR(10) NOT NULL UNIQUE,
+    anno_immatricolazione YEAR NOT NULL,
+    chilometri INT NOT NULL CHECK (chilometri &gt;= 0),
+    prezzo DECIMAL(10, 2) NOT NULL CHECK (prezzo &gt;= 0),
+    disponibile BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT NULL
+);</code></pre>
+                    </div>
+                </section>
+            </article>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="assets/main.js"></script>
+    </body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="d50e719d-021d-4f92-ba67-9f84699e511a" data-app-host="app.netlify.com"></script>
