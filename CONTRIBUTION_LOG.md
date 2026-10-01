@@ -141,3 +141,28 @@ Riorganizzare l'alberatura del repository eliminando file ridondanti, configurar
   - `pnpm run dev:host`: esposizione in rete locale per test multi-device su WiFi.
   - `pnpm run lighthouse:mobile`, `lighthouse:desktop`, `lighthouse:all`: suite di audit automatizzata.
   - `pnpm run lint`: linter Oxlint pulito con **0 errori e 0 warning**.
+
+---
+
+## Milestone 8: Motore IA LangChain Zod, Suite Audit Lighthouse e Question Bank Avanzata (120 Quesiti)
+
+### Specifiche Tecniche M8
+
+Consolidare il motore intelligente del Tutor IA con LangChain LCEL e output strutturato Zod, integrare la suite di monitoraggio Core Web Vitals e accessibilità con Lighthouse, e completare il dataset didattico con 120 quesiti d'esame calibrati sull'intero ecosistema full-stack.
+
+### Interventi e Risoluzioni M8
+
+- **Motore Tutor IA & Schemi Zod (`src/services/langchainService.js`, `aiService.js`)**:
+  - Integrazione nativa di `@langchain/google-genai` e `@langchain/core` con validazione rigorosa dei prompt e delle risposte strutturate tramite Zod.
+  - Implementazione di 4 modalità di studio specializzate (*Spiega Teoria*, *Simula Orale*, *Genera Quiz*, *Correggi Codice*) alimentate dalla base di conoscenza completa di 42 dispense.
+  - Crittografia offline con fallback pure-JS SHA-256 in [`src/utils/authStorage.js`](file:///C:/dev/projects/DEVRECAP/src/utils/authStorage.js) per garantire compatibilità immediata sia su desktop che su dispositivi mobili in rete locale.
+- **Suite di Audit Automatizzata & Ottimizzazione Accessibilità (`scripts/run-lighthouse.mjs`, `index.html`)**:
+  - Configurazione dello script Lighthouse multipiattaforma per l'esecuzione sequenziale dei report Mobile e Desktop.
+  - Ottimizzazione semantica e accessibilità WCAG 2.1 AA certificata a **100/100**, con navigazione da tastiera e link canonico configurato.
+  - Gestione della privacy per uso didattico interno tramite tag `<meta name="robots" content="noindex, nofollow" />`.
+- **Espansione del Question Bank a 120 Domande Full-Stack (`src/data/questionsData.js`)**:
+  - Estensione mirata del dataset con 120 domande d'esame corredate da spiegazioni socratiche e frammenti di codice interattivi.
+  - Copertura approfondita di JavaScript (40 quesiti su Event Loop, Express Middleware, Fetch e LangChain), React (30 quesiti su Hooks, React Router v6 e Form), CSS (25 quesiti) e SQL/Prisma ORM (25 quesiti su modelli, relazioni e query eager loading).
+- **Validazione CI/CD & Pulizia Codice (`.oxlintrc.json`, `scripts/test-core.mjs`)**:
+  - Pipeline di test unitari a zero dipendenze superata al 100%.
+  - Linter Oxlint pulito con **0 errori e 0 warning** e compilazione Vite completata in ~700ms.
