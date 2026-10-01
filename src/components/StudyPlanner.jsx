@@ -52,7 +52,7 @@ export default function StudyPlanner({ onStartQuiz }) {
     : roadmapData.filter(r => r.subject === selectedSubjectFilter);
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-2 sm:pb-4">
       
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">

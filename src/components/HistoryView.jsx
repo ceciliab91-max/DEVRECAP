@@ -37,7 +37,7 @@ export default function HistoryView({ onRefreshStats }) {
   };
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-2 sm:pb-4">
       
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-50/90 via-indigo-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-purple-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">

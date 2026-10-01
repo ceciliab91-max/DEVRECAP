@@ -68,7 +68,7 @@ export default function HubStudio() {
   const percentageKnown = Math.round((knownCount / totalCards) * 100) || 0;
 
   return (
-    <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-6 pb-2 sm:pb-4 animate-fadeIn">
       
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-slate-50 dark:from-slate-900 dark:via-indigo-950/80 dark:to-slate-900 border border-indigo-100 dark:border-slate-800 p-4 sm:p-8 shadow-sm dark:shadow-xl">

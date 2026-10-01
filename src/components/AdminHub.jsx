@@ -171,7 +171,7 @@ export default function AdminHub({ currentUser }) {
   });
 
   return (
-    <div className="space-y-8 pb-16 animate-fadeIn">
+    <div className="space-y-6 pb-2 sm:pb-4 animate-fadeIn">
       
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-50/90 via-indigo-50/80 to-slate-50 dark:from-purple-950 dark:via-slate-900 dark:to-indigo-950 border border-purple-100 dark:border-purple-500/30 p-6 sm:p-10 shadow-sm dark:shadow-2xl">

@@ -158,7 +158,7 @@ export default function QuizEngine({ questions, modeInfo, onFinishQuiz }) {
   if (!currentQ) return null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16">
+    <div className="max-w-4xl mx-auto space-y-4 pb-2 sm:pb-4">
       
       {/* Top Header Bar */}
       <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">

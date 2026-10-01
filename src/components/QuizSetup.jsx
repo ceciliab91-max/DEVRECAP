@@ -32,7 +32,7 @@ export default function QuizSetup({ onStartQuiz }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16 animate-fadeIn">
+    <div className="max-w-4xl mx-auto space-y-6 pb-2 sm:pb-4 animate-fadeIn">
       
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 border border-indigo-500/20 p-8 shadow-2xl space-y-4 text-center sm:text-left text-white">

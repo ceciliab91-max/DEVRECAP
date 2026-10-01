@@ -89,7 +89,7 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
   };
 
   return (
-    <div className="space-y-4 sm:space-y-8 pb-4 sm:pb-12 animate-fadeIn">
+    <div className="space-y-4 sm:space-y-6 pb-2 sm:pb-4 animate-fadeIn">
       
       {/* Hero Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-50/90 via-purple-50/80 to-pink-50/60 dark:from-indigo-950/80 dark:via-purple-950/80 dark:to-slate-900 p-5 sm:p-10 border border-indigo-100 dark:border-indigo-500/20 shadow-sm dark:shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
@@ -323,9 +323,20 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
           </div>
 
           {historyList.length === 0 ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-6">
-              Nessuna prova effettuata di recente. Avvia una simulazione!
-            </p>
+            <div className="text-center py-4 space-y-2">
+              <div className="w-10 h-10 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
+                <BrainCircuit className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-300 font-semibold">Nessuna simulazione recente</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Inizia la tua prima prova d'esame completa a tempo.</p>
+              <button
+                onClick={() => setActiveTab('quiz-select')}
+                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Avvia Test</span>
+              </button>
+            </div>
           ) : (
             <div className="space-y-3">
               {historyList.map(item => (
@@ -362,10 +373,19 @@ export default function Dashboard({ stats, onStartQuiz, onStartErrorReview, setA
           </div>
 
           {recentErrorQuestions.length === 0 ? (
-            <div className="text-center py-6 space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto" />
-              <p className="text-xs text-slate-800 dark:text-slate-300 font-semibold">Nessun errore registrato!</p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">I tuoi punti deboli compariranno qui dopo i test.</p>
+            <div className="text-center py-4 space-y-2">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-300 font-semibold">Banca Errori Pulita!</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Ottimo lavoro! I tuoi punti deboli compariranno qui dopo i test.</p>
+              <button
+                onClick={() => setActiveTab('mappe-schemi')}
+                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold text-xs transition-all cursor-pointer"
+              >
+                <Layers className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                <span>Ripassa Flashcard</span>
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
