@@ -348,16 +348,26 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
         />
       )}
 
+      {/* Mobile Backdrop for Floating Mode */}
+      {!isFullPage && isOpen && (
+        <div
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Floating Launcher Button when closed */}
       {!isOpen && !isFullPage && (
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group cursor-pointer"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 p-3.5 sm:p-4 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center space-x-2 group cursor-pointer"
           aria-label="Apri Tutor IA"
         >
           <Bot className="w-6 h-6" />
-          <span className="hidden sm:inline font-bold pr-1">Tutor IA</span>
+          <span className="hidden sm:inline font-bold pr-1 text-sm">Tutor IA</span>
           <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -368,34 +378,41 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
       {/* Main Container */}
       {(isOpen || isFullPage) && (
         <div
-          className={`flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
+          className={`flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden ${
             isFullPage
-              ? 'w-full max-w-5xl mx-auto rounded-3xl border h-[calc(100vh-140px)] min-h-[550px]'
-              : 'fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 z-50 w-full sm:max-w-2xl h-[100dvh] sm:h-[680px] max-h-[100dvh] sm:max-h-[calc(100vh-theme(spacing.16))] sm:rounded-3xl animate-fadeIn'
+              ? 'w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl h-[calc(100dvh-12rem)] min-h-[500px] max-h-[780px] mb-8'
+              : 'fixed inset-x-0 bottom-0 top-14 sm:top-auto sm:inset-auto sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 z-50 w-full sm:w-[500px] md:w-[540px] max-w-[calc(100vw-2rem)] h-[calc(100dvh-3.75rem)] sm:h-[600px] max-h-[calc(100dvh-5.5rem)] rounded-t-3xl sm:rounded-3xl animate-fadeIn'
           }`}
         >
+          {/* Mobile Handle Drag Bar */}
+          {!isFullPage && (
+            <div className="sm:hidden flex justify-center pt-2 pb-1 bg-slate-950/90 border-b border-slate-800">
+              <div className="w-12 h-1.5 rounded-full bg-slate-600" />
+            </div>
+          )}
+
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-800 text-white flex flex-col space-y-3">
+          <div className="p-3 sm:p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-800 text-white flex flex-col space-y-2.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
-                  <Bot className="w-6 h-6" />
+              <div className="flex items-center space-x-2.5 sm:space-x-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white shrink-0">
+                  <Bot className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-sm tracking-tight flex items-center gap-1.5">
+                <div className="min-w-0">
+                  <div className="flex items-center space-x-1.5">
+                    <h3 className="font-bold text-xs sm:text-sm tracking-tight flex items-center gap-1.5 truncate">
                       <span>Tutor IA Sviluppatore Web</span>
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                     </h3>
                   </div>
-                  <p className="text-[11px] text-slate-300 flex items-center space-x-1.5 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Knowledge Base 24 Dispense &bull; CSS, JS, React, SQL</span>
+                  <p className="text-[10px] sm:text-[11px] text-slate-300 flex items-center space-x-1.5 font-medium truncate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="truncate">Knowledge Base 40+ Dispense &bull; CSS, JS, React, Node, AI, SQL</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -405,7 +422,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                       setShowMissingKeyModal(true);
                     }
                   }}
-                  className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  className={`p-1.5 sm:p-2 rounded-xl transition-colors cursor-pointer ${
                     hasValidApiKey()
                       ? 'text-emerald-400 hover:bg-slate-800/80'
                       : 'text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 animate-pulse'
@@ -418,7 +435,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 <button
                   type="button"
                   onClick={() => setMessages([messages[0]])}
-                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
+                  className="p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
                   title="Nuova Conversazione"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -428,7 +445,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
+                    className="p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
                     title="Chiudi Finestra"
                   >
                     <X className="w-4 h-4" />
@@ -438,11 +455,11 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             </div>
 
             {/* Mode Selectors */}
-            <div className="flex items-center space-x-1.5 bg-slate-950/70 p-1.5 rounded-2xl border border-slate-800 overflow-x-auto no-scrollbar">
+            <div className="flex items-center space-x-1.5 bg-slate-950/70 p-1 sm:p-1.5 rounded-2xl border border-slate-800 overflow-x-auto no-scrollbar">
               <button
                 type="button"
                 onClick={() => setActiveMode('socratic')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'socratic'
                     ? 'bg-indigo-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -455,7 +472,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               <button
                 type="button"
                 onClick={() => setActiveMode('oral_exam')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'oral_exam'
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -468,7 +485,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               <button
                 type="button"
                 onClick={() => handleStartAdaptiveQuiz()}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'quiz'
                     ? 'bg-amber-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -481,7 +498,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
               <button
                 type="button"
                 onClick={() => setActiveMode('debug')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeMode === 'debug'
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -493,12 +510,14 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
             </div>
 
             {/* Subject Filter Pills */}
-            <div className="flex items-center space-x-1.5 text-[11px] overflow-x-auto no-scrollbar pt-0.5">
-              <span className="text-slate-400 font-medium">Filtro Materia:</span>
+            <div className="flex items-center space-x-1.5 text-[10px] sm:text-[11px] overflow-x-auto no-scrollbar pt-0.5">
+              <span className="text-slate-400 font-medium shrink-0">Filtro Materia:</span>
               {[
                 { id: 'all', name: 'Tutte' },
                 { id: 'javascript', name: 'JavaScript' },
                 { id: 'react', name: 'React' },
+                { id: 'node', name: 'Node.js' },
+                { id: 'ai', name: 'AI Engineering' },
                 { id: 'sql', name: 'SQL' },
                 { id: 'css', name: 'CSS' }
               ].map(sub => (
@@ -506,7 +525,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                   type="button"
                   key={sub.id}
                   onClick={() => setSelectedSubject(sub.id)}
-                  className={`px-2.5 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${
+                  className={`px-2.5 py-0.5 rounded-lg font-medium whitespace-nowrap transition-colors cursor-pointer ${
                     selectedSubject === sub.id
                       ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-500/50'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -895,7 +914,7 @@ export default function AITutorChat({ externalTriggerContext, onClearTriggerCont
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
                   activeMode === 'socratic'
-                    ? "Fai una domanda tecnica su CSS, JS, React o SQL..."
+                    ? "Fai una domanda tecnica su CSS, JS, React, Node, AI o SQL..."
                     : activeMode === 'oral_exam'
                     ? "Inserisci la tua risposta tecnica..."
                     : activeMode === 'debug'
