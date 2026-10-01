@@ -1478,4 +1478,485 @@ HAVING COUNT(*) > 3;`,
     "correctIndex": 0,
     "explanation": "Il DDL (Data Definition Language) comprende le istruzioni che definiscono o modificano la struttura dello schema del database (CREATE, ALTER, DROP, TRUNCATE)."
   }
+,
+  {
+    "id": "js-26",
+    "subject": "JavaScript",
+    "chapter": "Express.js Middleware & next()",
+    "question": "Cosa accade se una funzione middleware in Express non invia una risposta (res) e non invoca next()?",
+    "codeSnippet": "app.use((req, res, next) => {\n  console.log(\"Richiesta ricevuta:\", req.url);\n  // Nessun res.send() o next()\n});",
+    "options": [
+      "La richiesta del client rimane bloccata in sospeso (hanging) fino allo scadere del timeout del browser o del server.",
+      "Express passa automaticamente al middleware successivo.",
+      "Il server genera immediatamente un errore 500.",
+      "Viene inviata una risposta 200 OK vuota di default."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalle dispense di Express Middleware: in Express ogni middleware deve terminare il ciclo inviando una risposta (es. res.json) oppure chiamare next() per cedere il controllo alla catena successiva; in caso contrario la connessione resta appesa."
+  },
+  {
+    "id": "js-27",
+    "subject": "JavaScript",
+    "chapter": "Express.js Body Parsing",
+    "question": "Perché è necessario includere app.use(express.json()) prima delle rotte POST in Express?",
+    "codeSnippet": "app.use(express.json());\napp.post(\"/api/users\", (req, res) => {\n  console.log(req.body);\n});",
+    "options": [
+      "Per analizzare il payload della richiesta con Content-Type: application/json e popolare req.body con l'oggetto JS parsato.",
+      "Per crittografare tutte le risposte JSON inviate al client.",
+      "Per impedire attacchi SQL injection in automatico.",
+      "Per abilitare il rendering di file HTML."
+    ],
+    "correctIndex": 0,
+    "explanation": "Di default Node/Express non effettua il parsing del corpo delle richieste HTTP. express.json() è il middleware integrato che intercetta i flussi raw JSON e li converte in un oggetto JS assegnato a req.body."
+  },
+  {
+    "id": "js-28",
+    "subject": "JavaScript",
+    "chapter": "Express.js Gestione Centralizzata Errori",
+    "question": "Come viene identificato un middleware di gestione errori in Express rispetto ai middleware standard?",
+    "codeSnippet": "app.use((err, req, res, next) => {\n  console.error(err.stack);\n  res.status(500).json({ error: err.message });\n});",
+    "options": [
+      "Dalla presenza di esattamente 4 parametri nella firma della funzione (err, req, res, next).",
+      "Dal nome obbligatorio della funzione 'errorHandler'.",
+      "Dal fatto che deve essere registrato prima di tutte le altre rotte.",
+      "Dall'uso della parola chiave 'throw'."
+    ],
+    "correctIndex": 0,
+    "explanation": "Express ispeziona il numero di argomenti (fn.length): una funzione con 4 parametri (err, req, res, next) viene registrata specialmente come Error Handling Middleware e riceve gli errori passati tramite next(error)."
+  },
+  {
+    "id": "js-29",
+    "subject": "JavaScript",
+    "chapter": "Express.js Router Modulare",
+    "question": "Qual è il pattern raccomandato per modularizzare le rotte in un'applicazione Express?",
+    "codeSnippet": "// postsRouter.js\nconst router = express.Router();\nrouter.get(\"/\", (req, res) => res.json([]));\nexport default router;\n\n// app.js\napp.use(\"/api/posts\", postsRouter);",
+    "options": [
+      "Creare istanze dedicate con express.Router() ed agganciarle con prefisso di percorso tramite app.use('/prefisso', router).",
+      "Dichiarare tutte le rotte in un unico file index.js di 5000 righe.",
+      "Usare una classe con soli metodi statici senza Express.",
+      "Creare un server app.listen() per ogni singola risorsa."
+    ],
+    "correctIndex": 0,
+    "explanation": "express.Router() consente di creare gestori di route isolati e riutilizzabili come 'mini-applicazioni', montabili su prefissi URL specifici tramite app.use."
+  },
+  {
+    "id": "js-30",
+    "subject": "JavaScript",
+    "chapter": "Express.js Params vs Query",
+    "question": "Data la richiesta GET /api/products/42?category=tech&sort=desc, come si estraggono i valori in Express?",
+    "codeSnippet": "app.get(\"/api/products/:id\", (req, res) => {\n  const id = req.params.id;\n  const category = req.query.category;\n});",
+    "options": [
+      "req.params.id vale '42' (parametro di route) e req.query.category vale 'tech' (query string).",
+      "req.body.id vale '42' e req.headers.category vale 'tech'.",
+      "req.params contiene sia l'id sia la query string uniti in una stringa.",
+      "req.query contiene l'id e req.params contiene i filtri."
+    ],
+    "correctIndex": 0,
+    "explanation": "I parametri dinamici inseriti nel percorso (:id) sono accessibili nell'oggetto req.params, mentre i parametri dopo il punto interrogativo (?key=val) sono analizzati in req.query."
+  },
+  {
+    "id": "js-31",
+    "subject": "JavaScript",
+    "chapter": "Fetch API & Response Status",
+    "question": "Perché la Promise restituita da fetch() non viene rigettata (reject) in caso di errore HTTP 404 o 500?",
+    "codeSnippet": "const res = await fetch(\"/api/data\");\nif (!res.ok) {\n  throw new Error(`Errore HTTP: ${res.status}`);\n}",
+    "options": [
+      "Fetch rigetta la Promise solo in caso di errore di rete (es. offline, DNS fallito); i codici HTTP 4xx/5xx risolvono la Promise con la proprietà res.ok impostata a false.",
+      "Perché 404 e 500 sono considerati stati di successo dal browser.",
+      "Perché serve installare un pacchetto esterno per intercettare gli errori 404.",
+      "Fetch restituisce sempre una stringa sincrona."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalle dispense sulle Richieste HTTP: la Promise di fetch() rigetta solo per errori catastrofici di rete o CORS bloccato. Le risposte HTTP valide (anche se di errore come 404 Not Found o 500 Server Error) devono essere verificate controllando if (!res.ok)."
+  },
+  {
+    "id": "js-32",
+    "subject": "JavaScript",
+    "chapter": "LangChain JS & Prompt Templates",
+    "question": "Qual è il vantaggio dell'utilizzo di ChatPromptTemplate in LangChain JS rispetto a stringhe template letterali?",
+    "codeSnippet": "const prompt = ChatPromptTemplate.fromMessages([\n  [\"system\", \"Sei un tutor didattico specializzato in: {subject}\"],\n  [\"human\", \"{userQuery}\"]\n]);",
+    "options": [
+      "Struttura i ruoli (system, human, ai) secondo gli standard dei modelli di chat e consente l'iniezione dinamica e tipizzata delle variabili nel flusso LCEL.",
+      "Compila il codice in WebAssembly per velocizzare la scheda video.",
+      "Memorizza automaticamente tutte le risposte in SQLite.",
+      "Permette di bypassare le API key dei provider di intelligenza artificiale."
+    ],
+    "correctIndex": 0,
+    "explanation": "ChatPromptTemplate di LangChain assicura che i messaggi siano formattati con i ruoli corretti per i modelli di chat e si integra nelle pipeline di composizione (pipe) con validazione dei parametri."
+  },
+  {
+    "id": "js-33",
+    "subject": "JavaScript",
+    "chapter": "LangChain & Zod Structured Output",
+    "question": "Come garantisce LangChain che la risposta del modello IA rispetti fedelmente uno schema TypeScript/Zod?",
+    "codeSnippet": "const schema = z.object({\n  evaluation: z.string(),\n  score: z.number().min(0).max(100),\n  hints: z.array(z.string())\n});\nconst structuredModel = model.withStructuredOutput(schema);",
+    "options": [
+      "Configura il model con Function Calling / Tool Calling JSON schema del provider e valida/parsa automaticamente l'output finale con Zod.",
+      "Esegue un ciclo while finché l'IA non restituisce casualmente un JSON valido.",
+      "Sostituisce il modello con un database SQL statico.",
+      "Usa una Regular Expression sul testo grezzo."
+    ],
+    "correctIndex": 0,
+    "explanation": "Il metodo .withStructuredOutput(schema) di LangChain traduce lo schema Zod in schema JSON standard inviato al motore dell'LLM e converte la risposta JSON in un oggetto JavaScript tipizzato."
+  },
+  {
+    "id": "js-34",
+    "subject": "JavaScript",
+    "chapter": "Web Storage (localStorage vs sessionStorage)",
+    "question": "Qual è la differenza di persistenza e ciclo di vita tra localStorage e sessionStorage?",
+    "codeSnippet": "localStorage.setItem(\"theme\", \"dark\");\nsessionStorage.setItem(\"quiz_step\", \"3\");",
+    "options": [
+      "localStorage persiste indefinitamente finché non viene esplicitamente rimosso; sessionStorage dura solo per la durata della sessione della scheda del browser.",
+      "sessionStorage è condiviso tra tutte le schede e finestre, localStorage solo in quella attiva.",
+      "localStorage salva i dati nel cloud server, sessionStorage su disco fisso.",
+      "Non c'è alcuna differenza, sono due nomi per la stessa API."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa JavaScript Storage: localStorage non ha scadenza e sopravvive alla chiusura del browser; sessionStorage viene svuotato automaticamente non appena la scheda (tab) viene chiusa."
+  },
+  {
+    "id": "js-35",
+    "subject": "JavaScript",
+    "chapter": "Timing Functions & Memory Leaks",
+    "question": "Come si arresta correttamente un timer avviato con setInterval in JavaScript?",
+    "codeSnippet": "const timerId = setInterval(() => console.log(\"Tick\"), 1000);\n// Come si ferma?",
+    "options": [
+      "clearInterval(timerId)",
+      "stopInterval(timerId)",
+      "timerId.stop()",
+      "delete timerId"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa Timing Functions: setInterval restituisce un identificativo numerico (timerId) che deve essere passato alla funzione globale clearInterval(timerId) per interrompere l'esecuzione e liberare la memoria."
+  },
+  {
+    "id": "js-36",
+    "subject": "JavaScript",
+    "chapter": "Moduli: ESM vs CommonJS",
+    "question": "Quale combinazione rappresenta la sintassi ufficiale ECMAScript Modules (ESM) rispetto a CommonJS?",
+    "codeSnippet": "/* ESM */ import { sum } from \"./math.js\"; export const pi = 3.14;\n/* CJS */ const { sum } = require(\"./math.js\"); module.exports = { pi };",
+    "options": [
+      "ESM usa 'import' / 'export'; CommonJS usa 'require()' / 'module.exports'.",
+      "ESM è solo per browser vecchi, CommonJS è per React 19.",
+      "CommonJS usa 'import' e ESM usa 'include'.",
+      "Non possono coesistere nello stesso ecosistema Node.js."
+    ],
+    "correctIndex": 0,
+    "explanation": "ESM (standard ufficiale ECMAScript con import/export statici e top-level await) è il modulo moderno predefinito, mentre CommonJS (require/module.exports sincrono) è il modulo storico di Node.js."
+  },
+  {
+    "id": "js-37",
+    "subject": "JavaScript",
+    "chapter": "AbortController & Cancellazione Fetch",
+    "question": "A cosa serve l'oggetto AbortController in una chiamata fetch o in una richiesta HTTP?",
+    "codeSnippet": "const controller = new AbortController();\nfetch(url, { signal: controller.signal });\n// Annulla richiesta\ncontroller.abort();",
+    "options": [
+      "Permette di interrompere/annullare una o più richieste di rete asincrone in corso (es. se l'utente cambia pagina).",
+      "Riavvia il server Node.js in caso di blocco.",
+      "Aumenta la banda di connessione disponibile.",
+      "Rallenta la richiesta simulando una connessione 3G."
+    ],
+    "correctIndex": 0,
+    "explanation": "AbortController fornisce un AbortSignal che consente di abortire programmaticamente richieste HTTP fetch in volo, utile quando un componente si smonta prima della risposta."
+  },
+  {
+    "id": "js-38",
+    "subject": "JavaScript",
+    "chapter": "Custom Events nel Browser",
+    "question": "Come si crea e si invia un evento personalizzato con payload di dati nel DOM?",
+    "codeSnippet": "const event = new CustomEvent(\"userLogin\", { detail: { username: \"Mario\" } });\nwindow.dispatchEvent(event);",
+    "options": [
+      "Usando new CustomEvent('nomeEvento', { detail: { ... } }) e richiamando target.dispatchEvent(event).",
+      "Usando window.trigger('nomeEvento', dati).",
+      "Inviando un messaggio WebSocket alla porta 80.",
+      "Modificando direttamente la proprietà document.event."
+    ],
+    "correctIndex": 0,
+    "explanation": "L'API standard CustomEvent consente di istanziare eventi con dati allegati nella proprietà detail e propagarli tramite dispatchEvent verso qualsiasi EventTarget."
+  },
+  {
+    "id": "js-39",
+    "subject": "JavaScript",
+    "chapter": "CORS in Express & Browser Security",
+    "question": "Cosa provoca un errore CORS (Cross-Origin Resource Sharing) nel browser quando il frontend chiama un'API Express?",
+    "codeSnippet": "/* Errore tipico */ No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "options": [
+      "Il browser blocca la lettura della risposta perché l'origine del frontend (es. http://localhost:5173) differisce dall'origine del backend (es. http://localhost:3000) e il server non ha inviato gli header CORS abilitanti.",
+      "Il database MySQL è andato in crash.",
+      "Il file index.html non ha la favicon.",
+      "L'utente ha inserito una password errata."
+    ],
+    "correctIndex": 0,
+    "explanation": "La Same-Origin Policy dei browser impedisce a script JS di leggere dati da un'origine differente a meno che il backend non risponda con header espliciti come Access-Control-Allow-Origin (usando il middleware cors in Express)."
+  },
+  {
+    "id": "js-40",
+    "subject": "JavaScript",
+    "chapter": "Async Iterators & for await...of",
+    "question": "A cosa serve la sintassi for await...of in JavaScript moderno?",
+    "codeSnippet": "for await (const chunk of stream) {\n  console.log(chunk);\n}",
+    "options": [
+      "A iterare sequenzialmente su flussi di dati asincroni (AsyncIterables), come i chunk di uno streaming di risposta di un modello IA.",
+      "A velocizzare i cicli for tradizionali di 10 volte.",
+      "A creare un thread parallelo in Web Worker.",
+      "A convertire un array in una stringa JSON."
+    ],
+    "correctIndex": 0,
+    "explanation": "for await...of consente di ciclare su iterabili asincroni consumando ogni valore restituito da una sequenza di Promise, fondamentale per gestire flussi e stream di token di LLM in tempo reale."
+  },
+  {
+    "id": "react-21",
+    "subject": "React",
+    "chapter": "React Router v6: Configurazione Rotte",
+    "question": "Qual è la sintassi standard in React Router v6 per dichiarare una route che visualizza un componente?",
+    "codeSnippet": "<Routes>\n  <Route path=\"/dispense\" element={<DispenseView />} />\n</Routes>",
+    "options": [
+      "<Route path=\"/dispense\" element={<DispenseView />} /> all'interno di <Routes>",
+      "<Route path=\"/dispense\" component={DispenseView} /> senza tag contenitore",
+      "<Router to=\"/dispense\"> <DispenseView /> </Router>",
+      "<a href=\"/dispense\"> <DispenseView /> </a>"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa React Router: in React Router v6 le rotte si definiscono dentro <Routes> assegnando il componente JSX istanziato alla prop element."
+  },
+  {
+    "id": "react-22",
+    "subject": "React",
+    "chapter": "React Router v6: Hooks di Navigazione",
+    "question": "Quali hook di React Router v6 si utilizzano rispettivamente per leggere un parametro URL (/post/:id) e per effettuare una navigazione programmatica?",
+    "codeSnippet": "const { id } = useParams();\nconst navigate = useNavigate();\nnavigate(\"/dashboard\");",
+    "options": [
+      "useParams() per i parametri di percorso e useNavigate() per la navigazione programmatica.",
+      "useRoute() e useHistory() (deprecati in v6).",
+      "useLocation() per i parametri e window.location.href per navigare.",
+      "useQuery() e useRedirect()."
+    ],
+    "correctIndex": 0,
+    "explanation": "useParams() estrae le variabili definite nel path (es. :id); useNavigate() restituisce una funzione imperativa per reindirizzare l'utente senza ricaricare la pagina."
+  },
+  {
+    "id": "react-23",
+    "subject": "React",
+    "chapter": "React Router: <Link> vs Tag <a>",
+    "question": "Perché nelle Single Page Application in React si deve usare il componente <Link to=\"...\"> anziché il tag <a href=\"...\"> per la navigazione interna?",
+    "codeSnippet": "<Link to=\"/quiz\" className=\"btn\">Inizia Quiz</Link>",
+    "options": [
+      "Perché <Link> intercetta il click e aggiorna la URL tramite History API prevenendo il ricaricamento completo della pagina (SPA), preservando lo stato React in memoria.",
+      "Perché il tag <a> non è supportato in HTML5.",
+      "Perché <Link> esegue il download automatico del database.",
+      "Perché <Link> è un tag nativo del browser Chrome."
+    ],
+    "correctIndex": 0,
+    "explanation": "Il tag <a> standard provoca un full page reload che distruggerebbe lo stato applicativo; <Link> esegue la navigazione lato client (client-side routing) istantanea."
+  },
+  {
+    "id": "react-24",
+    "subject": "React",
+    "chapter": "Form & Gestione Submit",
+    "question": "Perché nell'handler onSubmit di un form React si esegue quasi sempre e.preventDefault()?",
+    "codeSnippet": "const handleSubmit = (e) => {\n  e.preventDefault();\n  salvaDati(formData);\n};",
+    "options": [
+      "Per impedire il comportamento predefinito del browser di inviare una richiesta sincrona e ricaricare la pagina.",
+      "Per svuotare automaticamente tutti gli input del modulo.",
+      "Per disabilitare la tastiera dell'utente.",
+      "Per inviare il form via email."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa React Form: il comportamento di default del form HTML consiste nel fare un refresh completo della pagina inviando i parametri in querystring o body HTTP. e.preventDefault() permette a React di gestire l'invio via JavaScript/fetch."
+  },
+  {
+    "id": "react-25",
+    "subject": "React",
+    "chapter": "Context Provider & Custom Consumer Hook",
+    "question": "Qual è la best practice raccomandata per consumare un React Context in modo sicuro nei componenti?",
+    "codeSnippet": "export function useAuth() {\n  const context = useContext(AuthContext);\n  if (!context) throw new Error(\"useAuth deve essere usato dentro un AuthProvider\");\n  return context;\n}",
+    "options": [
+      "Creare un Custom Hook (es. useAuth) che incapsula useContext e valida la presenza del Provider lanciando un errore descrittivo se omesso.",
+      "Esportare il Context grezzo e invocare useContext direttamente in ogni file senza controlli.",
+      "Usare solo variabili globali di window.",
+      "Non usare mai Custom Hook con il Context."
+    ],
+    "correctIndex": 0,
+    "explanation": "Incapsulare useContext in un hook dedicato (es. useAuth, useTheme) centralizza i controlli di sicurezza, garantisce messaggi di errore chiari se il componente è fuori dal Provider e semplifica le importazioni."
+  },
+  {
+    "id": "react-26",
+    "subject": "React",
+    "chapter": "Two-Way Binding Pattern",
+    "question": "Come si realizza il pattern del 'Two-Way Data Binding' controllato in un componente React?",
+    "codeSnippet": "<input \n  type=\"text\" \n  value={name} \n  onChange={(e) => setName(e.target.value)} \n/>",
+    "options": [
+      "Passando lo stato alla prop 'value' e aggiornando lo stato nell'evento 'onChange'.",
+      "Usando la direttiva v-model o ng-model.",
+      "Assegnando un id e leggendo document.getElementById('name').value.",
+      "Usando solo la prop 'defaultValue' senza onChange."
+    ],
+    "correctIndex": 0,
+    "explanation": "In React il binding bidirezionale si ottiene associando la lettura dello stato alla prop value e la scrittura alla callback onChange."
+  },
+  {
+    "id": "react-27",
+    "subject": "React",
+    "chapter": "Stato Derivato vs Ridondante",
+    "question": "Perché memorizzare in uno useState un valore facilmente calcolabile da altre prop o stati (es. fullName = firstName + lastName) è un antipattern?",
+    "codeSnippet": "/* CORRETTO: Calcolo al volo o useMemo */\nconst fullName = `${firstName} ${lastName}`;",
+    "options": [
+      "Perché introduce disallineamenti di stato (stato fuori sincronia) e costringe a mantenere sincronizzati molteplici setter con re-render superflui.",
+      "Perché React impedisce di avere più di 3 stati per componente.",
+      "Perché le stringhe occupano troppa memoria RAM.",
+      "Perché i browser non supportano template literals dentro i componenti."
+    ],
+    "correctIndex": 0,
+    "explanation": "Lo stato derivato calcolato al volo o memoizzato garantisce la sincronizzazione immediata con la single source of truth senza rischio di valori obsoleti."
+  },
+  {
+    "id": "react-28",
+    "subject": "React",
+    "chapter": "Optimistic UI Updates",
+    "question": "Cos'è il pattern dell'Optimistic UI Update in un'applicazione React?",
+    "codeSnippet": "// 1. Aggiorna UI immediatamente\nsetTodos(prev => [...prev, newTodo]);\n// 2. Chiamata API\ntry { await api.save(newTodo); } catch { setTodos(rollback); }",
+    "options": [
+      "Aggiornare subito l'interfaccia assumendo che la richiesta al server avrà successo, e fare rollback allo stato precedente solo in caso di errore.",
+      "Attendere 10 secondi prima di inviare qualsiasi dato al backend.",
+      "Disabilitare lo schermo finché il database non risponde.",
+      "Mostrare sempre uno spinner a tutto schermo per ogni click."
+    ],
+    "correctIndex": 0,
+    "explanation": "L'aggiornamento ottimistico fornisce una sensazione di reattività istantanea all'utente modificando la UI prima della conferma del server, con ripristino in caso di fallimento."
+  },
+  {
+    "id": "react-29",
+    "subject": "React",
+    "chapter": "Lifting State Up (Sollevamento dello Stato)",
+    "question": "Quando si applica il principio del 'Lifting State Up' in React?",
+    "codeSnippet": "function Parent() {\n  const [filter, setFilter] = useState(\"\");\n  return (<><FilterInput value={filter} onChange={setFilter} /><ItemList filter={filter} /></>);\n}",
+    "options": [
+      "Quando due o più componenti fratelli devono condividere lo stesso stato mutevole, spostando lo stato nel loro genitore comune più prossimo.",
+      "Quando si deve eliminare un componente dalla cartella del progetto.",
+      "Quando si vuole spostare l'applicazione su un server cloud.",
+      "Quando un componente ha troppe righe di CSS."
+    ],
+    "correctIndex": 0,
+    "explanation": "Se componenti distinti devono riflettere gli stessi dati che cambiano, si sposta lo stato nell'antenato comune più vicino che lo redistribuisce tramite prop."
+  },
+  {
+    "id": "react-30",
+    "subject": "React",
+    "chapter": "React Transitions & useTransition",
+    "question": "A cosa serve l'hook useTransition / startTransition in React?",
+    "codeSnippet": "const [isPending, startTransition] = useTransition();\nstartTransition(() => {\n  setFilterQuery(input); // Aggiornamento non bloccante a bassa priorità\n});",
+    "options": [
+      "A marcare un aggiornamento di stato come non urgente (transizione), mantenendo l'interfaccia reattiva e fluida agli input dell'utente durante rendering pesanti.",
+      "Ad aggiungere animazioni CSS di dissolvenza in entrata.",
+      "A ricaricare la pagina in background.",
+      "A convertire i componenti funzionali in classi."
+    ],
+    "correctIndex": 0,
+    "explanation": "useTransition consente di separare aggiornamenti urgenti (come la digitazione in un input) da aggiornamenti pesanti (come il filtraggio di liste enormi), evitando freeze della UI."
+  },
+  {
+    "id": "sql-19",
+    "subject": "SQL",
+    "chapter": "Prisma Schema & Tipi Modello",
+    "question": "Nel file schema.prisma, quale annotazione imposta un campo intero come chiave primaria auto-incrementale?",
+    "codeSnippet": "model User {\n  id    Int     @id @default(autoincrement())\n  email String  @unique\n  name  String?\n}",
+    "options": [
+      "@id @default(autoincrement())",
+      "@primaryKey @auto()",
+      "@key @serial",
+      "PRIMARY KEY AUTO_INCREMENT"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa Prisma Tabelle & Tipi: in Prisma schema @id dichiara il campo come chiave primaria e @default(autoincrement()) delega al database la generazione progressiva del valore numerico."
+  },
+  {
+    "id": "sql-20",
+    "subject": "SQL",
+    "chapter": "Prisma Relazioni 1-a-Molti (@relation)",
+    "question": "Come viene definita una relazione 1-a-Molti tra Utente e Post nello schema Prisma?",
+    "codeSnippet": "model Post {\n  id       Int   @id @default(autoincrement())\n  author   User  @relation(fields: [authorId], references: [id])\n  authorId Int\n}",
+    "options": [
+      "Con l'attributo @relation(fields: [authorId], references: [id]) sul modello figlio che specifica la colonna FK e la PK del modello genitore.",
+      "Usando solo la parola chiave JOIN nel codice JavaScript.",
+      "Scrivendo una query SQL manuale dentro il file .env.",
+      "Le relazioni in Prisma non necessitano di campi di riferimento."
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalla dispensa Prisma Relazioni: @relation stabilisce il collegamento referenziale specificando quali campi del modello corrente (fields) puntano alle chiavi del modello correlato (references)."
+  },
+  {
+    "id": "sql-21",
+    "subject": "SQL",
+    "chapter": "Prisma Client: Query con include (Eager Loading)",
+    "question": "Come si recuperano tutti i post includendo contestualmente i dati dell'autore con Prisma Client?",
+    "codeSnippet": "const posts = await prisma.post.findMany({\n  include: {\n    author: true\n  }\n});",
+    "options": [
+      "Usando prisma.post.findMany({ include: { author: true } }) che effettua automaticamente il JOIN necessario.",
+      "Eseguendo due query separate e unendole con un for.",
+      "Usando prisma.post.join('author').",
+      "Passando una stringa SQL grezza dentro res.send()."
+    ],
+    "correctIndex": 0,
+    "explanation": "In Prisma Client l'opzione include: { relazione: true } istruisce l'ORM ad eseguire l'eager loading e allegare gli oggetti della tabella correlata nel risultato finale."
+  },
+  {
+    "id": "sql-22",
+    "subject": "SQL",
+    "chapter": "Prisma Client: Filtri, Paginazione e Ordinamento",
+    "question": "Quale combinazione di opzioni in findMany implementa paginazione e ordinamento in Prisma?",
+    "codeSnippet": "const results = await prisma.product.findMany({\n  where: { inStock: true },\n  orderBy: { price: \"desc\" },\n  skip: 20,\n  take: 10\n});",
+    "options": [
+      "where (filtro), orderBy (ordinamento), skip (offset/salto righe) e take (limite righe per pagina).",
+      "filter, sort, page e limit.",
+      "having, group, from e to.",
+      "where, order, start ed end."
+    ],
+    "correctIndex": 0,
+    "explanation": "Prisma mappa i costrutti SQL standard in proprietà intuitive dell'oggetto di query: where per WHERE, orderBy per ORDER BY, skip per OFFSET e take per LIMIT."
+  },
+  {
+    "id": "sql-23",
+    "subject": "SQL",
+    "chapter": "Prisma CLI & Migrazioni",
+    "question": "Qual è il comando da terminale per generare ed applicare una migrazione SQL basata sulle modifiche di schema.prisma in ambiente di sviluppo?",
+    "codeSnippet": "$ npx prisma migrate dev --name init_tables",
+    "options": [
+      "npx prisma migrate dev",
+      "npx prisma generate build",
+      "npx prisma push --force-delete",
+      "npx prisma sql run"
+    ],
+    "correctIndex": 0,
+    "explanation": "npx prisma migrate dev confronta lo schema.prisma con lo stato del database, genera il file di migrazione SQL storico ed applica le modifiche aggiornando anche il client generato."
+  },
+  {
+    "id": "sql-24",
+    "subject": "SQL",
+    "chapter": "Prisma Nested Writes (Scritture Annidate)",
+    "question": "Cosa permette di fare una Nested Write (es. create annidato) in Prisma?",
+    "codeSnippet": "await prisma.user.create({\n  data: {\n    email: \"test@example.com\",\n    posts: {\n      create: [{ title: \"Primo Post\" }]\n    }\n  }\n});",
+    "options": [
+      "Creare sia il record principale (User) sia i record correlati (Posts) in una singola operazione transazionale atomica.",
+      "Scrivere dati su due database diversi contemporaneamente senza connessione di rete.",
+      "Cancellare tutti i dati vecchi prima di salvare.",
+      "Generare un file PDF con i post dell'utente."
+    ],
+    "correctIndex": 0,
+    "explanation": "Le Nested Writes di Prisma consentono di creare o connettere record in tabelle relazionali multiple garantendo che l'intera catena sia eseguita all'interno di una transazione sicura."
+  },
+  {
+    "id": "sql-25",
+    "subject": "SQL",
+    "chapter": "Prisma Client Lifecycle & Singleton Pattern",
+    "question": "Perché nelle applicazioni Node.js/Express è buona norma istanziare un unico PrismaClient condiviso?",
+    "codeSnippet": "// prisma.js\nimport { PrismaClient } from \"@prisma/client\";\nconst prisma = new PrismaClient();\nexport default prisma;",
+    "options": [
+      "Per evitare di esaurire il pool di connessioni (connection pool) verso il database aprendo troppi socket simultanei ad ogni richiesta HTTP.",
+      "Perché JavaScript permette di creare una sola classe per file.",
+      "Perché il database supporta una sola query al minuto.",
+      "Per risparmiare spazio su disco."
+    ],
+    "correctIndex": 0,
+    "explanation": "Ogni nuova istanza di PrismaClient alloca e gestisce un proprio connection pool; riutilizzare una singola istanza globale previene l'esaurimento delle connessioni simultanee del database server."
+  }
 ];
