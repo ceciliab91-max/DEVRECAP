@@ -561,16 +561,7 @@ export default function Notebook() {
         </div>
       )}
 
-      {/* Bottom Floating / Sticky Action Button to Trigger Drawer */}
-      <div className="fixed bottom-6 right-6 z-30">
-        <button
-          onClick={handleOpenNewNoteDrawer}
-          className="flex items-center space-x-2 px-5 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-95 text-white font-bold text-xs shadow-xl shadow-indigo-600/40 transition-all hover:scale-105"
-        >
-          <Plus className="w-5 h-5" />
-          <span className="hidden sm:inline">Crea Nuovo Appunto</span>
-        </button>
-      </div>
+
 
       {/* READ / EDIT DRAWER / MODAL PANEL (isNoteOpen === true) */}
       {isNoteOpen && activeNote && (
