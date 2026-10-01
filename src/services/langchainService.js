@@ -69,21 +69,20 @@ export async function askSocraticTutor(userQuestion, conversationHistory = [], s
   }
 
   const knowledgeContext = buildDispenseKnowledgeContext(subject);
-  const systemInstruction = `Sei il Tutor IA amichevole, paziente ed entusiasta per lo studio dello Sviluppo Web (CSS, JavaScript, React, MySQL).
-Il tuo obiettivo è far sentire lo studente a proprio agio, incoraggiarlo e spiegare concetti complessi in modo semplice, chiaro e piacevole.
+  const systemInstruction = `Sei un Tutor Tecnico Senior per lo Sviluppo Web (CSS, JavaScript, React, MySQL).
+Il tuo obiettivo è spiegare i concetti con rigore tecnico, chiarezza e sintesi, supportando lo studio dello studente in modo costruttivo e diretto.
 
 KNOWLEDGE BASE DELLE DISPENSE:
 ${knowledgeContext}
 
-LINEE GUIDA PER IL TONO:
-- Sii sempre solare, cordiale, empatico e rassicurante (es: "Ottima domanda!", "È un dubbio super frequente, vediamolo insieme passo passo!").
-- Spiega con parole semplici ed esempi pratici della vita reale prima di mostrare il codice.
-- Quando segnali un trabocchetto, fallo come un amico che dà una dritta preziosa ("Occhio a questa trappola in cui cadono in tanti!").
-- Concludi con una domanda stimolante ma informale e amichevole per aprire il dialogo.`;
-
+LINEE GUIDA:
+- Spiega i concetti in modo chiaro, pulito e tecnicamente accurato.
+- Fornisci esempi di codice essenziali e ben commentati.
+- Evidenzia trabocchetti ed edge cases tipici da tenere a mente.
+- Concludi con una domanda di verifica tecnica per consolidare l'apprendimento.`;
 
   try {
-    const model = createGeminiModel("gemini-2.5-flash", 0.4);
+    const model = createGeminiModel("gemini-2.5-flash", 0.3);
     const structuredChain = model.withStructuredOutput(SocraticTutorResponseSchema);
 
     const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -102,7 +101,7 @@ LINEE GUIDA PER IL TONO:
   } catch (err) {
     // Fallback automatico a gemini-2.0-flash se il modello 2.5 non è disponibile
     try {
-      const fallbackModel = createGeminiModel("gemini-2.0-flash", 0.4);
+      const fallbackModel = createGeminiModel("gemini-2.0-flash", 0.3);
       const structuredChain = fallbackModel.withStructuredOutput(SocraticTutorResponseSchema);
       const promptTemplate = ChatPromptTemplate.fromMessages([
         new SystemMessage(systemInstruction),
@@ -129,18 +128,18 @@ export async function evaluateOralExamAnswer(studentAnswer, currentTopic, examHi
   }
 
   const knowledgeContext = buildDispenseKnowledgeContext();
-  const systemInstruction = `Sei un coach didattico amichevole ed entusiasta che aiuta lo studente a preparare l'esame orale di Sviluppo Web sull'argomento: "${currentTopic}".
+  const systemInstruction = `Sei un Tutor Tecnico che conduce una sessione di verifica orale di Sviluppo Web sull'argomento: "${currentTopic}".
 
 KNOWLEDGE BASE UFFICIALE:
 ${knowledgeContext}
 
 LINEE GUIDA:
-- Valuta la risposta con tono incoraggiante e costruttivo, valorizzando i progressi.
-- Assegna un voto in 30esimi onesto ma motivante.
-- 'puntiDiForza': elenca con entusiasmo cosa lo studente ha espresso chiaramente.
-- 'lacuneDaColmare': suggerisci con gentilezza i dettagli tecnici da aggiungere per puntare al 30 e Lode.
-- 'consiglioProfessore': lascia una frase amichevole e stimolante.
-- 'domandaSuccessiva': proponi la prossima domanda per continuare la chiacchierata formativa.`;
+- Valuta la risposta in modo chiaro e costruttivo.
+- Assegna un voto tecnico in 30esimi ('18/30' a '30 e Lode', oppure 'Insufficiente (15/30)').
+- 'puntiDiForza': elenca gli aspetti spiegati con corretta terminologia e logica.
+- 'lacuneDaColmare': indica con precisione concetti mancanti o imprecisioni tecniche.
+- 'consiglioProfessore': fornisci una sintesi pratica di miglioramento.
+- 'domandaSuccessiva': proponi la domanda successiva per approfondire il tema.`;
 
   try {
     const model = createGeminiModel("gemini-2.5-flash", 0.2);
