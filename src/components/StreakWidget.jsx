@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Flame, Check, Sparkles, Calendar, Zap } from 'lucide-react';
 import { getStreakData, getWeekDays, recordStudyActivity } from '../utils/storage';
 
