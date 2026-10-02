@@ -58,9 +58,14 @@ export default function App() {
   // External context trigger for AI Tutor (e.g. asking explanation on a missed quiz question)
   const [aiTutorTriggerContext, setAiTutorTriggerContext] = useState(null);
 
-  // Initialize theme on mount
+  // Initialize and apply theme to DOM root
   useEffect(() => {
     setTheme(themeState);
+    if (themeState === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [themeState]);
 
   // Sync background cloud data on login / mount

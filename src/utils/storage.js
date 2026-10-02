@@ -46,6 +46,13 @@ export const getTheme = () => {
 export const setTheme = (theme) => {
   localStorage.setItem(KEYS.THEME, theme);
   localStorage.setItem(KEYS.THEME_ALT, theme);
+  if (typeof document !== 'undefined') {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
 };
 
 // --- DAILY STREAK & WEEKLY ACTIVITY ---
